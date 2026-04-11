@@ -3,83 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servis Karekod Takip</title>
+    <title>Servis Takip | Admin Panel</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; text-align: center; background: #f4f4f4; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
-        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; }
-        button { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; width: 100%; }
+        :root { --primary: #2c3e50; --accent: #e74c3c; --success: #27ae60; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f0f2f5; color: #333; }
+        .header { background: var(--primary); color: white; padding: 1rem; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .container { max-width: 1000px; margin: 20px auto; padding: 0 20px; }
+        
+        /* İstatistik Kartları */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 12px; border-left: 5px solid var(--accent); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .stat-card h3 { margin: 0; font-size: 0.9rem; color: #666; }
+        .stat-card p { margin: 10px 0 0; font-size: 1.8rem; font-weight: bold; color: var(--primary); }
+
+        /* QR Üretme Alanı */
+        .action-box { background: white; padding: 25px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        input, button { padding: 12px; border-radius: 8px; border: 1px solid #ddd; margin: 5px; }
+        button { background: var(--success); color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { opacity: 0.9; }
+
+        /* QR Baskı Önizleme */
+        #print-area { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .qr-item { background: white; padding: 10px; border: 1px dashed #ccc; text-align: center; font-size: 10px; }
+        
+        @media print { .no-print { display: none; } body { background: white; } }
     </style>
 </head>
 <body>
 
-<div class="card" id="app">
-    <h2>Servis Takip Sistemi</h2>
-    <div id="loading">Yükleniyor...</div>
-    <div id="content" style="display:none;">
+<div class="header">
+    <h1>Servis Takip Yönetim Merkezi</h1>
+</div>
+
+<div class="container">
+    
+    <div class="stats no-print">
+        <div class="stat-card">
+            <h3>Toplam Aktif QR</h3>
+            <p id="total-qr">0</p>
         </div>
+        <div class="stat-card" style="border-left-color: var(--success);">
+            <h3>Bugün Yapılan Bakım</h3>
+            <p id="today-bakim">0</p>
+        </div>
+    </div>
+
+    <div class="action-box no-print">
+        <h3>Seri QR Sticker Üret</h3>
+        <p style="font-size: 0.8rem; color: #777;">Başlangıç ve bitiş numarası vererek toplu çıktı alabilirsin.</p>
+        <input type="number" id="start-id" placeholder="Başlangıç ID (Örn: 100)">
+        <input type="number" id="end-id" placeholder="Bitiş ID (Örn: 150)">
+        <button onclick="topluUret()">QR'ları Oluştur ve Yazdır</button>
+    </div>
+
+    <div id="print-area">
+        </div>
+
 </div>
 
 <script>
-    // FIREBASE AYARLARIN (Burayı senin Project Settings -> Web App kısmındaki kodla değiştir)
+    // FIREBASE BAĞLANTISI
     const firebaseConfig = {
         databaseURL: "https://bakm-d2f77-default-rtdb.europe-west1.firebasedatabase.app"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // URL'den ID al (Örn: index.html?id=123)
-    const urlParams = new URLSearchParams(window.location.search);
-    const carId = urlParams.get('id');
-
-    const content = document.getElementById('content');
-    const loading = document.getElementById('loading');
-
-    if (carId) {
-        // ID VARSA: Aracı sorgula
-        db.ref('bakimlar/' + carId).on('value', (snapshot) => {
-            loading.style.display = 'none';
-            content.style.display = 'block';
-            const data = snapshot.val();
-            if (data) {
-                content.innerHTML = `
-                    <h3>Araç: ${data.plaka}</h3>
-                    <p><b>Son Bakım:</b> ${data.tarih}</p>
-                    <p><b>Yapılan:</b> ${data.islem}</p>
-                    <p><b>KM:</b> ${data.km}</p>
-                    <hr>
-                    <small>Karekod ID: ${carId}</small>
-                `;
-            } else {
-                content.innerHTML = `
-                    <p>Bu karekod henüz tanımlanmamış.</p>
-                    <input type="text" id="plaka" placeholder="Plaka Yaz">
-                    <input type="text" id="islem" placeholder="Yapılan İşlem (Yağ, Filtre vb.)">
-                    <input type="number" id="km" placeholder="Araç KM">
-                    <button onclick="kaydet()">Servis Kaydı Oluştur</button>
-                `;
-            }
-        });
-    } else {
-        loading.innerHTML = "Lütfen bir karekod okutun.";
-    }
-
-    function kaydet() {
-        const plaka = document.getElementById('plaka').value;
-        const islem = document.getElementById('islem').value;
-        const km = document.getElementById('km').value;
-        const tarih = new Date().toLocaleDateString('tr-TR');
-
-        if(plaka && islem) {
-            db.ref('bakimlar/' + carId).set({
-                plaka: plaka,
-                islem: islem,
-                km: km,
-                tarih: tarih
-            }).then(() => alert("Başarıyla Kaydedildi!"));
+    // İSTATİSTİKLERİ ÇEK
+    db.ref('bakimlar').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            const count = Object.keys(data).length;
+            document.getElementById('total-qr').innerText = count;
+            
+            // Bugünün tarihini kontrol et
+            const today = new Date().toLocaleDateString('tr-TR');
+            let todayCount = 0;
+            Object.values(data).forEach(item => {
+                if(item.tarih === today) todayCount++;
+            });
+            document.getElementById('today-bakim').innerText = todayCount;
         }
+    });
+
+    // SERİ QR ÜRETME FONKSİYONU
+    function topluUret() {
+        const start = parseInt(document.getElementById('start-id').value);
+        const end = parseInt(document.getElementById('end-id').value);
+        const printArea = document.getElementById('print-area');
+        printArea.innerHTML = ""; // Temizle
+
+        if(!start || !end || start > end) {
+            alert("Lütfen geçerli bir sayı aralığı girin!");
+            return;
+        }
+
+        const siteUrl = window.location.href.split('?')[0];
+
+        for (let i = start; i <= end; i++) {
+            const qrDiv = document.createElement('div');
+            qrDiv.className = "qr-item";
+            qrDiv.innerHTML = `<div id="qr-${i}"></div><br>ID: ${i}`;
+            printArea.appendChild(qrDiv);
+
+            new QRCode(document.getElementById(`qr-${i}`), {
+                text: `${siteUrl}?id=SERVIS-${i}`,
+                width: 100,
+                height: 100
+            });
+        }
+        
+        setTimeout(() => { window.print(); }, 1000); // QR'lar oluşunca yazdır
     }
 </script>
 </body>
