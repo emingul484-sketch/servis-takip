@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servis Karekod Sistemi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="container mx-auto p-4 max-w-2xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-blue-600">Oto Servis Takip</h1>
+            <p class="text-gray-600">Hızlı Bakım Kaydı ve Karekod Oluşturucu</p>
+        </header>
+
+        <div id="admin-panel" class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Yeni Servis Kaydı</h2>
+            <div class="space-y-4">
+                <input type="text" id="plaka" placeholder="Plaka (Örn: 34 ABC 123)" class="w-full p-2 border rounded">
+                <input type="text" id="marka" placeholder="Araç Marka / Model" class="w-full p-2 border rounded">
+                <textarea id="islemler" placeholder="Yapılan İşlemler (Yağ, Filtre, Fren...)" class="w-full p-2 border rounded h-24"></textarea>
+                <input type="date" id="tarih" class="w-full p-2 border rounded">
+                <button onclick="kaydetVeUret()" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 transition">
+                    KAYDET VE KAREKOD ÜRET
+                </button>
+            </div>
+        </div>
+
+        <div id="qrcode-container" class="hidden bg-white p-6 rounded-lg shadow-md text-center">
+            <h2 class="text-lg font-bold mb-4">Araç Sticker Karekodu</h2>
+            <div id="qrcode" class="flex justify-center mb-4"></div>
+            <p id="etiket-bilgi" class="text-sm text-gray-500 mb-4"></p>
+            <button onclick="window.print()" class="bg-green-500 text-white px-4 py-2 rounded">Yazdır (Sticker)</button>
+            <button onclick="yeniKayit()" class="ml-2 text-blue-600 underline">Yeni Kayıt Aç</button>
+        </div>
+
+        <div id="view-panel" class="hidden bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
+            <h2 id="view-plaka" class="text-2xl font-bold mb-2"></h2>
+            <p id="view-marka" class="text-lg text-gray-700 mb-4 font-semibold"></p>
+            <div class="bg-blue-50 p-4 rounded text-sm">
+                <h3 class="font-bold border-b border-blue-200 mb-2 text-blue-800">SON SERVİS BİLGİLERİ</h3>
+                <p id="view-tarih" class="mb-2 italic"></p>
+                <p id="view-islemler" class="whitespace-pre-line"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URL'den parametre kontrolü (Müşteri bakıyor mu?)
+        const urlParams = new URLSearchParams(window.location.search);
+        const dataParam = urlParams.get('data');
+
+        if (dataParam) {
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('view-panel').classList.remove('hidden');
+            
+            // Veriyi çöz ve ekrana bas
+            const decodedData = JSON.parse(atob(dataParam));
+            document.getElementById('view-plaka').innerText = decodedData.plaka.toUpperCase();
+            document.getElementById('view-marka').innerText = decodedData.marka;
+            document.getElementById('view-tarih').innerText = "Tarih: " + decodedData.tarih;
+            document.getElementById('view-islemler').innerText = decodedData.islemler;
+        }
+
+        function kaydetVeUret() {
+            const data = {
+                plaka: document.getElementById('plaka').value,
+                marka: document.getElementById('marka').value,
+                islemler: document.getElementById('islemler').value,
+                tarih: document.getElementById('tarih').value
+            };
+
+            if(!data.plaka || !data.marka) return alert("Lütfen plaka ve marka giriniz.");
+
+            // Veriyi Base64 formatına çeviriyoruz (URL'de taşımak için en basit yol)
+            const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+            const currentUrl = window.location.origin + window.location.pathname;
+            const fullUrl = `${currentUrl}?data=${encodedData}`;
+
+            // Karekod oluştur
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById("qrcode"), {
+                text: fullUrl,
+                width: 200,
+                height: 200
+            });
+
+            document.getElementById('etiket-bilgi').innerText = data.plaka + " - " + data.marka;
+            document.getElementById('qrcode-container').classList.remove('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
+        }
+
+        function yeniKayit() {
+            location.href = window.location.origin + window.location.pathname;
+        }
+    </script>
+</body>
+</html>
