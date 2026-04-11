@@ -3,98 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servis Karekod Sistemi</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Servis Karekod Takip</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; text-align: center; background: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 400px; margin: auto; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; }
+        button { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; width: 100%; }
+    </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body>
 
-    <div class="container mx-auto p-4 max-w-2xl">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-blue-600">Oto Servis Takip</h1>
-            <p class="text-gray-600">Hızlı Bakım Kaydı ve Karekod Oluşturucu</p>
-        </header>
-
-        <div id="admin-panel" class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h2 class="text-xl font-semibold mb-4 border-b pb-2">Yeni Servis Kaydı</h2>
-            <div class="space-y-4">
-                <input type="text" id="plaka" placeholder="Plaka (Örn: 34 ABC 123)" class="w-full p-2 border rounded">
-                <input type="text" id="marka" placeholder="Araç Marka / Model" class="w-full p-2 border rounded">
-                <textarea id="islemler" placeholder="Yapılan İşlemler (Yağ, Filtre, Fren...)" class="w-full p-2 border rounded h-24"></textarea>
-                <input type="date" id="tarih" class="w-full p-2 border rounded">
-                <button onclick="kaydetVeUret()" class="w-full bg-blue-600 text-white p-3 rounded font-bold hover:bg-blue-700 transition">
-                    KAYDET VE KAREKOD ÜRET
-                </button>
-            </div>
+<div class="card" id="app">
+    <h2>Servis Takip Sistemi</h2>
+    <div id="loading">Yükleniyor...</div>
+    <div id="content" style="display:none;">
         </div>
+</div>
 
-        <div id="qrcode-container" class="hidden bg-white p-6 rounded-lg shadow-md text-center">
-            <h2 class="text-lg font-bold mb-4">Araç Sticker Karekodu</h2>
-            <div id="qrcode" class="flex justify-center mb-4"></div>
-            <p id="etiket-bilgi" class="text-sm text-gray-500 mb-4"></p>
-            <button onclick="window.print()" class="bg-green-500 text-white px-4 py-2 rounded">Yazdır (Sticker)</button>
-            <button onclick="yeniKayit()" class="ml-2 text-blue-600 underline">Yeni Kayıt Aç</button>
-        </div>
+<script>
+    // FIREBASE AYARLARIN (Burayı senin Project Settings -> Web App kısmındaki kodla değiştir)
+    const firebaseConfig = {
+        databaseURL: "https://bakm-d2f77-default-rtdb.europe-west1.firebasedatabase.app"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        <div id="view-panel" class="hidden bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500">
-            <h2 id="view-plaka" class="text-2xl font-bold mb-2"></h2>
-            <p id="view-marka" class="text-lg text-gray-700 mb-4 font-semibold"></p>
-            <div class="bg-blue-50 p-4 rounded text-sm">
-                <h3 class="font-bold border-b border-blue-200 mb-2 text-blue-800">SON SERVİS BİLGİLERİ</h3>
-                <p id="view-tarih" class="mb-2 italic"></p>
-                <p id="view-islemler" class="whitespace-pre-line"></p>
-            </div>
-        </div>
-    </div>
+    // URL'den ID al (Örn: index.html?id=123)
+    const urlParams = new URLSearchParams(window.location.search);
+    const carId = urlParams.get('id');
 
-    <script>
-        // URL'den parametre kontrolü (Müşteri bakıyor mu?)
-        const urlParams = new URLSearchParams(window.location.search);
-        const dataParam = urlParams.get('data');
+    const content = document.getElementById('content');
+    const loading = document.getElementById('loading');
 
-        if (dataParam) {
-            document.getElementById('admin-panel').classList.add('hidden');
-            document.getElementById('view-panel').classList.remove('hidden');
-            
-            // Veriyi çöz ve ekrana bas
-            const decodedData = JSON.parse(atob(dataParam));
-            document.getElementById('view-plaka').innerText = decodedData.plaka.toUpperCase();
-            document.getElementById('view-marka').innerText = decodedData.marka;
-            document.getElementById('view-tarih').innerText = "Tarih: " + decodedData.tarih;
-            document.getElementById('view-islemler').innerText = decodedData.islemler;
+    if (carId) {
+        // ID VARSA: Aracı sorgula
+        db.ref('bakimlar/' + carId).on('value', (snapshot) => {
+            loading.style.display = 'none';
+            content.style.display = 'block';
+            const data = snapshot.val();
+            if (data) {
+                content.innerHTML = `
+                    <h3>Araç: ${data.plaka}</h3>
+                    <p><b>Son Bakım:</b> ${data.tarih}</p>
+                    <p><b>Yapılan:</b> ${data.islem}</p>
+                    <p><b>KM:</b> ${data.km}</p>
+                    <hr>
+                    <small>Karekod ID: ${carId}</small>
+                `;
+            } else {
+                content.innerHTML = `
+                    <p>Bu karekod henüz tanımlanmamış.</p>
+                    <input type="text" id="plaka" placeholder="Plaka Yaz">
+                    <input type="text" id="islem" placeholder="Yapılan İşlem (Yağ, Filtre vb.)">
+                    <input type="number" id="km" placeholder="Araç KM">
+                    <button onclick="kaydet()">Servis Kaydı Oluştur</button>
+                `;
+            }
+        });
+    } else {
+        loading.innerHTML = "Lütfen bir karekod okutun.";
+    }
+
+    function kaydet() {
+        const plaka = document.getElementById('plaka').value;
+        const islem = document.getElementById('islem').value;
+        const km = document.getElementById('km').value;
+        const tarih = new Date().toLocaleDateString('tr-TR');
+
+        if(plaka && islem) {
+            db.ref('bakimlar/' + carId).set({
+                plaka: plaka,
+                islem: islem,
+                km: km,
+                tarih: tarih
+            }).then(() => alert("Başarıyla Kaydedildi!"));
         }
-
-        function kaydetVeUret() {
-            const data = {
-                plaka: document.getElementById('plaka').value,
-                marka: document.getElementById('marka').value,
-                islemler: document.getElementById('islemler').value,
-                tarih: document.getElementById('tarih').value
-            };
-
-            if(!data.plaka || !data.marka) return alert("Lütfen plaka ve marka giriniz.");
-
-            // Veriyi Base64 formatına çeviriyoruz (URL'de taşımak için en basit yol)
-            const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-            const currentUrl = window.location.origin + window.location.pathname;
-            const fullUrl = `${currentUrl}?data=${encodedData}`;
-
-            // Karekod oluştur
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById("qrcode"), {
-                text: fullUrl,
-                width: 200,
-                height: 200
-            });
-
-            document.getElementById('etiket-bilgi').innerText = data.plaka + " - " + data.marka;
-            document.getElementById('qrcode-container').classList.remove('hidden');
-            document.getElementById('admin-panel').classList.add('hidden');
-        }
-
-        function yeniKayit() {
-            location.href = window.location.origin + window.location.pathname;
-        }
-    </script>
+    }
+</script>
 </body>
 </html>
