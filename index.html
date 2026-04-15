@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SERVİS TAKİP</title>
+    <title>SERVİS TAKİP PRO | ADMİN PANELİ</title>
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -11,176 +11,216 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
     
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: 'Montserrat', sans-serif; text-align: center; }
-        .container { padding: 20px; max-width: 500px; margin: auto; }
-        .card { background: #0a0a0a; border: 1px solid #d4af37; border-radius: 20px; padding: 20px; margin-top: 20px; box-shadow: 0 0 20px rgba(212,175,55,0.2); }
-        input, textarea { width: 100%; background: #111; border: 1px solid #333; padding: 12px; color: #fff; border-radius: 10px; margin-bottom: 10px; outline: none; }
-        .btn { background: linear-gradient(135deg, #d4af37, #f2d06b); color: #000; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: 900; cursor: pointer; }
+        :root { --gold: #d4af37; --dark-bg: #0a0a0a; --card-bg: #151515; }
+        * { box-sizing: border-box; font-family: 'Montserrat', sans-serif; }
+        body { margin: 0; background: var(--dark-bg); color: #fff; line-height: 1.6; }
+        .container { max-width: 600px; margin: auto; padding: 20px; }
         .hidden { display: none !important; }
-        #debug-log { color: #ff4444; font-size: 10px; margin-top: 10px; text-align: left; background: #222; padding: 5px; border-radius: 5px; }
+
+        /* Başlık Stili */
+        .header { text-align: center; padding: 20px 0; border-bottom: 2px solid var(--gold); margin-bottom: 30px; }
+        .header h1 { margin: 0; font-weight: 900; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; }
+
+        /* Kart Stili */
+        .card { background: var(--card-bg); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 25px; border: 1px solid #222; }
         
-        /* Checklist */
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .item { background: #151515; padding: 10px; border-radius: 8px; font-size: 12px; display: flex; align-items: center; border: 1px solid #222; }
-        .item input { width: auto; margin-right: 8px; margin-bottom: 0; }
+        /* Input & Form Elemanları */
+        label { display: block; font-size: 12px; color: var(--gold); margin-bottom: 8px; font-weight: 700; }
+        input, select, textarea { width: 100%; background: #000; border: 1px solid #333; padding: 15px; color: #fff; border-radius: 12px; margin-bottom: 15px; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--gold); }
         
-        /* QR Output */
-        #qr-area { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
-        .q-box { background: #fff; padding: 10px; border-radius: 5px; color: #000; font-size: 10px; font-weight: bold; }
+        /* Butonlar */
+        .btn { background: linear-gradient(135deg, #d4af37, #f2d06b); color: #000; border: none; padding: 18px; width: 100%; border-radius: 12px; font-weight: 900; cursor: pointer; text-transform: uppercase; font-size: 14px; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3); }
+        .btn:active { transform: scale(0.98); }
+
+        /* QR Üretim Alanı */
+        #qr-display { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 30px; }
+        .qr-item { background: #fff; padding: 15px; border-radius: 15px; text-align: center; color: #000; }
+        .qr-item b { display: block; margin-top: 10px; font-size: 12px; color: #555; }
+
+        /* Bakım Geçmişi Listesi */
+        .history-item { background: #000; border-left: 4px solid var(--gold); padding: 15px; margin-top: 15px; border-radius: 8px; }
+        .history-item p { margin: 5px 0; font-size: 13px; color: #ccc; }
+        .history-item .date { font-weight: 900; color: var(--gold); font-size: 14px; }
+
+        @media print { .no-print { display: none; } body { background: white; } .qr-item { border: 1px solid #ddd; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="color:#d4af37; letter-spacing: 2px;">SERVİS TAKİP</h2>
-    <div id="debug-log">Sistem başlatılıyor...</div>
-
-    <div id="p-prod" class="hidden">
-        <div class="card">
-            <p>Karekod Seri Üretim</p>
-            <input type="number" id="start" placeholder="Başlangıç ID">
-            <input type="number" id="end" placeholder="Bitiş ID">
-            <button class="btn" onclick="makeQR()">KAREKOD ÜRET</button>
-        </div>
-        <div id="qr-area"></div>
+    <div class="header">
+        <h1>Servis Takip</h1>
+        <small id="status" style="color: #555;">Sistem Hazırlanıyor...</small>
     </div>
 
-    <div id="p-main" class="hidden">
+    <div id="admin-panel" class="hidden">
+        <div class="card">
+            <h3>Yeni Karekod Üretimi</h3>
+            <label>Başlangıç Numarası</label>
+            <input type="number" id="start-no" value="100">
+            <label>Adet</label>
+            <input type="number" id="count" value="5">
+            <button class="btn" onclick="generateBatch()">Karekodları Oluştur</button>
+        </div>
+        <div id="qr-display"></div>
+    </div>
+
+    <div id="service-panel" class="hidden">
         
-        <div id="view" class="hidden">
-            <div class="card">
-                <h1 id="v-plaka" style="background:#fff; color:#000; display:inline-block; padding:5px 15px; border-radius:5px;">---</h1>
-                <h3 id="v-marka">---</h3>
-                <div style="display:flex; justify-content:space-around; margin:20px 0;">
-                    <div><small>SON KM</small><div id="v-km" style="font-weight:900; color:#d4af37;">0</div></div>
-                    <div><small>GELECEK</small><div id="v-nkm" style="font-weight:900; color:#d4af37;">0</div></div>
-                </div>
-                <div id="v-list" style="text-align:left;"></div>
-                <button class="btn" onclick="showForm()" style="margin-top:15px;">+ YENİ BAKIM</button>
+        <div id="car-info" class="card hidden" style="text-align: center;">
+            <div id="v-plate" style="background:#fff; color:#000; display:inline-block; padding:5px 20px; border-radius:8px; font-weight:900; font-size:24px; margin-bottom:15px;">---</div>
+            <h2 id="v-model" style="margin:0; text-transform: uppercase;">MARKA / MODEL</h2>
+            <div style="display: flex; justify-content: space-around; margin-top: 20px; background: #000; padding: 15px; border-radius: 12px;">
+                <div><small style="color:var(--gold)">SON KM</small><div id="v-km" style="font-weight:900; font-size:18px;">0</div></div>
+                <div><small style="color:var(--gold)">GELECEK KM</small><div id="v-next-km" style="font-weight:900; font-size:18px;">0</div></div>
             </div>
+            <div id="history-list"></div>
+            <button class="btn" onclick="toggleForm()" style="margin-top:20px;">+ Yeni Bakım Ekle</button>
         </div>
 
-        <div id="form" class="hidden">
-            <div class="card">
-                <p>Bakım Kayıt Formu</p>
-                <input type="text" id="f-plaka" placeholder="PLAKA">
-                <input type="text" id="f-marka" placeholder="MARKA / MODEL">
-                <input type="number" id="f-km" placeholder="ŞU ANKİ KM">
-                <input type="number" id="f-nkm" placeholder="SONRAKİ BAKIM KM">
-                
-                <div class="grid">
-                    <label class="item"><input type="checkbox" value="Motor Yağı"> Yağ</label>
-                    <label class="item"><input type="checkbox" value="Yağ Filtresi"> Yağ F.</label>
-                    <label class="item"><input type="checkbox" value="Hava Filtresi"> Hava F.</label>
-                    <label class="item"><input type="checkbox" value="Polen Filtresi"> Polen F.</label>
-                    <label class="item"><input type="checkbox" value="Antifriz"> Antifriz</label>
-                    <label class="item"><input type="checkbox" value="Fren Balatası"> Balata</label>
-                </div>
-                <textarea id="f-not" placeholder="Ekstra işlemler..."></textarea>
-                <button class="btn" id="s-btn" onclick="save()">KAYDET</button>
-            </div>
+        <div id="form-card" class="card hidden">
+            <h3 id="form-title" style="color:var(--gold); text-align:center;">Araç ve Bakım Kaydı</h3>
+            
+            <label>Plaka</label>
+            <input type="text" id="f-plate" placeholder="Örn: 34 ABC 123">
+            
+            <label>Araç Marka / Model</label>
+            <input type="text" id="f-model" placeholder="Örn: Volkswagen Golf">
+            
+            <label>Güncel Kilometre</label>
+            <input type="number" id="f-km" placeholder="0">
+            
+            <label>Gelecek Bakım Kilometresi</label>
+            <input type="number" id="f-next-km" placeholder="0">
+            
+            <label>Yapılan İşlemler</label>
+            <textarea id="f-desc" rows="4" placeholder="Yağ değişimi, Filtre değişimi vb."></textarea>
+            
+            <button class="btn" id="save-btn" onclick="saveRecord()">Bilgileri Kaydet</button>
+            <button class="btn" onclick="location.reload()" style="background:none; color:#555; margin-top:10px; box-shadow:none;">İptal</button>
         </div>
     </div>
 </div>
 
 <script>
-    const log = (msg) => document.getElementById('debug-log').innerText = msg;
+    // 1. Firebase Ayarları (Senin projen)
+    const firebaseConfig = { databaseURL: "https://bakm-d2f77-default-rtdb.europe-west1.firebasedatabase.app" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    try {
-        const config = { databaseURL: "https://bakm-d2f77-default-rtdb.europe-west1.firebasedatabase.app" };
-        firebase.initializeApp(config);
-        const db = firebase.database();
-        log("Firebase bağlandı.");
+    // 2. URL Kontrolü
+    const urlParams = new URLSearchParams(window.location.search);
+    const carID = urlParams.get('id');
 
-        const url = new URLSearchParams(window.location.search);
-        const id = url.get('id');
+    if (!carID) {
+        // ID yoksa Admin Panelini göster
+        document.getElementById('admin-panel').classList.remove('hidden');
+        document.getElementById('status').innerText = "Admin Modu: QR Üretimi";
+    } else {
+        // ID varsa Servis Panelini göster
+        document.getElementById('service-panel').classList.remove('hidden');
+        checkCarData(carID);
+    }
 
-        if (!id) {
-            document.getElementById('p-prod').classList.remove('hidden');
-            log("Üretim modu aktif.");
-        } else {
-            document.getElementById('p-main').classList.remove('hidden');
-            log("Araç ID okundu: " + id);
-            
-            db.ref('servis/' + id).on('value', (snap) => {
-                const data = snap.val();
-                if (data) {
-                    log("Araç verisi bulundu.");
-                    document.getElementById('view').classList.remove('hidden');
-                    document.getElementById('form').classList.add('hidden');
-                    document.getElementById('v-plaka').innerText = data.plaka;
-                    document.getElementById('v-marka').innerText = data.marka;
+    // 3. Araç Bilgisi Çekme
+    function checkCarData(id) {
+        document.getElementById('status').innerText = "Araç Sorgulanıyor: " + id;
+        db.ref('servis/' + id).on('value', (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                // ARAÇ KAYITLI
+                document.getElementById('car-info').classList.remove('hidden');
+                document.getElementById('form-card').classList.add('hidden');
+                
+                document.getElementById('v-plate').innerText = data.plaka;
+                document.getElementById('v-model').innerText = data.marka;
+                
+                const list = document.getElementById('history-list');
+                list.innerHTML = "";
+                if (data.gecmis) {
+                    const records = Object.values(data.gecmis).reverse();
+                    document.getElementById('v-km').innerText = records[0].km;
+                    document.getElementById('v-next-km').innerText = records[0].gelecek;
                     
-                    const list = document.getElementById('v-list');
-                    list.innerHTML = "";
-                    if (data.gecmis) {
-                        const recs = Object.values(data.gecmis).reverse();
-                        document.getElementById('v-km').innerText = recs[0].km;
-                        document.getElementById('v-nkm').innerText = recs[0].nkm;
-                        recs.forEach(r => {
-                            list.innerHTML += `<div style="border-bottom:1px solid #222; padding:10px 0;">
-                                <small style="color:#d4af37;">${r.tarih}</small><br>
-                                <span style="font-size:12px;">${r.islem}</span></div>`;
-                        });
-                    }
-                } else {
-                    log("Bu QR henüz kaydedilmemiş. Form açılıyor...");
-                    document.getElementById('form').classList.remove('hidden');
+                    records.forEach(r => {
+                        list.innerHTML += `<div class="history-item">
+                            <div class="date">${r.tarih}</div>
+                            <p><b>KM:</b> ${r.km} | <b>Sonraki:</b> ${r.gelecek}</p>
+                            <p>${r.islem}</p>
+                        </div>`;
+                    });
                 }
-            }, (err) => log("DB Hatası: " + err.message));
-        }
-    } catch (e) { log("Başlatma Hatası: " + e.message); }
-
-    function showForm() {
-        document.getElementById('view').classList.add('hidden');
-        document.getElementById('form').classList.remove('hidden');
+            } else {
+                // ARAÇ HENÜZ KAYITLI DEĞİL
+                document.getElementById('form-card').classList.remove('hidden');
+                document.getElementById('status').innerText = "Yeni Araç Kaydı (ID: " + id + ")";
+            }
+        });
     }
 
-    function save() {
-        const plaka = document.getElementById('f-plaka').value.toUpperCase();
+    // 4. Yeni Kayıt Kaydetme
+    function saveRecord() {
+        const btn = document.getElementById('save-btn');
+        const plate = document.getElementById('f-plate').value.toUpperCase();
+        const model = document.getElementById('f-model').value;
         const km = document.getElementById('f-km').value;
-        const nkm = document.getElementById('f-nkm').value;
-        const id = new URLSearchParams(window.location.search).get('id');
+        const nextKm = document.getElementById('f-next-km').value;
+        const desc = document.getElementById('f-desc').value;
 
-        let works = [];
-        document.querySelectorAll('.grid input:checked').forEach(i => works.push(i.value));
-        const fullWork = works.join(', ') + " " + document.getElementById('f-not').value;
+        if (!plate || !km) { alert("Lütfen Plaka ve KM giriniz!"); return; }
 
-        if (!plaka || !km) return alert("Eksik bilgi!");
+        btn.disabled = true;
+        btn.innerText = "Kaydediliyor...";
 
-        log("Kaydediliyor...");
-        firebase.database().ref('servis/' + id).update({
-            plaka: plaka,
-            marka: document.getElementById('f-marka').value
+        const record = {
+            tarih: new Date().toLocaleDateString('tr-TR'),
+            km: km,
+            gelecek: nextKm,
+            islem: desc
+        };
+
+        db.ref('servis/' + carID).update({
+            plaka: plate,
+            marka: model
         }).then(() => {
-            return firebase.database().ref('servis/' + id + '/gecmis').push({
-                tarih: new Date().toLocaleDateString('tr-TR'),
-                km: km,
-                nkm: nkm,
-                islem: fullWork
-            });
+            return db.ref('servis/' + carID + '/gecmis').push(record);
         }).then(() => {
-            log("Başarıyla kaydedildi.");
+            alert("Başarıyla Kaydedildi!");
             location.reload();
-        }).catch(e => log("Kayıt Hatası: " + e.message));
+        }).catch(err => {
+            alert("Hata: " + err.message);
+            btn.disabled = false;
+        });
     }
 
-    function makeQR() {
-        const s = document.getElementById('start').value;
-        const e = document.getElementById('end').value;
-        const area = document.getElementById('qr-area');
-        area.innerHTML = "";
-        const base = window.location.href.split('?')[0];
+    // 5. Admin: Seri QR Üretme
+    function generateBatch() {
+        const start = parseInt(document.getElementById('start-no').value);
+        const count = parseInt(document.getElementById('count').value);
+        const display = document.getElementById('qr-display');
+        display.innerHTML = "";
+        
+        const currentUrl = window.location.href.split('?')[0];
 
-        for (let i = s; i <= e; i++) {
-            const qrId = "S" + i;
-            const d = document.createElement('div');
-            d.className = "q-box";
-            d.innerHTML = `<div id="q${qrId}"></div>${qrId}`;
-            area.appendChild(d);
-            new QRCode(document.getElementById("q"+qrId), { text: base + "?id=" + qrId, width: 90, height: 90 });
+        for (let i = 0; i < count; i++) {
+            const currentID = "S" + (start + i);
+            const qrWrapper = document.createElement('div');
+            qrWrapper.className = "qr-item";
+            qrWrapper.innerHTML = `<div id="qr-${currentID}"></div><b>Seri: ${currentID}</b>`;
+            display.appendChild(qrWrapper);
+
+            new QRCode(document.getElementById("qr-" + currentID), {
+                text: currentUrl + "?id=" + currentID,
+                width: 120, height: 120
+            });
         }
+    }
+
+    function toggleForm() {
+        document.getElementById('form-card').classList.toggle('hidden');
     }
 </script>
+
 </body>
 </html>
