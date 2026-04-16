@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Bakım | Pro Üretim Merkezi</title>
+    <title>E-Bakım | Pro Üretim Hattı</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -12,105 +12,80 @@
     <style>
         :root { 
             --nardo: #6c757d; --dark: #121417; --blue: #0d6efd; 
-            --green: #198754; --bg: #f8f9fa; --card: #ffffff;
+            --red: #d63031; --bg: #f8f9fa; --card: #ffffff;
         }
         
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--dark); }
         .container { max-width: 1300px; margin: 0 auto; }
 
-        /* Dashboard Header */
-        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .logo-box { font-size: 26px; font-weight: 900; letter-spacing: -1px; }
-        .logo-box span { color: var(--nardo); font-weight: 400; }
-
-        /* Ana Grid */
+        /* Layout */
         .main-layout { display: grid; grid-template-columns: 1fr 380px; gap: 25px; }
 
-        /* Liste Penceresi */
+        /* Sol Liste Penceresi */
         .window-card { background: var(--card); border-radius: 20px; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border: 1px solid #eee; }
-        .scroll-area { height: 550px; overflow-y: auto; margin-top: 20px; border-radius: 12px; border: 1px solid #f1f1f1; }
+        .scroll-area { height: 400px; overflow-y: auto; margin-top: 20px; border: 1px solid #f1f1f1; border-radius: 12px; }
         
         table { width: 100%; border-collapse: collapse; }
-        thead { position: sticky; top: 0; background: #fdfdfd; z-index: 5; border-bottom: 2px solid #eee; }
-        th { padding: 15px; text-align: left; font-size: 12px; color: var(--nardo); text-transform: uppercase; }
-        td { padding: 15px; border-bottom: 1px solid #f8f9fa; vertical-align: middle; }
+        thead { position: sticky; top: 0; background: #fff; z-index: 5; }
+        th { padding: 15px; text-align: left; font-size: 12px; color: var(--nardo); text-transform: uppercase; border-bottom: 2px solid #eee; }
+        td { padding: 12px 15px; border-bottom: 1px solid #f8f9fa; }
 
-        /* Tablo İçindeki Küçük Sticker Ön İzleme */
-        .mini-sticker { 
-            width: 60px; height: 80px; background: var(--dark); border-radius: 4px; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 2px solid var(--nardo); margin-right: 10px;
-        }
-        .mini-qr { width: 40px; height: 40px; background: white; padding: 2px; }
-        .mini-id { color: white; font-size: 8px; margin-top: 4px; font-weight: bold; }
-
-        /* Sağ Kontrol Paneli */
+        /* Sağ Panel */
         .side-panel { background: var(--dark); color: white; padding: 30px; border-radius: 20px; position: sticky; top: 20px; }
-        .btn { border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.3s; width: 100%; margin-bottom: 12px; }
-        .btn-primary { background: var(--blue); color: white; padding: 15px; font-size: 16px; }
-        .btn-secondary { background: #2c3138; color: #adb5bd; padding: 12px; font-size: 14px; border: 1px solid #3d444d; }
-        .btn-success { background: var(--green); color: white; height: 70px; font-size: 18px; margin-top: 20px; }
-        .btn-plus { width: 35px; height: 35px; border-radius: 8px; background: #e9ecef; color: var(--dark); font-size: 20px; }
-        .btn-plus:hover { background: var(--blue); color: white; }
+        .btn { border: none; border-radius: 10px; cursor: pointer; font-weight: 700; transition: 0.3; width: 100%; margin-bottom: 10px; }
+        .btn-primary { background: var(--blue); color: white; padding: 15px; }
+        .btn-success { background: var(--green, #198754); color: white; height: 60px; font-size: 18px; margin-top: 15px; }
+        
+        /* Tema Seçici */
+        .theme-selector { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 15px 0; }
+        .theme-opt { height: 40px; border-radius: 8px; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .theme-opt.active { border-color: white; transform: scale(1.1); }
 
-        /* Baskı Kuyruğu Paneli */
-        .queue-box { margin-top: 30px; background: white; border-radius: 20px; padding: 25px; border: 1px dashed #ced4da; }
+        /* Baskı Kuyruğu */
+        .queue-box { margin-top: 30px; background: white; border-radius: 20px; padding: 25px; border: 2px dashed #ced4da; }
         .queue-flex { display: flex; flex-wrap: wrap; gap: 15px; }
-        .q-item { width: 100px; text-align: center; background: #f8f9fa; padding: 10px; border-radius: 10px; border: 1px solid #eee; position: relative; }
-        .q-del { position: absolute; -10px; -10px; background: #ff4757; color: white; border: none; border-radius: 50%; cursor: pointer; }
+        .q-item { width: 100px; text-align: center; background: #f8f9fa; padding: 10px; border-radius: 10px; position: relative; border: 1px solid #eee; }
+        .q-del { position: absolute; top: -8px; right: -8px; background: var(--red); color: white; border: none; border-radius: 50%; width: 22px; height: 22px; cursor: pointer; }
 
-        /* Görünmez Sticker Maker (ZIP İçin) */
+        /* Sticker Maker */
         #sticker-maker { position: absolute; left: -9999px; }
-        .stk-tpl { width: 400px; height: 550px; background: #1a1d21; color: white; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 35px; border: 12px solid #6c757d; font-family: sans-serif; }
+        .stk-tpl { width: 400px; height: 550px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 35px; border: 15px solid #6c757d; color: white; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header-nav">
-        <div class="logo-box">E-BAKIM <span>| PRO MANAGER</span></div>
-        <div id="stat-summary" style="font-weight: 600; color: var(--nardo);">Sistem Aktif</div>
-    </div>
-
     <div class="main-layout">
         <div class="window-card">
-            <div style="display:flex; justify-content:space-between; align-items:center">
-                <h2 style="margin:0">Üretim Bandı</h2>
-                <div id="counts" style="font-size:14px; font-weight:bold; color:var(--blue)">Stok: 0 | Aktif: 0</div>
-            </div>
-            
+            <h2 style="margin:0">Üretim Kayıtları</h2>
             <div class="scroll-area">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>Sticker Format</th>
-                            <th>Seri No</th>
-                            <th>Durum</th>
-                            <th>İşlem</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>Seri No</th><th>Durum</th><th>İşlem</th></tr></thead>
                     <tbody id="qr-table-body"></tbody>
                 </table>
             </div>
         </div>
 
         <div class="side-panel">
-            <h3 style="margin-top:0; border-bottom:1px solid #3d444d; padding-bottom:15px;">Hızlı Üretim</h3>
-            <button class="btn btn-primary" id="gen1">+ 1 Ürün Oluştur</button>
-            <button class="btn btn-secondary" id="gen10">+ 10 Ürün Oluştur (Seri)</button>
+            <h3 style="margin:0">Hızlı Üretim</h3>
+            <p style="font-size:12px; color:#888;">Üretilenler otomatik baskı kuyruğuna düşer.</p>
+            <button class="btn btn-primary" id="gen1">+ 1 Adet Üret</button>
+            <button class="btn btn-primary" style="background:#2c3e50" id="gen10">+ 10 Adet Üret</button>
             
-            <h3 style="margin-top:30px; border-bottom:1px solid #3d444d; padding-bottom:15px;">Filtreler</h3>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-                <button class="btn btn-secondary" onclick="updateList('hepsi')">Hepsi</button>
-                <button class="btn btn-secondary" onclick="updateList('stokta')">Sadece Stok</button>
+            <h3 style="margin-top:25px; border-top:1px solid #333; pt:20px;">Sticker Teması</h3>
+            <div class="theme-selector" id="themeSelector">
+                <div class="theme-opt active" data-color="#6c757d" title="Nardo Gri" style="background:#6c757d"></div>
+                <div class="theme-opt" data-color="#0d6efd" title="Safir Mavi" style="background:#0d6efd"></div>
+                <div class="theme-opt" data-color="#d63031" title="Yarış Kırmızısı" style="background:#d63031"></div>
+                <div class="theme-opt" data-color="#121417" title="Gece Siyahı" style="background:#121417"></div>
             </div>
 
-            <button class="btn btn-success" id="downloadZipBtn">📥 SEÇİLENLERİ PAKETLE (ZIP)</button>
+            <button class="btn btn-success" id="downloadZipBtn">📦 PAKETİ İNDİR (ZIP)</button>
         </div>
     </div>
 
     <div class="queue-box">
-        <h3 style="margin-top:0">🖨️ Baskı Listesi (<span id="q-count">0</span>)</h3>
+        <h3 style="margin:0; margin-bottom:15px;">🖨️ Baskı Kuyruğu (<span id="q-count">0</span>)</h3>
         <div class="queue-flex" id="queue-grid"></div>
     </div>
 </div>
@@ -134,46 +109,35 @@
     const db = getFirestore(app);
     const siteUrl = "https://emingul484-sketch.github.io/servis-takip/arac.html?id=";
     let queue = [];
+    let selectedTheme = "#6c757d";
 
-    function updateList(filter = 'hepsi') {
-        const q = query(collection(db, "karekodlar"), orderBy("olusturma_tarihi", "desc"));
-        onSnapshot(q, (snapshot) => {
-            const tbody = document.getElementById('qr-table-body');
-            tbody.innerHTML = "";
-            let s=0, a=0;
+    // Tema Seçimi
+    document.querySelectorAll('.theme-opt').forEach(opt => {
+        opt.onclick = () => {
+            document.querySelectorAll('.theme-opt').forEach(x => x.classList.remove('active'));
+            opt.classList.add('active');
+            selectedTheme = opt.dataset.color;
+        }
+    });
 
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if(filter !== 'hepsi' && data.durum !== filter) return;
-                data.durum === 'stokta' ? s++ : a++;
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>
-                        <div class="mini-sticker">
-                            <div id="mini-qr-${data.qr_id}" class="mini-qr"></div>
-                            <div class="mini-id">${data.qr_id}</div>
-                        </div>
-                    </td>
-                    <td><b>${data.qr_id}</b></td>
-                    <td><span style="color:${data.durum==='stokta'?'#f39c12':'#27ae60'}">● ${data.durum.toUpperCase()}</span></td>
-                    <td><button class="btn-plus" onclick="addToQueue('${data.qr_id}')">+</button></td>
-                `;
-                tbody.appendChild(tr);
-                
-                // Mini QR'ı oluştur
-                setTimeout(() => {
-                    new QRCode(document.getElementById(`mini-qr-${data.qr_id}`), { text: siteUrl + data.qr_id, width: 40, height: 40 });
-                }, 100);
-            });
-            document.getElementById('counts').innerText = `Stok: ${s} | Aktif: ${a}`;
+    // Veri Dinleme
+    onSnapshot(query(collection(db, "karekodlar"), orderBy("olusturma_tarihi", "desc")), (snapshot) => {
+        const tbody = document.getElementById('qr-table-body');
+        tbody.innerHTML = "";
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td><b>${data.qr_id}</b></td><td>${data.durum.toUpperCase()}</td><td><button class="btn" style="width:auto; padding:5px 10px; background:#eee" onclick="addToQueue('${data.qr_id}')">+</button></td>`;
+            tbody.appendChild(tr);
         });
-    }
+    });
 
+    // Üretim + Otomatik Kuyruğa Ekleme
     async function produce(n) {
         for(let i=0; i<n; i++) {
             const id = "EB" + Math.floor(100000 + Math.random() * 900000);
             await addDoc(collection(db, "karekodlar"), { qr_id: id, durum: "stokta", olusturma_tarihi: serverTimestamp() });
+            addToQueue(id); // Üretildiği an kuyruğa at
         }
     }
 
@@ -206,22 +170,24 @@
     }
 
     document.getElementById('downloadZipBtn').onclick = async () => {
-        if(queue.length === 0) return;
+        if(queue.length === 0) return alert("Kuyruk boş!");
         const zip = new JSZip();
         const m = document.getElementById('sticker-maker');
         for(let id of queue) {
-            m.innerHTML = `<div id="tpl" class="stk-tpl"><h3>ARAÇ BAKIM TAKİP</h3><div id="tpl-qr"></div><h2>${id}</h2></div>`;
+            m.innerHTML = `<div id="tpl" class="stk-tpl" style="background:#1a1d21; border-color:${selectedTheme}">
+                <h3 style="margin:0; border-bottom:3px solid ${selectedTheme}; width:100%; text-align:center; padding-bottom:10px;">ARAÇ BAKIM TAKİP</h3>
+                <div id="tpl-qr" style="background:white; padding:15px; border-radius:10px;"></div>
+                <h1 style="margin:0; background:${selectedTheme}; width:100%; text-align:center; padding:10px 0;">${id}</h1>
+            </div>`;
             new QRCode(document.getElementById("tpl-qr"), { text: siteUrl+id, width: 280, height: 280 });
             await new Promise(r => setTimeout(r, 200));
             const canvas = await html2canvas(document.getElementById("tpl"));
             zip.file(`${id}.png`, canvas.toDataURL("image/png").split(',')[1], {base64: true});
         }
         const blob = await zip.generateAsync({type:"blob"});
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "E-Bakim_Paket.zip"; a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Bakim_Stickerlari_${selectedTheme}.zip`; a.click();
         queue = []; renderQueue();
     };
-
-    updateList();
 </script>
 </body>
 </html>
