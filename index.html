@@ -5,48 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Bakım Üretim Kontrol Merkezi</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; padding: 20px; }
         .dashboard { display: flex; gap: 15px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 15px; border-radius: 8px; flex: 1; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .main-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
         
-        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        .btn-add { background: #28a745; color: white; font-size: 18px; }
-        .btn-link { background: #007bff; color: white; text-decoration: none; display: inline-block; font-size: 13px; }
-        .btn-print-all { background: #ffc107; color: #000; width: 100%; margin-top: 10px; }
-        .btn-generate { background: #333; color: white; }
-
+        .btn { padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: #28a745; color: white; font-size: 20px; width: 40px; }
+        .btn-link { background: #007bff; color: white; text-decoration: none; padding: 5px 10px; border-radius: 4px; font-size: 13px; }
+        .btn-download-all { background: #ffc107; color: #000; width: 100%; margin-top: 10px; height: 50px; font-size: 16px; }
+        
         #printQueue { background: #fffde7; padding: 15px; border: 1px dashed #fbc02d; margin-bottom: 20px; border-radius: 8px; }
         
-        /* Baskı Tasarımı */
-        @media print {
-            body * { display: none !important; }
-            #printContainer { display: block !important; }
-            .print-item { 
-                display: inline-block; 
-                width: 30%; 
-                margin: 10px; 
-                padding: 15px; 
-                border: 1px solid #ccc; 
-                text-align: center;
-                page-break-inside: avoid;
-            }
-            .print-item h3 { margin: 5px 0; font-size: 14px; }
-            .qr-code img { margin: 0 auto; width: 150px; height: 150px; }
+        /* Görünmez Sticker Tasarımı (PNG oluşturmak için kullanılır) */
+        #sticker-maker { position: absolute; left: -9999px; top: 0; }
+        .sticker-template { 
+            width: 300px; height: 400px; background: white; 
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; border: 2px solid #000; padding: 10px;
         }
-        #printContainer { display: none; }
+        .sticker-template h2 { margin: 0 0 10px 0; font-size: 20px; text-align: center; color: black; }
+        .sticker-template .qr-box { background: white; padding: 10px; }
+        .sticker-template p { margin-top: 10px; font-weight: bold; font-size: 18px; }
     </style>
 </head>
 <body>
 
 <div id="printQueue">
     <strong>Baskı Listesi: </strong> <span id="queueCount">0</span> ürün seçildi.
-    <button class="btn btn-print-all" onclick="topluYazdir()">SEÇİLENLERİ TOPLU YAZDIR</button>
-    <button class="btn" style="background:#eee; margin-top:5px;" onclick="temizleListe()">Listeyi Boşalt</button>
+    <button class="btn btn-download-all" id="downloadZipBtn">SEÇİLENLERİ PNG OLARAK İNDİR (ZIP)</button>
+    <button class="btn" style="background:#eee; margin-top:5px;" onclick="temizleListe()">Listeyi Temizle</button>
 </div>
 
 <div class="dashboard">
@@ -57,22 +51,17 @@
 <div class="main-card">
     <div style="display: flex; justify-content: space-between; align-items: center;">
         <h2>Üretim Hattı</h2>
-        <button class="btn btn-generate" id="generateBtn">+ Yeni Kod Üret</button>
+        <button class="btn" style="background:#333; color:white;" id="generateBtn">+ Yeni Kod Üret</button>
     </div>
-
     <table>
         <thead>
-            <tr>
-                <th>Seri No</th>
-                <th>Durum</th>
-                <th>İşlemler</th>
-            </tr>
+            <tr><th>Seri No</th><th>Durum</th><th>İşlemler</th></tr>
         </thead>
         <tbody id="qr-table-body"></tbody>
     </table>
 </div>
 
-<div id="printContainer"></div>
+<div id="sticker-maker"></div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -92,7 +81,6 @@
     const siteUrl = "https://emingul484-sketch.github.io/servis-takip/arac.html?id=";
     let baskiListesi = [];
 
-    // --- ANLIK VERİ VE TABLO ---
     onSnapshot(query(collection(db, "karekodlar"), orderBy("olusturma_tarihi", "desc")), (snapshot) => {
         const tableBody = document.getElementById('qr-table-body');
         tableBody.innerHTML = "";
@@ -101,7 +89,6 @@
         snapshot.forEach((sDoc) => {
             const data = sDoc.data();
             data.durum === "stokta" ? stock++ : active++;
-
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><b>${data.qr_id}</b></td>
@@ -116,29 +103,20 @@
         document.getElementById('stock-count').innerText = stock;
         document.getElementById('active-count').innerText = active;
 
-        // "+" Butonlarına Görev
         document.querySelectorAll('.btn-add').forEach(btn => {
-            btn.onclick = () => listeyeEkle(btn.getAttribute('data-id'));
+            btn.onclick = () => {
+                const id = btn.getAttribute('data-id');
+                if(!baskiListesi.includes(id)) {
+                    baskiListesi.push(id);
+                    document.getElementById('queueCount').innerText = baskiListesi.length;
+                }
+            };
         });
     });
 
-    // --- YENİ ÜRETİM ---
     document.getElementById('generateBtn').onclick = async () => {
         const uniqueID = "EB" + Math.floor(1000 + Math.random() * 9000);
-        await addDoc(collection(db, "karekodlar"), {
-            qr_id: uniqueID,
-            durum: "stokta",
-            olusturma_tarihi: serverTimestamp()
-        });
-    };
-
-    // --- BASKI LİSTESİ YÖNETİMİ ---
-    window.listeyeEkle = (id) => {
-        if(!baskiListesi.includes(id)) {
-            baskiListesi.push(id);
-            document.getElementById('queueCount').innerText = baskiListesi.length;
-            alert(id + " baskı listesine eklendi.");
-        }
+        await addDoc(collection(db, "karekodlar"), { qr_id: uniqueID, durum: "stokta", olusturma_tarihi: serverTimestamp() });
     };
 
     window.temizleListe = () => {
@@ -146,26 +124,45 @@
         document.getElementById('queueCount').innerText = "0";
     };
 
-    window.topluYazdir = () => {
-        if(baskiListesi.length === 0) return alert("Önce ürün seçmelisin!");
+    // PNG OLARAK ZIP İNDİRME FONKSİYONU
+    document.getElementById('downloadZipBtn').onclick = async () => {
+        if(baskiListesi.length === 0) return;
         
-        const printContainer = document.getElementById('printContainer');
-        printContainer.innerHTML = "";
-
-        baskiListesi.forEach(id => {
-            const item = document.createElement('div');
-            item.className = "print-item";
-            item.innerHTML = `<h3>ID: ${id}</h3><div id="qr-${id}" class="qr-code"></div>`;
-            printContainer.appendChild(item);
-
-            new QRCode(document.getElementById(`qr-${id}`), {
+        const zip = new JSZip();
+        const maker = document.getElementById('sticker-maker');
+        
+        for (let id of baskiListesi) {
+            maker.innerHTML = `
+                <div id="temp-sticker" class="sticker-template">
+                    <h2>ARAÇ BAKIM TAKİP</h2>
+                    <div id="temp-qr"></div>
+                    <p>${id}</p>
+                </div>
+            `;
+            
+            new QRCode(document.getElementById("temp-qr"), {
                 text: siteUrl + id,
-                width: 150,
-                height: 150
+                width: 200,
+                height: 200
             });
-        });
 
-        setTimeout(() => { window.print(); }, 1000);
+            // Küçük bir bekleme (QR oluşması için)
+            await new Promise(r => setTimeout(r, 100));
+
+            const canvas = await html2canvas(document.getElementById("temp-sticker"));
+            const dataUrl = canvas.toDataURL("image/png");
+            const base64Data = dataUrl.replace(/^data:image\/(png|jpg);base64,/, "");
+            
+            zip.file(`${id}_sticker.png`, base64Data, {base64: true});
+        }
+
+        const content = await zip.generateAsync({type:"blob"});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = "servis_stickerlari.zip";
+        link.click();
+        
+        temizleListe();
     };
 </script>
 </body>
