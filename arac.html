@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Araç Servis Kayıt Sistemi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --nardo: #6c757d; --dark: #1a1d21; --blue: #0d6efd; --bg: #f4f7f6; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: var(--dark); }
+        .container { max-width: 500px; margin: 0 auto; }
+        
+        /* Kart Yapıları */
+        .card { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 22px; margin: 0; color: var(--dark); }
+        .header p { color: var(--nardo); font-size: 14px; }
+
+        /* Form Elemanları */
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--nardo); }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 16px; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-outline { background: transparent; border: 2px solid var(--blue); color: var(--blue); margin-top: 10px; }
+
+        /* Servis Geçmişi Listesi */
+        .service-item { border-left: 4px solid var(--blue); padding-left: 15px; margin-bottom: 15px; position: relative; }
+        .service-date { font-size: 12px; color: var(--nardo); }
+        .service-title { font-weight: 700; margin: 5px 0; }
+        .service-km { font-size: 13px; color: var(--blue); font-weight: 600; }
+
+        #activation-screen, #main-screen, #add-service-screen { display: none; }
+        .status-badge { display: inline-block; padding: 4px 8px; border-radius: 5px; font-size: 11px; background: #e9ecef; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>E-BAKIM DEFTERİ</h1>
+        <div id="qr-id-display" class="status-badge">Yükleniyor...</div>
+    </div>
+
+    <div id="activation-screen" class="card">
+        <h3>🚗 Aracı Kaydet</h3>
+        <p style="font-size: 13px;">Bu karekod henüz bir araca atanmamış. Kayıt yaparak başlayın.</p>
+        <div class="form-group"><label>Plaka</label><input type="text" id="reg-plaka" placeholder="34 ABC 123"></div>
+        <div class="form-group"><label>Marka / Model</label><input type="text" id="reg-model" placeholder="CF Moto 450SR"></div>
+        <div class="form-group"><label>Şase No (Opsiyonel)</label><input type="text" id="reg-sase"></div>
+        <button class="btn btn-blue" id="btn-activate">AKTİVASYONU TAMAMLA</button>
+    </div>
+
+    <div id="main-screen">
+        <div class="card" style="background: var(--dark); color: white;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h2 id="view-plaka" style="margin:0">---</h2>
+                    <p id="view-model" style="margin:5px 0 0 0; color: #adb5bd;">---</p>
+                </div>
+                <div id="view-km" style="text-align: right;">
+                    <small>GÜNCEL KM</small><br><strong>0</strong>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn btn-blue" id="show-add-service">+ YENİ SERVİS KAYDI EKLE</button>
+
+        <h3 style="margin-top:25px;">🛠 Servis Geçmişi</h3>
+        <div id="service-list">
+            </div>
+    </div>
+
+    <div id="add-service-screen" class="card">
+        <h3>🔧 Servis Detayları</h3>
+        <div class="form-group"><label>Güncel KM</label><input type="number" id="service-km"></div>
+        <div class="form-group">
+            <label>Yapılan İşlem</label>
+            <select id="service-type">
+                <option value="Periyodik Bakım">Periyodik Bakım</option>
+                <option value="Yağ Değişimi">Yağ Değişimi</option>
+                <option value="Fren Bakımı">Fren Bakımı</option>
+                <option value="Ağır Bakım">Ağır Bakım</option>
+                <option value="Diğer">Diğer (Açıklamaya yazın)</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Açıklama</label><textarea id="service-note" rows="3"></textarea></div>
+        <button class="btn btn-blue" id="btn-save-service">KAYDI KAYDET</button>
+        <button class="btn btn-outline" id="btn-cancel">İPTAL</button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDn179sk4QyEh7TYuoU1KXcaXtigqWus6I",
+        authDomain: "servis-56e5d.firebaseapp.com",
+        projectId: "servis-56e5d",
+        storageBucket: "servis-56e5d.firebasestorage.app",
+        messagingSenderId: "497738142821",
+        appId: "1:497738142821:web:7b23a60815048fbe21228c"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // URL'den ID çekme (arac.html?id=EB1234)
+    const urlParams = new URLSearchParams(window.location.search);
+    const qrID = urlParams.get('id');
+    document.getElementById('qr-id-display').innerText = "SERİ NO: " + (qrID || "BELİRSİZ");
+
+    if (!qrID) {
+        alert("Geçersiz Karekod!");
+    } else {
+        checkVehicle();
+    }
+
+    // Aracı Kontrol Et
+    async function checkVehicle() {
+        // Not: Koleksiyon ismini paneldekiyle aynı yapıyoruz: "karekodlar"
+        // Ancak araç verilerini ayrı bir dökümanda veya aynı dökümanın içinde tutabiliriz.
+        // Kolaylık için her karekod dökümanının içine 'arac_bilgi' ve 'servisler' ekleyelim.
+        
+        const docRef = doc(db, "karekodlar", qrID); // Burada dikkat: ID, Firestore'daki döküman ID'si olmalı.
+        // Eğer panelde döküman ID'sini manuel set etmediysek, query ile bulmamız gerekir.
+        // Ama en sağlıklısı döküman ID'si ile qr_id'nin aynı olmasıdır.
+        
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists() && docSnap.data().durum === "aktif") {
+                showMainScreen(docSnap.data());
+            } else {
+                document.getElementById('activation-screen').style.display = "block";
+            }
+        });
+    }
+
+    // Aktivasyon İşlemi
+    document.getElementById('btn-activate').onclick = async () => {
+        const plaka = document.getElementById('reg-plaka').value;
+        const model = document.getElementById('reg-model').value;
+        
+        if(!plaka || !model) return alert("Lütfen plaka ve model girin.");
+
+        await updateDoc(doc(db, "karekodlar", qrID), {
+            plaka: plaka,
+            model: model,
+            sase: document.getElementById('reg-sase').value,
+            durum: "aktif",
+            kayit_tarihi: new Date().toISOString(),
+            servisler: []
+        });
+        location.reload();
+    };
+
+    function showMainScreen(data) {
+        document.getElementById('activation-screen').style.display = "none";
+        document.getElementById('main-screen').style.display = "block";
+        document.getElementById('add-service-screen').style.display = "none";
+
+        document.getElementById('view-plaka').innerText = data.plaka;
+        document.getElementById('view-model').innerText = data.model;
+        
+        const list = document.getElementById('service-list');
+        list.innerHTML = "";
+        
+        if(data.servisler && data.servisler.length > 0) {
+            // Son km'yi göster
+            document.getElementById('view-km').innerHTML = `<small>GÜNCEL KM</small><br><strong>${data.servisler[0].km}</strong>`;
+            
+            data.servisler.reverse().forEach(s => {
+                const item = document.createElement('div');
+                item.className = "service-item";
+                item.innerHTML = `
+                    <div class="service-date">${new Date(s.tarih).toLocaleDateString('tr-TR')}</div>
+                    <div class="service-title">${s.islem}</div>
+                    <div class="service-km">${s.km} KM</div>
+                    <div style="font-size:13px; color:#555;">${s.not}</div>
+                `;
+                list.appendChild(item);
+            });
+        }
+    }
+
+    // Servis Ekleme Ekranı Geçişleri
+    document.getElementById('show-add-service').onclick = () => {
+        document.getElementById('main-screen').style.display = "none";
+        document.getElementById('add-service-screen').style.display = "block";
+    };
+
+    document.getElementById('btn-cancel').onclick = () => {
+        location.reload();
+    };
+
+    document.getElementById('btn-save-service').onclick = async () => {
+        const km = document.getElementById('service-km').value;
+        const islem = document.getElementById('service-type').value;
+        const not = document.getElementById('service-note').value;
+
+        if(!km) return alert("Lütfen KM bilgisini girin.");
+
+        await updateDoc(doc(db, "karekodlar", qrID), {
+            servisler: arrayUnion({
+                tarih: new Date().toISOString(),
+                km: km,
+                islem: islem,
+                not: not
+            })
+        });
+        alert("Kayıt başarıyla eklendi.");
+        location.reload();
+    };
+</script>
+</body>
+</html>
