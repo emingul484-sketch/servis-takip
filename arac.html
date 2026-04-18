@@ -5,36 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Bakım | Dijital Servis Defteri</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --nardo: #6c757d; --accent: #2563eb; --dark: #0f172a; --bg: #f8fafc; --success: #22c55e; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--dark); }
-        .container { max-width: 450px; margin: 0 auto; padding: 20px; }
-        
+        :root { --accent: #2563eb; --dark: #0f172a; --bg: #f8fafc; --whatsapp: #25d366; --instagram: #e1306c; }
+        body { font-family: 'Outfit', sans-serif; background: var(--bg); margin: 0; padding: 0; padding-bottom: 80px; }
+        .container { max-width: 450px; margin: 0 auto; padding: 15px; }
+
+        /* Logo Alanı */
+        .brand-header { text-align: center; padding: 20px 0; }
+        .service-logo { max-width: 150px; height: auto; margin-bottom: 10px; border-radius: 12px; }
+
         /* Profil Kartı */
-        .vehicle-card { background: var(--dark); color: white; border-radius: 24px; padding: 25px; margin-bottom: 20px; position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .vehicle-card::after { content: ''; position: absolute; right: -20px; top: -20px; width: 100px; height: 100px; background: rgba(255,255,255,0.05); border-radius: 50%; }
-        
-        .plaka { font-size: 28px; font-weight: 800; letter-spacing: 1px; display: block; }
-        .model { font-size: 16px; opacity: 0.8; }
-        .km-badge { background: var(--accent); color: white; padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; margin-top: 10px; display: inline-block; }
+        .vehicle-card { background: linear-gradient(135deg, var(--dark) 0%, #1e293b 100%); color: white; border-radius: 24px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+        .plaka { font-size: 30px; font-weight: 800; letter-spacing: 1px; display: block; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px; }
+        .km-badge { background: var(--accent); padding: 6px 15px; border-radius: 99px; font-size: 13px; font-weight: 600; }
 
-        /* Modern Formlar */
-        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .input-group { margin-bottom: 15px; }
-        label { font-size: 13px; font-weight: 600; color: var(--nardo); margin-bottom: 6px; display: block; }
-        input, select, textarea { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 15px; transition: 0.2s; box-sizing: border-box; }
-        input:focus { border-color: var(--accent); outline: none; }
-
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        /* Kayıt Kartları */
+        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-weight: 700; font-size: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .btn-primary { background: var(--accent); color: white; }
-        .btn-secondary { background: #f1f5f9; color: var(--dark); margin-top: 10px; }
 
-        /* Zaman Tüneli (Timeline) */
-        .timeline-item { background: white; padding: 20px; border-radius: 18px; margin-bottom: 15px; border-left: 6px solid var(--accent); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .t-date { font-size: 12px; font-weight: 600; color: var(--nardo); }
-        .t-title { font-size: 17px; font-weight: 700; margin: 5px 0; }
-        .t-details { font-size: 14px; color: #475569; line-height: 1.5; }
-        
+        /* Timeline Kayıtları */
+        .timeline-item { background: white; padding: 15px; border-radius: 18px; margin-bottom: 12px; border-left: 6px solid var(--accent); border: 1px solid #f1f5f9; }
+        .t-header { display: flex; justify-content: space-between; font-size: 12px; color: #64748b; font-weight: 600; }
+        .t-title { font-size: 16px; font-weight: 700; margin: 8px 0; color: var(--dark); }
+
+        /* Sabit Alt İletişim Barı */
+        .contact-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); z-index: 1000; }
+        .contact-btn { flex: 1; margin: 0 5px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; text-decoration: none; font-weight: 700; font-size: 14px; color: white; }
+        .btn-wp { background: var(--whatsapp); }
+        .btn-insta { background: var(--instagram); }
+        .btn-call { background: var(--dark); }
+
         #screen-loading, #screen-activation, #screen-main, #screen-add { display: none; }
         .active { display: block !important; }
     </style>
@@ -42,61 +44,67 @@
 <body>
 
 <div class="container">
-    <div id="screen-loading" class="active" style="text-align: center; margin-top: 50px;">
-        <h2>Veriler Yükleniyor...</h2>
+    <div class="brand-header">
+        <img src="https://via.placeholder.com/150x60?text=SERVIS+LOGO" alt="Servis Logo" class="service-logo" id="main-logo">
+        <h2 id="service-name" style="margin:0; font-size:18px; color:var(--dark)">Hızlı Servis Merkezi</h2>
+    </div>
+
+    <div id="screen-loading" class="active" style="text-align: center; padding-top: 50px;">
+        <i class="fas fa-circle-notch fa-spin fa-2x" style="color:var(--accent)"></i>
+        <p>Veriler senkronize ediliyor...</p>
     </div>
 
     <div id="screen-activation">
         <div class="card">
-            <h2 style="margin-top:0">Yeni Araç Kaydı</h2>
-            <p style="color:var(--nardo); font-size:14px;">Bu QR kodu sisteme tanıtarak dijital servis defterini başlatın.</p>
-            <div class="input-group"><label>PLAKA</label><input type="text" id="reg-plaka" placeholder="Örn: 34 EB 2026"></div>
-            <div class="input-group"><label>MARKA / MODEL</label><input type="text" id="reg-model" placeholder="Örn: Honda Forza 250"></div>
-            <div class="input-group"><label>TELEFON NO (Opsiyonel)</label><input type="tel" id="reg-phone"></div>
-            <button class="btn btn-primary" id="btn-activate">KAYDI TAMAMLA VE BAŞLAT</button>
+            <h3>🚀 Aktivasyon</h3>
+            <div style="margin-bottom:15px"><label>PLAKA</label><input type="text" id="reg-plaka" placeholder="34 ABC 123"></div>
+            <div style="margin-bottom:15px"><label>MARKA/MODEL</label><input type="text" id="reg-model" placeholder="CF Moto 450SR"></div>
+            <button class="btn btn-primary" id="btn-activate">KAYDI BAŞLAT</button>
         </div>
     </div>
 
     <div id="screen-main">
         <div class="vehicle-card">
             <span class="plaka" id="view-plaka">---</span>
-            <span class="model" id="view-model">---</span><br>
-            <div class="km-badge" id="view-km">0 KM</div>
+            <span id="view-model" style="opacity: 0.8;">---</span>
+            <div style="margin-top:15px"><span class="km-badge" id="view-km">0 KM</span></div>
         </div>
 
-        <button class="btn btn-primary" id="btn-show-add">+ YENİ SERVİS KAYDI</button>
+        <button class="btn btn-primary" id="btn-show-add"><i class="fas fa-plus"></i> YENİ SERVİS KAYDI</button>
         
-        <h3 style="margin: 25px 0 15px 5px;">🔧 Servis Geçmişi</h3>
+        <h3 style="margin: 25px 0 15px 5px;"><i class="fas fa-history"></i> Servis Geçmişi</h3>
         <div id="timeline"></div>
     </div>
 
     <div id="screen-add">
         <div class="card">
-            <h3 style="margin-top:0">İşlem Detayları</h3>
-            <div class="input-group"><label>GÜNCEL KM</label><input type="number" id="srv-km"></div>
-            <div class="input-group">
-                <label>İŞLEM TİPİ</label>
+            <h3>🔧 Yeni İşlem</h3>
+            <div style="margin-bottom:15px"><label>KM</label><input type="number" id="srv-km"></div>
+            <div style="margin-bottom:15px">
+                <label>İŞLEM</label>
                 <select id="srv-type">
-                    <option value="Periyodik Bakım">Periyodik Bakım</option>
-                    <option value="Yağ Değişimi">Yağ Değişimi</option>
-                    <option value="Fren & Balata">Fren & Balata</option>
-                    <option value="Lastik Değişimi">Lastik Değişimi</option>
-                    <option value="Aksesuar / Ekipman">Aksesuar / Ekipman</option>
-                    <option value="Ağır Bakım">Ağır Bakım</option>
+                    <option>Periyodik Bakım</option>
+                    <option>Yağ/Filtre Değişimi</option>
+                    <option>Fren Bakımı</option>
+                    <option>Genel Kontrol</option>
                 </select>
             </div>
-            <div class="input-group"><label>YAPILAN İŞLEMLER</label><textarea id="srv-note" rows="4" placeholder="Hangi parçalar değişti?"></textarea></div>
-            <div class="input-group"><label>BİR SONRAKİ BAKIM KM (Öneri)</label><input type="number" id="srv-next-km"></div>
-            
-            <button class="btn btn-primary" id="btn-save">KAYDI SİSTEME İŞLE</button>
-            <button class="btn btn-secondary" onclick="location.reload()">VAZGEÇ</button>
+            <div style="margin-bottom:15px"><label>DETAYLAR</label><textarea id="srv-note" rows="3"></textarea></div>
+            <button class="btn btn-primary" id="btn-save">KAYDET</button>
+            <button class="btn" style="background:#eee; margin-top:10px;" onclick="location.reload()">İPTAL</button>
         </div>
     </div>
 </div>
 
+<div class="contact-bar">
+    <a href="tel:05555555555" class="contact-btn btn-call" id="call-link"><i class="fas fa-phone"></i></a>
+    <a href="https://wa.me/905555555555" class="contact-btn btn-wp" id="wp-link"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+    <a href="https://instagram.com/servisadiniz" class="contact-btn btn-insta" id="insta-link"><i class="fab fa-instagram"></i></a>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs, setDoc, doc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDn179sk4QyEh7TYuoU1KXcaXtigqWus6I",
@@ -109,51 +117,35 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
     const params = new URLSearchParams(window.location.search);
     const qrID = params.get('id');
 
     async function init() {
-        if(!qrID) { document.body.innerHTML = "<h1>Hata: Geçersiz QR</h1>"; return; }
-
-        // QR_ID'ye göre dökümanı ARA (Burada qr_id alanına göre sorgu yapıyoruz)
+        if(!qrID) return;
         const q = query(collection(db, "karekodlar"), where("qr_id", "==", qrID));
-        const querySnapshot = await getDocs(q);
-
+        const snap = await getDocs(q);
         document.getElementById('screen-loading').classList.remove('active');
 
-        if (querySnapshot.empty) {
-            alert("Bu kod panelde üretilmemiş!");
-            return;
+        if (!snap.empty) {
+            const vehicleDoc = snap.docs[0];
+            const data = vehicleDoc.data();
+            const docRef = vehicleDoc.ref;
+
+            if (data.durum === "aktif") {
+                showMain(data, docRef);
+            } else {
+                document.getElementById('screen-activation').classList.add('active');
+                document.getElementById('btn-activate').onclick = async () => {
+                    await updateDoc(docRef, {
+                        plaka: document.getElementById('reg-plaka').value,
+                        model: document.getElementById('reg-model').value,
+                        durum: "aktif",
+                        servisler: []
+                    });
+                    location.reload();
+                };
+            }
         }
-
-        const vehicleDoc = querySnapshot.docs[0];
-        const data = vehicleDoc.data();
-        const docRef = vehicleDoc.ref; // Mevcut dökümanın referansı
-
-        if (data.durum === "aktif") {
-            showMain(data, docRef);
-        } else {
-            document.getElementById('screen-activation').classList.add('active');
-            setupActivation(docRef);
-        }
-    }
-
-    function setupActivation(docRef) {
-        document.getElementById('btn-activate').onclick = async () => {
-            const plaka = document.getElementById('reg-plaka').value;
-            const model = document.getElementById('reg-model').value;
-            if(!plaka || !model) return alert("Eksik bilgi!");
-
-            await updateDoc(docRef, {
-                plaka: plaka,
-                model: model,
-                tel: document.getElementById('reg-phone').value,
-                durum: "aktif",
-                servisler: []
-            });
-            location.reload();
-        };
     }
 
     function showMain(data, docRef) {
@@ -163,17 +155,14 @@
         
         const timeline = document.getElementById('timeline');
         if(data.servisler && data.servisler.length > 0) {
-            const lastKm = data.servisler[data.servisler.length - 1].km;
-            document.getElementById('view-km').innerText = lastKm + " KM";
-
+            document.getElementById('view-km').innerText = data.servisler[data.servisler.length-1].km + " KM";
             data.servisler.reverse().forEach(s => {
                 const item = document.createElement('div');
                 item.className = "timeline-item";
                 item.innerHTML = `
-                    <div class="t-date">${new Date(s.tarih).toLocaleDateString('tr-TR')}</div>
+                    <div class="t-header"><span>${new Date(s.tarih).toLocaleDateString('tr-TR')}</span><span>${s.km} KM</span></div>
                     <div class="t-title">${s.type}</div>
-                    <div class="t-details"><b>KM:</b> ${s.km} <br> ${s.note}</div>
-                    ${s.next ? `<div style="margin-top:10px; color:var(--accent); font-size:12px;"><b>Sonraki Bakım:</b> ${s.next} KM</div>` : ''}
+                    <div style="font-size:13px; color:#475569;">${s.note}</div>
                 `;
                 timeline.appendChild(item);
             });
@@ -185,27 +174,17 @@
         };
 
         document.getElementById('btn-save').onclick = async () => {
-            const km = document.getElementById('srv-km').value;
-            const type = document.getElementById('srv-type').value;
-            const note = document.getElementById('srv-note').value;
-            const next = document.getElementById('srv-next-km').value;
-
-            if(!km) return alert("KM giriniz!");
-
             await updateDoc(docRef, {
                 servisler: arrayUnion({
                     tarih: new Date().toISOString(),
-                    km: km,
-                    type: type,
-                    note: note,
-                    next: next
+                    km: document.getElementById('srv-km').value,
+                    type: document.getElementById('srv-type').value,
+                    note: document.getElementById('srv-note').value
                 })
             });
-            alert("Servis kaydı eklendi!");
             location.reload();
         };
     }
-
     init();
 </script>
 </body>
