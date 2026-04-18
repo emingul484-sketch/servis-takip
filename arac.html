@@ -3,105 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dijital Servis Paneli</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>E-Bakım Pro | Dijital Servis Defteri</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --accent: #2563eb; --dark: #0f172a; --bg: #f1f5f9; }
-        body { font-family: 'Outfit', sans-serif; background: var(--bg); margin: 0; padding-bottom: 90px; }
+        :root { --accent: #2563eb; --dark: #0f172a; --bg: #f8fafc; --success: #22c55e; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; color: var(--dark); }
         .container { max-width: 480px; margin: 0 auto; padding: 15px; }
 
-        /* Dinamik Marka Alanı */
-        .service-brand { text-align: center; padding: 30px 20px; background: white; border-radius: 0 0 30px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .logo-placeholder { width: 80px; height: 80px; background: #eee; border-radius: 20px; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-        .logo-placeholder img { width: 100%; height: 100%; object-fit: cover; }
+        /* Üst Marka Alanı */
+        .brand-zone { text-align: center; padding: 25px; background: white; border-radius: 0 0 30px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .logo-box { width: 70px; height: 70px; background: #f1f5f9; border-radius: 18px; margin: 0 auto 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 1px solid #e2e8f0; }
+        .logo-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Kartlar */
-        .card { background: white; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 15px; }
-        .section-title { font-size: 14px; font-weight: 800; color: var(--nardo); text-transform: uppercase; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        /* Araç Kartı (Dark Mode) */
+        .v-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 28px; padding: 25px; margin-bottom: 20px; position: relative; box-shadow: 0 15px 30px rgba(15, 23, 42, 0.2); }
+        .v-plaka { font-size: 32px; font-weight: 800; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 15px; display: block; }
+        .v-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 13px; opacity: 0.9; }
+        
+        /* Bakım Sayacı (Progress) */
+        .maintenance-status { background: white; border-radius: 20px; padding: 15px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+        .progress-bar { height: 8px; background: #f1f5f9; border-radius: 4px; margin: 10px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: 1s; }
 
-        /* Form Elemanları */
-        .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .input-group { margin-bottom: 12px; }
-        label { font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 4px; display: block; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 12px; font-size: 14px; box-sizing: border-box; font-family: inherit; }
+        /* Kayıt Formu ve Listesi */
+        .card { background: white; border-radius: 24px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); margin-bottom: 15px; border: 1px solid #f1f5f9; }
+        label { font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px; display: block; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 14px; margin-bottom: 12px; box-sizing: border-box; font-family: inherit; }
+        
+        /* İşlem Seçenekleri Grid */
+        .parts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
+        .part-item { font-size: 12px; background: #f1f5f9; padding: 8px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        .part-item input { width: auto; margin: 0; }
 
-        /* Butonlar */
         .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary { background: var(--accent); color: white; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2); }
 
-        /* İletişim Barı (Dinamik) */
-        .dock-bar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: var(--dark); border-radius: 20px; display: flex; padding: 10px; gap: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); z-index: 1000; }
-        .dock-item { flex: 1; height: 50px; border-radius: 15px; display: none; align-items: center; justify-content: center; text-decoration: none; color: white; font-size: 18px; transition: 0.2s; }
-        .dock-item.visible { display: flex; }
-        .bg-wp { background: #22c55e; }
-        .bg-insta { background: #e1306c; }
-        .bg-call { background: #334155; }
+        /* Timeline */
+        .t-item { border-left: 4px solid var(--accent); padding-left: 15px; margin-bottom: 20px; position: relative; }
+        .t-item::before { content: ''; position: absolute; left: -8px; top: 0; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; border: 3px solid white; }
 
-        #screen-loading, #screen-activation, #screen-main, #screen-add { display: none; }
-        .active { display: block !important; }
+        /* Alt İletişim Barı */
+        .contact-label { text-align: center; font-size: 12px; font-weight: 800; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .dock { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px); border-radius: 24px; padding: 12px; z-index: 1000; }
+        .dock-grid { display: flex; gap: 10px; }
+        .dock-btn { flex: 1; height: 55px; border-radius: 18px; display: none; align-items: center; justify-content: center; text-decoration: none; color: white; font-size: 20px; transition: 0.2s; }
+        .dock-btn.active { display: flex; }
+
+        #screen-activation, #screen-main, #screen-add { display: none; }
+        .visible { display: block !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="service-brand">
-        <div class="logo-placeholder" id="logo-area"><i class="fas fa-tools fa-2x" style="color:#ccc"></i></div>
-        <h2 id="disp-service-name" style="margin:0; font-size:20px;">Servis Yükleniyor...</h2>
-    </div>
-
-    <div id="screen-activation">
-        <div class="card">
-            <div class="section-title"><i class="fas fa-building"></i> Servis Kimliği (İlk Kurulum)</div>
-            <div class="input-group"><label>SERVİS ADI</label><input type="text" id="reg-s-name" placeholder="Örn: Garaj CF Moto"></div>
-            <div class="input-group"><label>LOGO URL (Opsiyonel)</label><input type="text" id="reg-s-logo" placeholder="https://site.com/logo.png"></div>
-            <div class="input-row">
-                <div class="input-group"><label>WP NO</label><input type="tel" id="reg-s-wp" placeholder="905xx..."></div>
-                <div class="input-group"><label>INSTA ADI</label><input type="text" id="reg-s-insta" placeholder="@kullanici"></div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="section-title"><i class="fas fa-car"></i> Araç Detayları</div>
-            <div class="input-row">
-                <div class="input-group"><label>PLAKA</label><input type="text" id="reg-plaka"></div>
-                <div class="input-group"><label>MODEL</label><input type="text" id="reg-model"></div>
-            </div>
-            <div class="input-row">
-                <div class="input-group"><label>ŞASE NO</label><input type="text" id="reg-sase"></div>
-                <div class="input-group"><label>YAKIT TİPİ</label>
-                    <select id="reg-yakit">
-                        <option>Benzin</option><option>Dizel</option><option>Elektrik</option><option>LPG</option>
-                    </select>
-                </div>
-            </div>
-            <button class="btn btn-primary" id="btn-activate">SİSTEMİ AKTİF ET</button>
-        </div>
+    <div class="brand-zone">
+        <div class="logo-box" id="s-logo-area"><i class="fas fa-tools fa-lg text-muted"></i></div>
+        <h2 id="s-name-disp" style="margin:0; font-size:18px;">Servis Yükleniyor...</h2>
     </div>
 
     <div id="screen-main">
-        <div class="card" style="background:var(--dark); color:white;">
-            <div style="display:flex; justify-content:space-between;">
-                <div>
-                    <h1 id="view-plaka" style="margin:0; font-size:32px;">---</h1>
-                    <p id="view-model" style="margin:5px 0; opacity:0.7;">---</p>
-                </div>
-                <div style="text-align:right">
-                    <div id="view-km" style="font-size:20px; font-weight:800; color:var(--accent)">0 KM</div>
-                    <small id="view-yakit" style="opacity:0.5"></small>
-                </div>
+        <div class="v-card">
+            <span class="v-plaka" id="v-plaka">---</span>
+            <div class="v-info-grid">
+                <div><i class="fas fa-motorcycle"></i> <span id="v-model">---</span></div>
+                <div style="text-align:right"><i class="fas fa-tachometer-alt"></i> <span id="v-km">0</span> KM</div>
+                <div><i class="fas fa-gas-pump"></i> <span id="v-fuel">---</span></div>
+                <div style="text-align:right"><i class="fas fa-fingerprint"></i> <span id="v-sase">---</span></div>
             </div>
         </div>
-        <button class="btn btn-primary" id="btn-show-add"><i class="fas fa-plus-circle"></i> YENİ SERVİS KAYDI EKLE</button>
-        <div id="timeline" style="margin-top:20px;"></div>
+
+        <div class="maintenance-status">
+            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700;">
+                <span>BAKIM DURUMU</span>
+                <span id="m-text" style="color:var(--accent)">KM Bilgisi Bekleniyor</span>
+            </div>
+            <div class="progress-bar"><div id="m-fill" class="progress-fill"></div></div>
+        </div>
+
+        <button class="btn btn-primary" id="btn-open-add"><i class="fas fa-plus-circle"></i> YENİ SERVİS KAYDI OLUŞTUR</button>
+        
+        <h3 style="margin-top:30px;"><i class="fas fa-history"></i> Servis Geçmişi</h3>
+        <div id="timeline"></div>
     </div>
 
+    <div id="screen-add" class="card">
+        <h3>🔧 Servis Kaydı İşle</h3>
+        <div class="parts-grid">
+            <div class="part-item"><input type="checkbox" value="Yağ Değişimi"> Yağ Değişimi</div>
+            <div class="part-item"><input type="checkbox" value="Yağ Filtresi"> Yağ Filtresi</div>
+            <div class="part-item"><input type="checkbox" value="Hava Filtresi"> Hava Filtresi</div>
+            <div class="part-item"><input type="checkbox" value="Fren Balata"> Fren Balata</div>
+        </div>
+        <label>GÜNCEL KM</label>
+        <input type="number" id="srv-km" placeholder="Örn: 12500">
+        <label>BİR SONRAKİ BAKIM KM</label>
+        <input type="number" id="srv-next" placeholder="Örn: 17500">
+        <label>DİĞER NOTLAR</label>
+        <textarea id="srv-note" rows="3" placeholder="Yapılan diğer işlemler..."></textarea>
+        <button class="btn btn-primary" id="btn-save-srv">KAYDI TAMAMLA</button>
+        <button class="btn" style="background:none;" onclick="location.reload()">VAZGEÇ</button>
+    </div>
+
+    <div id="screen-activation" class="card">
+        <h3>🚀 İlk Kurulum</h3>
+        <label>SERVİS ADI</label><input type="text" id="reg-s-name" placeholder="Örn: Garaj CF">
+        <label>WHATSAPP (905xx)</label><input type="tel" id="reg-s-wp">
+        <label>INSTAGRAM (@...)</label><input type="text" id="reg-s-insta">
+        <label>PLAKA</label><input type="text" id="reg-plaka">
+        <label>MODEL</label><input type="text" id="reg-model">
+        <button class="btn btn-primary" id="btn-activate">SİSTEMİ BAŞLAT</button>
+    </div>
 </div>
 
-<div class="dock-bar" id="dock-bar">
-    <a href="#" id="link-wp" class="dock-item bg-wp"><i class="fab fa-whatsapp"></i></a>
-    <a href="#" id="link-insta" class="dock-item bg-insta"><i class="fab fa-instagram"></i></a>
-    <a href="#" id="link-call" class="dock-item bg-call"><i class="fas fa-phone"></i></a>
+<div class="dock">
+    <div class="contact-label">SERVİS İLETİŞİM</div>
+    <div class="dock-grid">
+        <a href="#" id="dock-call" class="dock-btn" style="background:#334155"><i class="fas fa-phone"></i></a>
+        <a href="#" id="dock-wp" class="dock-btn" style="background:#22c55e"><i class="fab fa-whatsapp"></i></a>
+        <a href="#" id="dock-insta" class="dock-btn" style="background:#e1306c"><i class="fab fa-instagram"></i></a>
+    </div>
 </div>
 
 <script type="module">
@@ -127,71 +148,102 @@
         const q = query(collection(db, "karekodlar"), where("qr_id", "==", qrID));
         const snap = await getDocs(q);
 
-        if (!snap.empty) {
-            const docSnap = snap.docs[0];
-            const data = docSnap.data();
+        if(!snap.empty) {
+            const docRef = snap.docs[0].ref;
+            const data = snap.docs[0].data();
             
-            // Dinamik İletişim Kontrolü
-            updateDock(data);
+            setupDock(data);
 
-            if (data.durum === "aktif") {
-                renderMain(data, docSnap.ref);
+            if(data.durum === "aktif") {
+                renderMain(data, docRef);
             } else {
-                document.getElementById('screen-activation').classList.add('active');
-                setupActivation(docSnap.ref);
+                document.getElementById('screen-activation').classList.add('visible');
+                document.getElementById('btn-activate').onclick = async () => {
+                    await updateDoc(docRef, {
+                        s_name: document.getElementById('reg-s-name').value,
+                        s_wp: document.getElementById('reg-s-wp').value,
+                        s_insta: document.getElementById('reg-s-insta').value,
+                        plaka: document.getElementById('reg-plaka').value,
+                        model: document.getElementById('reg-model').value,
+                        durum: "aktif",
+                        servisler: []
+                    });
+                    location.reload();
+                };
             }
         }
     }
 
-    function updateDock(data) {
-        if(data.s_wp) { 
-            const wp = document.getElementById('link-wp');
-            wp.href = `https://wa.me/${data.s_wp}`;
-            wp.classList.add('visible');
+    function setupDock(data) {
+        if(data.s_wp) {
+            const dCall = document.getElementById('dock-call'); dCall.href=`tel:${data.s_wp}`; dCall.classList.add('active');
+            const dWp = document.getElementById('dock-wp'); dWp.href=`https://wa.me/${data.s_wp}`; dWp.classList.add('active');
         }
         if(data.s_insta) {
-            const ins = document.getElementById('link-insta');
-            ins.href = `https://instagram.com/${data.s_insta.replace('@','')}`;
-            ins.classList.add('visible');
+            const dIns = document.getElementById('dock-insta'); dIns.href=`https://instagram.com/${data.s_insta.replace('@','')}`; dIns.classList.add('active');
         }
-        if(data.s_wp) { // Telefon olarak da WP nosunu kullanalım
-            const call = document.getElementById('link-call');
-            call.href = `tel:${data.s_wp}`;
-            call.classList.add('visible');
-        }
-        
-        // Logo ve İsim Güncelleme
-        if(data.s_name) document.getElementById('disp-service-name').innerText = data.s_name;
-        if(data.s_logo) document.getElementById('logo-area').innerHTML = `<img src="${data.s_logo}">`;
+        if(data.s_name) document.getElementById('s-name-disp').innerText = data.s_name;
     }
 
-    function setupActivation(ref) {
-        document.getElementById('btn-activate').onclick = async () => {
-            const updateObj = {
-                s_name: document.getElementById('reg-s-name').value,
-                s_logo: document.getElementById('reg-s-logo').value,
-                s_wp: document.getElementById('reg-s-wp').value,
-                s_insta: document.getElementById('reg-s-insta').value,
-                plaka: document.getElementById('reg-plaka').value,
-                model: document.getElementById('reg-model').value,
-                sase: document.getElementById('reg-sase').value,
-                yakit: document.getElementById('reg-yakit').value,
-                durum: "aktif",
-                servisler: []
-            };
-            await updateDoc(ref, updateObj);
+    function renderMain(data, docRef) {
+        document.getElementById('screen-main').classList.add('visible');
+        document.getElementById('v-plaka').innerText = data.plaka;
+        document.getElementById('v-model').innerText = data.model;
+        
+        if(data.servisler && data.servisler.length > 0) {
+            const lastSrv = data.servisler[data.servisler.length - 1];
+            const currentKm = lastSrv.km;
+            const nextKm = lastSrv.next;
+            
+            document.getElementById('v-km').innerText = currentKm;
+            
+            // Bakım Sayacı Hesapla
+            if(nextKm) {
+                const total = 5000; // Standart bakım aralığı
+                const kalan = nextKm - currentKm;
+                const percent = Math.max(0, Math.min(100, (1 - (kalan/total)) * 100));
+                document.getElementById('m-fill').style.width = percent + "%";
+                document.getElementById('m-text').innerText = kalan > 0 ? `${kalan} KM Sonra Bakım` : "BAKIM ZAMANI GEÇTİ!";
+            }
+
+            const timeline = document.getElementById('timeline');
+            data.servisler.reverse().forEach(s => {
+                const div = document.createElement('div');
+                div.className = "t-item";
+                div.innerHTML = `
+                    <div style="font-size:11px; color:#64748b; font-weight:700;">${new Date(s.tarih).toLocaleDateString('tr-TR')}</div>
+                    <div style="font-size:16px; font-weight:800;">${s.km} KM - Bakım</div>
+                    <div style="font-size:13px; color:#475569; margin-top:5px;">${s.note}</div>
+                    <div style="font-size:10px; color:var(--accent); font-weight:800; margin-top:5px;">✓ ${data.s_name} ONAYLI</div>
+                `;
+                timeline.appendChild(div);
+            });
+        }
+
+        document.getElementById('btn-open-add').onclick = () => {
+            document.getElementById('screen-main').style.display = 'none';
+            document.getElementById('screen-add').classList.add('visible');
+        };
+
+        document.getElementById('btn-save-srv').onclick = async () => {
+            const selectedParts = Array.from(document.querySelectorAll('.part-item input:checked')).map(i => i.value);
+            const km = document.getElementById('srv-km').value;
+            const next = document.getElementById('srv-next').value;
+            const note = document.getElementById('srv-note').value;
+
+            if(!km) return alert("KM giriniz!");
+
+            await updateDoc(docRef, {
+                servisler: arrayUnion({
+                    tarih: new Date().toISOString(),
+                    km: km,
+                    next: next,
+                    note: (selectedParts.join(', ') + ". " + note).trim()
+                })
+            });
             location.reload();
         };
     }
-
-    function renderMain(data, ref) {
-        document.getElementById('screen-main').classList.add('active');
-        document.getElementById('view-plaka').innerText = data.plaka;
-        document.getElementById('view-model').innerText = data.model;
-        document.getElementById('view-yakit').innerText = data.yakit;
-        // ... (Servis geçmişi render kodları buraya gelecek)
-    }
-
     init();
 </script>
 </body>
