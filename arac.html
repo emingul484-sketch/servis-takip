@@ -3,48 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Karekod Oto | Dijital Servis Sistemi</title>
+    <title>Karekod Oto | Profesyonel Servis Paneli</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --accent: #2563eb; --dark: #0f172a; --bg: #f8fafc; --success: #22c55e; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding-bottom: 120px; color: var(--dark); overflow-x: hidden; }
+        :root { --accent: #2563eb; --dark: #0f172a; --bg: #f1f5f9; --success: #22c55e; --card-bg: #ffffff; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding-bottom: 130px; color: var(--dark); }
         .container { max-width: 480px; margin: 0 auto; padding: 15px; }
 
-        /* Üst Kurumsal Header */
-        .brand-header { text-align: center; padding: 25px; background: white; border-radius: 0 0 30px 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .logo-box { width: 85px; height: 85px; background: #f1f5f9; border-radius: 22px; margin: 0 auto 10px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px solid #e2e8f0; }
+        /* Kurumsal Header */
+        .brand-header { text-align: center; padding: 30px 20px; background: white; border-radius: 0 0 40px 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); margin-bottom: 25px; border-bottom: 3px solid var(--accent); }
+        .logo-box { width: 90px; height: 90px; background: #f8fafc; border-radius: 25px; margin: 0 auto 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px solid #e2e8f0; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
         .logo-box img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* Araç Bilgi Kartı */
-        .vehicle-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 28px; padding: 25px; margin-bottom: 20px; box-shadow: 0 10px 25px rgba(15,23,42,0.1); }
-        .v-plaka { font-size: 30px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 10px; display: block; }
-        .v-row { display: flex; justify-content: space-between; font-size: 14px; opacity: 0.8; margin-top: 5px; }
+        /* Araç Kartı */
+        .vehicle-card { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; border-radius: 30px; padding: 25px; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(15,23,42,0.2); position: relative; overflow: hidden; }
+        .v-plaka { font-size: 34px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 12px; margin-bottom: 12px; display: block; letter-spacing: 1px; }
+        .v-row { display: flex; justify-content: space-between; font-size: 15px; opacity: 0.9; }
 
-        /* Hızlı İşlem Butonları */
-        .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 15px; }
-        .action-item { background: #fff; border: 1.5px solid #e2e8f0; padding: 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .action-item input { width: 16px; height: 16px; margin: 0; }
+        /* Geçmiş Kayıt Kartları */
+        .history-card { background: white; border-radius: 22px; padding: 18px; margin-bottom: 15px; border: 1px solid #e2e8f0; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .history-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .history-date { font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; }
+        .history-km { font-size: 16px; font-weight: 800; color: var(--dark); }
+        .task-tag { display: inline-block; background: #eff6ff; color: #1e40af; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; margin: 2px; border: 1px solid #dbeafe; }
+        .history-note { font-size: 13px; color: #64748b; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0; line-height: 1.5; }
+
+        /* Hızlı İşlem Seçenekleri */
+        .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .action-item { background: #fff; border: 2px solid #f1f5f9; padding: 12px; border-radius: 15px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .action-item:has(input:checked) { border-color: var(--accent); background: #f0f7ff; }
 
         /* Form Elemanları */
-        .card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.02); margin-bottom: 15px; }
-        label { font-size: 11px; font-weight: 800; color: #64748b; margin-bottom: 5px; display: block; text-transform: uppercase; }
-        input, textarea, select { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; font-family: inherit; box-sizing: border-box; font-size: 14px; }
+        .card { background: white; border-radius: 25px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); margin-bottom: 20px; }
+        label { font-size: 11px; font-weight: 800; color: #94a3b8; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        input, textarea { width: 100%; padding: 14px; border: 2px solid #f1f5f9; border-radius: 16px; margin-bottom: 15px; font-family: inherit; box-sizing: border-box; font-size: 15px; transition: 0.3s; }
+        input:focus { border-color: var(--accent); outline: none; background: #fff; }
 
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-upload { background: #f1f5f9; color: #475569; border: 2px dashed #cbd5e1; margin-bottom: 15px; }
-
-        /* Timeline */
-        .t-item { border-left: 3px solid var(--accent); padding-left: 15px; margin-bottom: 20px; position: relative; margin-left: 10px; }
-        .t-item::after { content: ''; position: absolute; left: -10px; top: 0; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; border: 3px solid white; }
-
-        /* SERVİS İLETİŞİM PANELİ */
-        .contact-panel { position: fixed; bottom: 15px; left: 15px; right: 15px; background: #fff; border-radius: 24px; padding: 12px; box-shadow: 0 -5px 30px rgba(0,0,0,0.15); border: 1px solid #e2e8f0; z-index: 1000; }
-        .contact-header { text-align: center; font-size: 10px; font-weight: 800; color: #94a3b8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .contact-btns { display: flex; gap: 10px; }
-        .c-btn { flex: 1; height: 50px; border-radius: 16px; display: none; align-items: center; justify-content: center; text-decoration: none; color: white; font-size: 20px; }
-        .c-btn.visible { display: flex; }
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 18px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; font-size: 15px; }
+        .btn-primary { background: var(--accent); color: white; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); }
+        
+        /* İletişim Paneli */
+        .contact-panel { position: fixed; bottom: 20px; left: 20px; right: 20px; background: white; border-radius: 25px; padding: 15px; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; z-index: 1000; }
+        .contact-header { text-align: center; font-size: 10px; font-weight: 800; color: #94a3b8; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .contact-btns { display: flex; gap: 12px; }
+        .c-btn { flex: 1; height: 55px; border-radius: 18px; display: none; align-items: center; justify-content: center; text-decoration: none; color: white; font-size: 22px; transition: 0.3s; }
+        .c-btn:active { transform: scale(0.95); }
 
         #screen-activation, #screen-main, #screen-add { display: none; }
         .active { display: block !important; }
@@ -54,29 +58,29 @@
 
 <div class="container">
     <div class="brand-header">
-        <div class="logo-box" id="s-logo-area"><i class="fas fa-image fa-lg text-muted"></i></div>
-        <h2 id="s-name-disp" style="margin:0; font-size:18px;">Servis Paneli</h2>
+        <div class="logo-box" id="s-logo-area"><i class="fas fa-car-side fa-2x" style="color:#cbd5e1"></i></div>
+        <h2 id="s-name-disp" style="margin:0; font-size:20px; font-weight:800; color:var(--dark)">---</h2>
     </div>
 
     <div id="screen-activation">
         <div class="card">
-            <h3>🚀 Sistem Kurulumu</h3>
+            <h3 style="margin-top:0">🚀 Servis Kurulumu</h3>
             <label>SERVİS LOGOSU</label>
             <input type="file" id="logo-input" accept="image/*" style="display:none">
-            <button class="btn btn-upload" onclick="document.getElementById('logo-input').click()">
-                <i class="fas fa-camera"></i> Logo Seç veya Fotoğraf Çek
+            <button class="btn" style="background:#f1f5f9; color:#475569; border:2px dashed #cbd5e1; margin-bottom:15px;" onclick="document.getElementById('logo-input').click()">
+                <i class="fas fa-camera"></i> Logo Yükle
             </button>
             <p id="up-status" style="font-size:11px; text-align:center; color:var(--accent); margin-top:-10px; margin-bottom:10px;"></p>
 
-            <label>SERVİS ADI</label><input type="text" id="reg-s-name" placeholder="Örn: Karekod Oto Servis">
+            <label>SERVİS ADI</label><input type="text" id="reg-s-name" placeholder="Örn: Karekod Motor">
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
                 <div><label>WHATSAPP</label><input type="tel" id="reg-s-wp" placeholder="905xx"></div>
-                <div><label>INSTAGRAM</label><input type="text" id="reg-s-insta" placeholder="@kullanici"></div>
+                <div><label>INSTAGRAM</label><input type="text" id="reg-s-insta" placeholder="kullanici_adi"></div>
             </div>
-            <hr style="border:0; border-top:1px solid #eee; margin:15px 0">
+            <hr style="border:0; border-top:1px solid #f1f5f9; margin:20px 0">
             <label>ARAÇ PLAKASI</label><input type="text" id="reg-plaka">
             <label>MARKA / MODEL</label><input type="text" id="reg-model">
-            <button class="btn btn-primary" id="btn-activate">SİSTEMİ AKTİF ET</button>
+            <button class="btn btn-primary" id="btn-activate">SİSTEMİ OLUŞTUR</button>
         </div>
     </div>
 
@@ -89,45 +93,49 @@
             </div>
         </div>
 
-        <div class="card" style="padding:15px; display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:12px; font-weight:800; color:#64748b">MUAYENE TARİHİ:</span>
+        <div class="card" style="padding:18px; display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <span style="font-size:12px; font-weight:800; color:#64748b"><i class="fas fa-calendar-alt"></i> MUAYENE TARİHİ:</span>
             <span id="v-muayene" style="font-weight:800; color:var(--accent)">Girilmedi</span>
         </div>
 
-        <button class="btn btn-primary" id="btn-show-add"><i class="fas fa-plus-circle"></i> YENİ SERVİS KAYDI EKLE</button>
-        <div id="timeline" style="margin-top:20px"></div>
+        <button class="btn btn-primary" id="btn-show-add"><i class="fas fa-plus-circle"></i> YENİ BAKIM KAYDI EKLE</button>
+        
+        <div style="margin-top:25px">
+            <h3 style="font-size:16px; margin-bottom:15px; color:#64748b; padding-left:5px">GEÇMİŞ BAKIMLAR</h3>
+            <div id="timeline"></div>
+        </div>
     </div>
 
     <div id="screen-add" class="card">
-        <h3>🔧 Servis İşlemi</h3>
+        <h3 style="margin-top:0">🔧 Yeni Bakım İşlemi</h3>
         
-        <label>HIZLI SEÇENEKLER</label>
+        <label>YAPILAN İŞLEMLER</label>
         <div class="quick-actions">
-            <div class="action-item"><input type="checkbox" class="task" value="Yağ Değişimi"> Yağ Değişimi</div>
-            <div class="action-item"><input type="checkbox" class="task" value="Yağ Filtresi"> Yağ Filtresi</div>
-            <div class="action-item"><input type="checkbox" class="task" value="Hava Filtresi"> Hava Filtresi</div>
-            <div class="action-item"><input type="checkbox" class="task" value="Fren Kontrol"> Fren Kontrol</div>
-            <div class="action-item"><input type="checkbox" class="task" value="Zincir Yağlama"> Zincir Yağlama</div>
-            <div class="action-item"><input type="checkbox" class="task" value="Sıvı Kontrolleri"> Sıvı Kontrolleri</div>
-            <div class="action-item"><input type="checkbox" class="task" value="Antifriz"> Antifriz</div>
-            <div class="action-item"><input type="checkbox" class="task" value="Genel Check-up"> Genel Check-up</div>
+            <div class="action-item"><input type="checkbox" class="task" value="Yağ Değişti"> Yağ Değişti</div>
+            <div class="action-item"><input type="checkbox" class="task" value="Yağ Filtresi Değişti"> Yağ Filtresi Değişti</div>
+            <div class="action-item"><input type="checkbox" class="task" value="Hava Filtresi Değişti"> Hava Filtresi Değişti</div>
+            <div class="action-item"><input type="checkbox" class="task" value="Frenler Kontrol Edildi"> Fren Kontrol Edildi</div>
+            <div class="action-item"><input type="checkbox" class="task" value="Zincir Bakımı Yapıldı"> Zincir Bakımı Yapıldı</div>
+            <div class="action-item"><input type="checkbox" class="task" value="Antifriz Eklendi"> Antifriz Eklendi</div>
+            <div class="action-item"><input type="checkbox" class="task" value="Buji Değişti"> Buji Değişti</div>
+            <div class="action-item"><input type="checkbox" class="task" value="Genel Check-up Yapıldı"> Genel Check-up</div>
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
             <div><label>GÜNCEL KM</label><input type="number" id="srv-km"></div>
             <div><label>MUAYENE TARİHİ</label><input type="date" id="srv-muayene"></div>
         </div>
 
-        <label>DİĞER NOTLAR</label>
-        <textarea id="srv-note" rows="3" placeholder="Değişen parça markaları vb."></textarea>
+        <label>ÖZEL NOTLAR / DEĞİŞEN PARÇALAR</label>
+        <textarea id="srv-note" rows="4" placeholder="Kullanılan yağ markası vb. detaylar..."></textarea>
         
-        <button class="btn btn-primary" id="btn-save-srv">KAYDI KAYDET</button>
-        <button class="btn" style="background:none; margin-top:5px" onclick="location.reload()">İPTAL</button>
+        <button class="btn btn-primary" id="btn-save-srv">KAYDI SİSTEME İŞLE</button>
+        <button class="btn" style="background:none; margin-top:10px; color:#94a3b8" onclick="location.reload()">İPTAL ET</button>
     </div>
 </div>
 
 <div class="contact-panel" id="contact-panel" style="display:none">
-    <div class="contact-header">Servis İletişim</div>
+    <div class="contact-header">Servis İletişim Hattı</div>
     <div class="contact-btns">
         <a href="#" id="link-call" class="c-btn" style="background:#334155"><i class="fas fa-phone"></i></a>
         <a href="#" id="link-wp" class="c-btn" style="background:#22c55e"><i class="fab fa-whatsapp"></i></a>
@@ -156,13 +164,12 @@
 
     let uploadedLogoUrl = "";
 
-    // LOGO YÜKLEME FONKSİYONU (ImgBB)
+    // LOGO YÜKLEME (ImgBB)
     document.getElementById('logo-input').onchange = async (e) => {
         const file = e.target.files[0];
         if(!file) return;
-        
         const status = document.getElementById('up-status');
-        status.innerText = "Resim yükleniyor...";
+        status.innerText = "Yükleniyor...";
         
         const formData = new FormData();
         formData.append("image", file);
@@ -170,17 +177,12 @@
         try {
             const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: formData });
             const result = await res.json();
-            
             if(result.success) {
                 uploadedLogoUrl = result.data.url;
                 document.getElementById('s-logo-area').innerHTML = `<img src="${uploadedLogoUrl}">`;
-                status.innerText = "✅ Yüklendi!";
-            } else {
-                status.innerText = "❌ Hata oluştu!";
+                status.innerText = "✅ Logo Hazır";
             }
-        } catch (err) {
-            status.innerText = "❌ Bağlantı hatası!";
-        }
+        } catch (err) { status.innerText = "❌ Hata!"; }
     };
 
     async function init() {
@@ -216,14 +218,11 @@
     function renderMain(data, docRef) {
         document.getElementById('screen-main').classList.add('active');
         document.getElementById('contact-panel').style.display = 'block';
-        
         document.getElementById('s-name-disp').innerText = data.s_name || "Servis Paneli";
         if(data.s_logo) document.getElementById('s-logo-area').innerHTML = `<img src="${data.s_logo}">`;
-        
         document.getElementById('v-plaka').innerText = data.plaka;
         document.getElementById('v-model').innerText = data.model;
 
-        // İletişim Butonlarını Aktif Et
         if(data.s_wp) {
             const wp = document.getElementById('link-wp'); wp.href = `https://wa.me/${data.s_wp}`; wp.classList.add('visible');
             const cl = document.getElementById('link-call'); cl.href = `tel:${data.s_wp}`; cl.classList.add('visible');
@@ -233,20 +232,31 @@
         }
 
         if(data.servisler && data.servisler.length > 0) {
-            const last = data.servisler[data.servisler.length - 1];
-            document.getElementById('v-km').innerText = last.km;
-            if(last.muayene) document.getElementById('v-muayene').innerText = new Date(last.muayene).toLocaleDateString('tr-TR');
+            const sortedHistory = [...data.servisler].sort((a, b) => new Date(b.tarih) - new Date(a.tarih));
+            
+            document.getElementById('v-km').innerText = sortedHistory[0].km;
+            if(sortedHistory[0].muayene) document.getElementById('v-muayene').innerText = new Date(sortedHistory[0].muayene).toLocaleDateString('tr-TR');
 
             const timeline = document.getElementById('timeline');
-            data.servisler.reverse().forEach(s => {
-                const div = document.createElement('div');
-                div.className = "t-item";
-                div.innerHTML = `
-                    <div style="font-size:11px; font-weight:800; color:var(--accent)">${new Date(s.tarih).toLocaleDateString('tr-TR')}</div>
-                    <div style="font-size:15px; font-weight:800;">${s.km} KM - Periyodik Bakım</div>
-                    <div style="font-size:13px; color:#475569; margin-top:4px">${s.note}</div>
+            sortedHistory.forEach(s => {
+                const card = document.createElement('div');
+                card.className = "history-card";
+                
+                // Seçenekleri etiketlere çevir
+                const tagsHtml = s.tasks ? s.tasks.map(t => `<span class="task-tag">${t}</span>`).join('') : '';
+
+                card.innerHTML = `
+                    <div class="history-header">
+                        <div>
+                            <div class="history-date">${new Date(s.tarih).toLocaleDateString('tr-TR')}</div>
+                            <div class="history-km">${s.km} KM</div>
+                        </div>
+                        <i class="fas fa-chevron-right" style="color:#cbd5e1; font-size:12px"></i>
+                    </div>
+                    <div style="margin-top:5px">${tagsHtml}</div>
+                    ${s.note ? `<div class="history-note"><b>Not:</b> ${s.note}</div>` : ''}
                 `;
-                timeline.appendChild(div);
+                timeline.appendChild(card);
             });
         }
 
@@ -261,14 +271,15 @@
             const muayene = document.getElementById('srv-muayene').value;
             const note = document.getElementById('srv-note').value;
 
-            if(!km) return alert("KM bilgisini girin!");
+            if(!km) return alert("Lütfen aracın güncel kilometresini girin!");
 
             await updateDoc(docRef, {
                 servisler: arrayUnion({
                     tarih: new Date().toISOString(),
                     km: km,
                     muayene: muayene,
-                    note: (tasks.join(', ') + " " + note).trim()
+                    note: note,
+                    tasks: tasks
                 })
             });
             location.reload();
