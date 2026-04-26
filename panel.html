@@ -1,11 +1,101 @@
-// config.js
-export const firebaseConfig = {
-    apiKey: "AIzaSyDn179sk4QyEh7TYuoU1KXcaXtigqWus6I",
-    authDomain: "servis-56e5d.firebaseapp.com",
-    projectId: "servis-56e5d",
-    storageBucket: "servis-56e5d.firebasestorage.app",
-    messagingSenderId: "497738142821",
-    appId: "1:497738142821:web:7b23a60815048fbe21228c"
-};
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servis Yönetim Paneli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --accent: #2563eb; --bg: #f8fafc; --danger: #ef4444; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .login-box { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .panel-container { max-width: 800px; margin: 0 auto; display: none; }
+        .customer-card { background: white; padding: 20px; border-radius: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid #e2e8f0; }
+        .near-bakim { border-left-color: var(--danger); background: #fff1f2; }
+        .btn { padding: 12px 20px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.3s; }
+        .btn-wp { background: #22c55e; color: white; text-decoration: none; font-size: 13px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1.5px solid #eee; border-radius: 10px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
 
-export const IMGBB_KEY = "0fd006aeed01a4802808abbfc44990ca";
+<div id="login-screen" class="login-box">
+    <h2 style="text-align:center">Dükkan Girişi</h2>
+    <input type="text" id="l-user" placeholder="Kullanıcı Adı">
+    <input type="password" id="l-pass" placeholder="Şifre">
+    <button class="btn" style="background:var(--accent); color:white; width:100%" id="btn-login">GİRİŞ YAP</button>
+</div>
+
+<div id="panel-screen" class="panel-container">
+    <div style="display:flex; align-items:center; gap:15px; margin-bottom:30px">
+        <img id="s-logo" src="" style="width:60px; height:60px; border-radius:15px; object-fit:cover">
+        <h2 id="s-name">Yükleniyor...</h2>
+    </div>
+    <h3>Müşteri Takip Listesi</h3>
+    <div id="customer-list"></div>
+</div>
+
+<script type="module">
+    import { firebaseConfig } from './config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    let activeServis = null;
+
+    document.getElementById('btn-login').onclick = async () => {
+        const user = document.getElementById('l-user').value;
+        const pass = document.getElementById('l-pass').value;
+        const sDoc = await getDoc(doc(db, "servisler", user));
+
+        if(sDoc.exists() && sDoc.data().s_sifre === pass) {
+            activeServis = { id: user, ...sDoc.data() };
+            showPanel();
+        } else { alert("Hatalı giriş!"); }
+    };
+
+    async function showPanel() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('panel-screen').style.display = 'block';
+        document.getElementById('s-name').innerText = activeServis.s_name;
+        document.getElementById('s-logo').src = activeServis.s_logo;
+
+        const q = query(collection(db, "karekodlar"), where("servis_id", "==", activeServis.id));
+        const snap = await getDocs(q);
+        const list = document.getElementById('customer-list');
+        list.innerHTML = "";
+
+        snap.forEach(dSnap => {
+            const data = dSnap.data();
+            const last = data.servisler ? data.servisler[data.servisler.length - 1] : null;
+            
+            // KM HESABI (Günde 5 KM)
+            let isNear = false;
+            let daysLeft = 0;
+            if(last && last.next_km) {
+                const diff = last.next_km - last.km;
+                daysLeft = Math.floor(diff / 5);
+                if(daysLeft < 15) isNear = true; // 15 günden az kaldıysa uyar
+            }
+
+            const card = document.createElement('div');
+            card.className = `customer-card ${isNear ? 'near-bakim' : ''}`;
+            card.innerHTML = `
+                <div>
+                    <b style="font-size:18px">${data.plaka}</b><br>
+                    <small>${data.model}</small>
+                </div>
+                <div style="text-align:right">
+                    ${isNear ? `<span style="color:red; font-size:10px; font-weight:800">BAKIM YAKLAŞTI (${daysLeft} GÜN)</span><br>` : ''}
+                    <a href="https://wa.me/${activeServis.s_wp}?text=${encodeURIComponent('Merhaba, '+data.plaka+' plakalı aracınızın bakımı yaklaşmıştır.')}" 
+                       target="_blank" class="btn btn-wp"><i class="fab fa-whatsapp"></i> Mesaj At</a>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+</script>
+</body>
+</html>
