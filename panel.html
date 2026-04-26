@@ -3,99 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servis Yönetim Paneli</title>
+    <title>Karekod Oto | Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --accent: #2563eb; --bg: #f8fafc; --danger: #ef4444; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .login-box { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .panel-container { max-width: 800px; margin: 0 auto; display: none; }
-        .customer-card { background: white; padding: 20px; border-radius: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid #e2e8f0; }
-        .near-bakim { border-left-color: var(--danger); background: #fff1f2; }
-        .btn { padding: 12px 20px; border: none; border-radius: 12px; cursor: pointer; font-weight: 700; transition: 0.3s; }
-        .btn-wp { background: #22c55e; color: white; text-decoration: none; font-size: 13px; }
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1.5px solid #eee; border-radius: 10px; box-sizing: border-box; }
+        :root { --accent: #2563eb; --bg: #f4f7fe; --dark: #0f172a; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; display: flex; }
+        
+        /* Sidebar */
+        .sidebar { width: 260px; background: var(--dark); height: 100vh; color: white; padding: 20px; box-sizing: border-box; position: fixed; }
+        .main-content { margin-left: 260px; padding: 40px; width: 100%; }
+        
+        /* Form & Cards */
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 800px; }
+        h2 { margin-top: 0; color: var(--dark); }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 700; font-size: 13px; margin-bottom: 8px; color: #64748b; }
+        input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; box-sizing: border-box; }
+        input:focus { border-color: var(--accent); outline: none; }
+        
+        .btn-add { background: var(--accent); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px; }
+        .btn-add:hover { opacity: 0.9; transform: translateY(-2px); }
+
+        /* Servis Listesi */
+        .servis-list { margin-top: 40px; width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; }
+        .servis-list th, .servis-list td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        .servis-list th { background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; }
+        .logo-preview { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
     </style>
 </head>
 <body>
 
-<div id="login-screen" class="login-box">
-    <h2 style="text-align:center">Dükkan Girişi</h2>
-    <input type="text" id="l-user" placeholder="Kullanıcı Adı">
-    <input type="password" id="l-pass" placeholder="Şifre">
-    <button class="btn" style="background:var(--accent); color:white; width:100%" id="btn-login">GİRİŞ YAP</button>
+<div class="sidebar">
+    <h1 style="font-size: 20px; font-weight: 800;">Karekod Oto<br><span style="color: var(--accent); font-size: 14px;">ADMIN PANEL</span></h1>
+    <hr style="opacity: 0.1; margin: 20px 0;">
+    <p style="font-size: 12px; opacity: 0.6;">BAYİLİK YÖNETİMİ</p>
 </div>
 
-<div id="panel-screen" class="panel-container">
-    <div style="display:flex; align-items:center; gap:15px; margin-bottom:30px">
-        <img id="s-logo" src="" style="width:60px; height:60px; border-radius:15px; object-fit:cover">
-        <h2 id="s-name">Yükleniyor...</h2>
+<div class="main-content">
+    <div id="admin-auth" class="card" style="max-width: 400px; margin: 100px auto; text-align: center;">
+        <h2>Yönetici Girişi</h2>
+        <input type="password" id="admin-pass" placeholder="Admin Şifresi">
+        <button onclick="checkAdmin()" class="btn-add">GİRİŞ YAP</button>
     </div>
-    <h3>Müşteri Takip Listesi</h3>
-    <div id="customer-list"></div>
+
+    <div id="admin-panel" style="display: none;">
+        <div class="card">
+            <h2>Yeni Servis (Bayi) Ekle</h2>
+            <div class="form-grid">
+                <div class="input-group">
+                    <label>DÜKKAN ADI</label>
+                    <input type="text" id="s_name" placeholder="Örn: Battalbey Cengiz Topel">
+                </div>
+                <div class="input-group">
+                    <label>KULLANICI ADI (Giriş ID)</label>
+                    <input type="text" id="s_user" placeholder="Örn: battalbey01">
+                </div>
+                <div class="input-group">
+                    <label>SERVİS ŞİFRE</label>
+                    <input type="text" id="s_sifre" placeholder="Giriş Şifresi">
+                </div>
+                <div class="input-group">
+                    <label>LOGO URL</label>
+                    <input type="text" id="s_logo" placeholder="https://... /logo.png">
+                </div>
+                <div class="input-group">
+                    <label>WHATSAPP (905...)</label>
+                    <input type="text" id="s_wp" placeholder="905xxxxxxxxx">
+                </div>
+                <div class="input-group">
+                    <label>INSTAGRAM (Kullanıcı Adı)</label>
+                    <input type="text" id="s_insta" placeholder="dükkan_kullaniciadi">
+                </div>
+                <div class="input-group" style="grid-column: span 2;">
+                    <label>GOOGLE HARİTA LİNKİ (KONUM)</label>
+                    <input type="text" id="s_konum" placeholder="https://maps.app.goo.gl/...">
+                </div>
+            </div>
+            <button class="btn-add" onclick="servisKaydet()">BAYİLİĞİ ONAYLA VE KAYDET</button>
+        </div>
+
+        <table class="servis-list">
+            <thead>
+                <tr>
+                    <th>Logo</th>
+                    <th>Servis Adı</th>
+                    <th>Kullanıcı Adı</th>
+                    <th>Şifre</th>
+                    <th>İşlem</th>
+                </tr>
+            </thead>
+            <tbody id="servis-table-body">
+                </tbody>
+        </table>
+    </div>
 </div>
 
 <script type="module">
     import { firebaseConfig } from './config.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let activeServis = null;
 
-    document.getElementById('btn-login').onclick = async () => {
-        const user = document.getElementById('l-user').value;
-        const pass = document.getElementById('l-pass').value;
-        const sDoc = await getDoc(doc(db, "servisler", user));
-
-        if(sDoc.exists() && sDoc.data().s_sifre === pass) {
-            activeServis = { id: user, ...sDoc.data() };
-            showPanel();
-        } else { alert("Hatalı giriş!"); }
+    // Admin Giriş Kontrolü (Basit Güvenlik)
+    window.checkAdmin = () => {
+        const pass = document.getElementById('admin-pass').value;
+        if(pass === "admin123") { // Burayı kendi özel şifren yap
+            document.getElementById('admin-auth').style.display = 'none';
+            document.getElementById('admin-panel').style.display = 'block';
+            servisleriGetir();
+        } else {
+            alert("Hatalı Admin Şifresi!");
+        }
     };
 
-    async function showPanel() {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('panel-screen').style.display = 'block';
-        document.getElementById('s-name').innerText = activeServis.s_name;
-        document.getElementById('s-logo').src = activeServis.s_logo;
+    // YENİ SERVİS KAYDET
+    window.servisKaydet = async () => {
+        const userID = document.getElementById('s_user').value.trim();
+        if(!userID) return alert("Kullanıcı adı şart!");
 
-        const q = query(collection(db, "karekodlar"), where("servis_id", "==", activeServis.id));
-        const snap = await getDocs(q);
-        const list = document.getElementById('customer-list');
-        list.innerHTML = "";
+        const yeniServis = {
+            s_name: document.getElementById('s_name').value,
+            s_sifre: document.getElementById('s_sifre').value,
+            s_logo: document.getElementById('s_logo').value,
+            s_wp: document.getElementById('s_wp').value,
+            s_insta: document.getElementById('s_insta').value,
+            s_konum: document.getElementById('s_konum').value,
+            kayit_tarihi: new Date().toLocaleDateString('tr-TR')
+        };
 
-        snap.forEach(dSnap => {
-            const data = dSnap.data();
-            const last = data.servisler ? data.servisler[data.servisler.length - 1] : null;
-            
-            // KM HESABI (Günde 5 KM)
-            let isNear = false;
-            let daysLeft = 0;
-            if(last && last.next_km) {
-                const diff = last.next_km - last.km;
-                daysLeft = Math.floor(diff / 5);
-                if(daysLeft < 15) isNear = true; // 15 günden az kaldıysa uyar
-            }
+        try {
+            await setDoc(doc(db, "servisler", userID), yeniServis);
+            alert("Bayilik başarıyla tanımlandı!");
+            location.reload();
+        } catch (e) {
+            console.error("Hata: ", e);
+        }
+    };
 
-            const card = document.createElement('div');
-            card.className = `customer-card ${isNear ? 'near-bakim' : ''}`;
-            card.innerHTML = `
-                <div>
-                    <b style="font-size:18px">${data.plaka}</b><br>
-                    <small>${data.model}</small>
-                </div>
-                <div style="text-align:right">
-                    ${isNear ? `<span style="color:red; font-size:10px; font-weight:800">BAKIM YAKLAŞTI (${daysLeft} GÜN)</span><br>` : ''}
-                    <a href="https://wa.me/${activeServis.s_wp}?text=${encodeURIComponent('Merhaba, '+data.plaka+' plakalı aracınızın bakımı yaklaşmıştır.')}" 
-                       target="_blank" class="btn btn-wp"><i class="fab fa-whatsapp"></i> Mesaj At</a>
-                </div>
+    // KAYITLI SERVİSLERİ LİSTELE
+    async function servisleriGetir() {
+        const querySnapshot = await getDocs(collection(db, "servisler"));
+        const tableBody = document.getElementById('servis-table-body');
+        tableBody.innerHTML = "";
+        
+        querySnapshot.forEach((doc) => {
+            const s = doc.data();
+            tableBody.innerHTML += `
+                <tr>
+                    <td><img src="${s.s_logo}" class="logo-preview"></td>
+                    <td><b>${s.s_name}</b></td>
+                    <td>${doc.id}</td>
+                    <td><code>${s.s_sifre}</code></td>
+                    <td><button onclick="servisSil('${doc.id}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button></td>
+                </tr>
             `;
-            list.appendChild(card);
         });
     }
+
+    window.servisSil = async (id) => {
+        if(confirm("Bu bayiliği iptal etmek istediğine emin misin?")) {
+            await deleteDoc(doc(db, "servisler", id));
+            location.reload();
+        }
+    };
 </script>
 </body>
 </html>
