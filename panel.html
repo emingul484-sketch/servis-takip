@@ -1,22 +1,11 @@
-<script type="module">
-    import { firebaseConfig } from './config.js';
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// config.js
+export const firebaseConfig = {
+    apiKey: "AIzaSyDn179sk4QyEh7TYuoU1KXcaXtigqWus6I",
+    authDomain: "servis-56e5d.firebaseapp.com",
+    projectId: "servis-56e5d",
+    storageBucket: "servis-56e5d.firebasestorage.app",
+    messagingSenderId: "497738142821",
+    appId: "1:497738142821:web:7b23a60815048fbe21228c"
+};
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Giriş yapınca dükkan bilgilerini ve müşterileri otomatik çeker
-    async function girisYap() {
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-        
-        const sRef = doc(db, "servisler", user);
-        const sSnap = await getDoc(sRef);
-
-        if(sSnap.exists() && sSnap.data().sifre === pass) {
-            // Müşterileri listele ve KM hesabı yap (Günde 5 KM)
-            // Bakımı 15 günden az kalanları kırmızı yak!
-        }
-    }
-</script>
+export const IMGBB_KEY = "0fd006aeed01a4802808abbfc44990ca";
