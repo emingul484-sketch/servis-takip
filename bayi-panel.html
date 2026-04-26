@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servis Paneli | Karekod Oto</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; --success: #22c55e; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; }
+        .sidebar { width: 280px; background: var(--dark); height: 100vh; color: white; padding: 30px; position: fixed; box-sizing: border-box; }
+        .main { margin-left: 280px; padding: 40px; }
+        
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .stat-card h3 { margin: 0; font-size: 13px; color: #64748b; text-transform: uppercase; }
+        .stat-card p { margin: 10px 0 0 0; font-size: 28px; font-weight: 800; color: var(--dark); }
+
+        .client-table { width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .client-table th, .client-table td { padding: 18px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        .client-table th { background: #f8fafc; font-size: 12px; color: #64748b; }
+        
+        .btn-wp { background: var(--success); color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 13px; }
+        .status-pill { padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; }
+        .status-soon { background: #fef3c7; color: #d97706; } /* Bakımı Yaklaşan */
+        
+        #login-screen { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; color: white; }
+        .login-box { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 350px; text-align: center; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; margin-bottom: 15px; box-sizing: border-box; }
+        .btn-login { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: 800; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="login-screen">
+    <div class="login-box">
+        <h2 style="margin-bottom: 30px;">Bayi Girişi</h2>
+        <input type="text" id="user-id" placeholder="Servis Kullanıcı Adı">
+        <input type="password" id="user-pass" placeholder="Şifre">
+        <button class="btn-login" onclick="login()">SİSTEME GİRİŞ YAP</button>
+    </div>
+</div>
+
+<div id="panel-content" style="display: none;">
+    <div class="sidebar">
+        <h2 id="servis-label" style="font-size: 20px; font-weight: 800;">Servis Paneli</h2>
+        <p id="servis-name-label" style="opacity: 0.6; font-size: 14px; margin-bottom: 40px;">Yükleniyor...</p>
+        <hr style="opacity: 0.1;">
+        <p style="font-size: 12px; cursor: pointer; margin-top: 20px;" onclick="location.reload()">Çıkış Yap</p>
+    </div>
+
+    <div class="main">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Toplam Müşteri</h3>
+                <p id="stat-total">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Son 30 Gün</h3>
+                <p id="stat-month">0</p>
+            </div>
+            <div class="stat-card" style="border-left: 5px solid var(--success);">
+                <h3>Bakımı Gelenler</h3>
+                <p id="stat-alert">0</p>
+            </div>
+        </div>
+
+        <div style="background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
+            <h2 style="margin-bottom: 20px; font-size: 18px;">Müşteri Listesi & Bakım Takibi</h2>
+            <table class="client-table">
+                <thead>
+                    <tr>
+                        <th>Plaka / Model</th>
+                        <th>Telefon</th>
+                        <th>Son Bakım KM</th>
+                        <th>Gelecek Bakım</th>
+                        <th>Durum</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="client-list-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { firebaseConfig } from './config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let loggedInServis = null;
+
+    window.login = async () => {
+        const uid = document.getElementById('user-id').value;
+        const pass = document.getElementById('user-pass').value;
+
+        const sSnap = await getDoc(doc(db, "servisler", uid));
+        if (sSnap.exists() && sSnap.data().s_sifre === pass) {
+            loggedInServis = { id: uid, ...sSnap.data() };
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('panel-content').style.display = 'block';
+            document.getElementById('servis-name-label').innerText = loggedInServis.s_name;
+            verileriYukle();
+        } else {
+            alert("Giriş bilgileri hatalı!");
+        }
+    };
+
+    async function verileriYukle() {
+        const q = query(collection(db, "karekodlar"), where("servis_id", "==", loggedInServis.id));
+        const snap = await getDocs(q);
+        const listBody = document.getElementById('client-list-body');
+        listBody.innerHTML = "";
+        
+        let total = 0;
+        let alerts = 0;
+
+        snap.forEach(doc => {
+            const data = doc.data();
+            if (!data.plaka) return; // Henüz araç kaydı yapılmamışsa atla
+
+            total++;
+            const sonBakim = data.servisler ? data.servisler[data.servisler.length - 1] : null;
+            const nextKm = sonBakim ? sonBakim.next_km : "---";
+            const currentKm = sonBakim ? sonBakim.km : "---";
+
+            // Basit Bakım Kontrolü (Örn: Bakıma 500km kalmışsa sarı yak)
+            let statusHtml = '<span class="status-pill" style="background:#dcfce7; color:#166534;">Güncel</span>';
+            // Not: Gerçek KM takibi için araçtan veri gelmediğinden "Gelecek Bakım KM"ye göre manuel kontrol yapılabilir.
+
+            listBody.innerHTML += `
+                <tr>
+                    <td>
+                        <div style="font-weight:800;">${data.plaka}</div>
+                        <div style="font-size:11px; color:#64748b;">${data.model || ''}</div>
+                    </td>
+                    <td>${data.musteri_tel || 'Kayıtsız'}</td>
+                    <td>${currentKm.toLocaleString()} KM</td>
+                    <td style="font-weight:700; color:var(--accent);">${nextKm.toLocaleString()} KM</td>
+                    <td>${statusHtml}</td>
+                    <td>
+                        <a href="https://wa.me/${data.musteri_tel}?text=Merhaba, ${data.plaka} plakalı aracınızın ${nextKm} KM bakımı yaklaşmıştır. Randevu için bize ulaşabilirsiniz." 
+                           target="_blank" class="btn-wp">
+                           <i class="fab fa-whatsapp"></i> Mesaj At
+                        </a>
+                    </td>
+                </tr>
+            `;
+        });
+
+        document.getElementById('stat-total').innerText = total;
+    }
+</script>
+</body>
+</html>
