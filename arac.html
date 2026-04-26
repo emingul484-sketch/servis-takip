@@ -3,83 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Karekod Oto | Servis Kayıt</title>
+    <title>Karekod Oto | Gelişmiş Servis Kaydı</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --accent: #2563eb; --bg: #f8fafc; --text: #0f172a; }
+        :root { --accent: #2563eb; --bg: #f8fafc; --text: #0f172a; --success: #22c55e; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
-        .container { max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
+        .container { max-width: 500px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
         
-        /* Kart Yapısı */
-        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .s-logo { width: 80px; height: 80px; border-radius: 20px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* Kartlar */
+        .card { background: white; padding: 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 15px; }
         
-        /* Form Elemanları */
-        label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 14px; color: #64748b; }
-        input, select, textarea { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 14px; margin-bottom: 15px; font-family: inherit; font-size: 15px; box-sizing: border-box; transition: 0.3s; }
-        input:focus { border-color: var(--accent); outline: none; background: #f0f7ff; }
+        /* Dükkan Üst Alanı */
+        .header-area { text-align: center; padding: 10px 0; }
+        .s-logo { width: 90px; height: 90px; border-radius: 22px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-bottom: 10px; border: 3px solid white; }
         
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:active { transform: scale(0.98); }
+        /* Sosyal Butonlar */
+        .social-bar { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+        .s-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 18px; transition: 0.3s; }
+        .bg-wp { background: #25d366; }
+        .bg-insta { background: #e4405f; }
+        .bg-map { background: #4285f4; }
 
-        /* Başarı Ekranı */
-        #success-msg { display: none; text-align: center; padding: 40px 20px; }
-        #main-form { display: none; }
-        #login-form { display: none; }
+        /* Gelişmiş Checkbox Seçenekleri */
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .opt-item { background: #f1f5f9; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid transparent; }
+        .opt-item input { display: none; }
+        .opt-item.active { background: #eff6ff; border-color: var(--accent); color: var(--accent); }
+
+        /* Form Elemanları */
+        label { display: block; font-weight: 800; margin-bottom: 6px; font-size: 12px; color: #64748b; text-transform: uppercase; }
+        input, select, textarea { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 14px; margin-bottom: 15px; font-family: inherit; font-size: 15px; box-sizing: border-box; }
+        
+        .btn-main { width: 100%; padding: 18px; border: none; border-radius: 18px; font-weight: 800; font-size: 16px; cursor: pointer; background: var(--accent); color: white; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); }
+
+        #login-form, #main-form, #success-msg { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="login-form" class="card">
-        <h2 style="margin-top:0">QR Aktivasyonu</h2>
-        <p style="color:#64748b; font-size:14px">Bu karekod henüz bir servise atanmamış. Devam etmek için servis girişi yapın.</p>
-        <label>Servis Kullanıcı Adı</label>
-        <input type="text" id="u-name" placeholder="Örn: test-servis">
-        <label>Şifre</label>
-        <input type="password" id="u-pass" placeholder="••••••">
-        <button id="btn-assign" class="btn btn-primary">QR'I SERVİSE BAĞLA</button>
+    <div id="login-form" class="card" style="margin-top:50px; text-align:center">
+        <i class="fas fa-qrcode" style="font-size:40px; color:var(--accent); margin-bottom:15px"></i>
+        <h2>Servis Aktivasyonu</h2>
+        <p style="font-size:14px; color:#64748b">Bu QR henüz bir servise bağlı değil. Başlamak için dükkan bilgilerinizle giriş yapın.</p>
+        <input type="text" id="u-name" placeholder="Servis Kullanıcı Adı">
+        <input type="password" id="u-pass" placeholder="Şifre">
+        <button id="btn-assign" class="btn-main">QR'I DÜKKANA BAĞLA</button>
     </div>
 
     <div id="main-form">
-        <div style="text-align:center; margin-bottom:20px">
-            <img id="display-logo" class="s-logo" src="">
-            <h2 id="display-sname" style="margin:0">Servis Adı</h2>
-            <p id="display-sinfo" style="color:#64748b; font-size:13px; margin-top:5px"></p>
+        <div class="header-area">
+            <img id="d-logo" class="s-logo" src="">
+            <h2 id="d-name" style="margin:0">Yükleniyor...</h2>
+            <div class="social-bar" id="social-container">
+                </div>
         </div>
 
         <div class="card">
-            <label>ARAÇ PLAKASI</label>
-            <input type="text" id="v-plaka" placeholder="Örn: 27 ABC 123" style="text-transform: uppercase;">
-            
-            <label>ARAÇ MODELİ</label>
-            <input type="text" id="v-model" placeholder="Örn: Honda Forza 250">
-            
-            <label>GÜNCEL KM</label>
-            <input type="number" id="v-km" placeholder="0">
+            <label>Araç Bilgileri</label>
+            <input type="text" id="v-plaka" placeholder="PLAKA (Örn: 27 ABC 123)" style="font-weight:800; font-size:18px; text-align:center">
+            <input type="text" id="v-model" placeholder="MARKA / MODEL">
+            <input type="number" id="v-km" placeholder="GÜNCEL KM">
 
-            <label>SONRAKİ BAKIM ÖNERİSİ</label>
+            <label>Yapılan İşlemler</label>
+            <div class="options-grid">
+                <label class="opt-item"><input type="checkbox" value="Yağ Değişimi"> <i class="fas fa-oil-can"></i> Yağ Değişimi</label>
+                <label class="opt-item"><input type="checkbox" value="Hava Filtresi"> <i class="fas fa-wind"></i> Hava Filtresi</label>
+                <label class="opt-item"><input type="checkbox" value="Yağ Filtresi"> <i class="fas fa-filter"></i> Yağ Filtresi</label>
+                <label class="opt-item"><input type="checkbox" value="Fren Bakımı"> <i class="fas fa-stop-circle"></i> Fren Bakımı</label>
+                <label class="opt-item"><input type="checkbox" value="Buji Değişimi"> <i class="fas fa-bolt"></i> Buji Değişimi</label>
+                <label class="opt-item"><input type="checkbox" value="Zincir Bakımı"> <i class="fas fa-link"></i> Zincir / Kayış</label>
+            </div>
+
+            <label>Sonraki Bakım Önerisi</label>
             <select id="v-next-km">
                 <option value="5000">5.000 KM Sonra</option>
                 <option value="10000" selected>10.000 KM Sonra</option>
             </select>
 
-            <label>YAPILAN İŞLEMLER</label>
-            <textarea id="v-note" rows="3" placeholder="Yağ değişimi, filtre kontrolü vb."></textarea>
+            <label>Ek Notlar</label>
+            <textarea id="v-note" rows="2" placeholder="Ustanın notu..."></textarea>
             
-            <button id="btn-save" class="btn btn-primary">
-                <i class="fas fa-save"></i> SERVİS KAYDINI TAMAMLA
-            </button>
+            <button id="btn-save" class="btn-main">KAYDI SİSTEME İŞLE</button>
         </div>
     </div>
 
-    <div id="success-msg" class="card">
-        <i class="fas fa-check-circle" style="font-size:60px; color:#22c55e"></i>
+    <div id="success-msg" class="card" style="text-align:center; padding:40px">
+        <i class="fas fa-check-circle" style="font-size:60px; color:var(--success)"></i>
         <h2>Kayıt Başarılı!</h2>
-        <p>Araç bilgileri sisteme işlendi. Müşteri bu QR'ı her okuttuğunda servis geçmişini görebilecek.</p>
-        <button class="btn btn-primary" onclick="location.reload()">YENİ KAYIT EKLE</button>
+        <p>Araç bilgileri kaydedildi. Müşteri bu QR'ı her okuttuğunda yapılanları görecek.</p>
+        <button class="btn-main" onclick="location.reload()">YENİ KAYIT</button>
     </div>
 </div>
 
@@ -94,22 +108,18 @@
     const qrID = params.get('id');
 
     let currentQRRef = null;
-    let serviceData = null;
 
-    // SİSTEM BAŞLATICI
-    async function init() {
-        if(!qrID) {
-            alert("QR ID bulunamadı!");
-            return;
-        }
+    // Checkbox Tasarım Efekti
+    document.querySelectorAll('.opt-item').forEach(item => {
+        item.addEventListener('click', () => {
+            item.classList.toggle('active');
+        });
+    });
 
+    async function baslat() {
         const q = query(collection(db, "karekodlar"), where("qr_id", "==", qrID));
         const snap = await getDocs(q);
-
-        if(snap.empty) {
-            alert("Bu QR sistemde tanımlı değil!");
-            return;
-        }
+        if(snap.empty) return;
 
         const qrDoc = snap.docs[0];
         currentQRRef = qrDoc.ref;
@@ -118,58 +128,56 @@
         if(!qrData.servis_id) {
             document.getElementById('login-form').style.display = 'block';
         } else {
-            loadService(qrData.servis_id);
+            servisYukle(qrData.servis_id);
         }
     }
 
-    // ADIM 1: QR'I SERVİSE BAĞLAMA
+    // ADIM 1: ZİMMETLEME
     document.getElementById('btn-assign').onclick = async () => {
         const user = document.getElementById('u-name').value;
         const pass = document.getElementById('u-pass').value;
+        const sSnap = await getDoc(doc(db, "servisler", user));
 
-        const sDoc = await getDoc(doc(db, "servisler", user));
-        if(sDoc.exists() && sDoc.data().s_sifre === pass) {
-            await updateDoc(currentQRRef, {
-                servis_id: user,
-                durum: "aktif"
-            });
-            alert("QR Başarıyla Zimmetlendi!");
+        if(sSnap.exists() && sSnap.data().s_sifre === pass) {
+            await updateDoc(currentQRRef, { servis_id: user });
             location.reload();
-        } else {
-            alert("Hatalı kullanıcı adı veya şifre!");
-        }
+        } else { alert("Hatalı Giriş!"); }
     };
 
-    // ADIM 2: SERVİS VE FORM YÜKLEME
-    async function loadService(sID) {
+    // ADIM 2: BUTONLAR VE LOGO YÜKLEME
+    async function servisYukle(sID) {
         const sSnap = await getDoc(doc(db, "servisler", sID));
-        serviceData = sSnap.data();
+        const s = sSnap.data();
 
-        document.getElementById('display-logo').src = serviceData.s_logo;
-        document.getElementById('display-sname').innerText = serviceData.s_name;
-        document.getElementById('display-sinfo').innerText = serviceData.s_wp + " | " + serviceData.s_insta;
+        document.getElementById('d-logo').src = s.s_logo;
+        document.getElementById('d-name').innerText = s.s_name;
         
+        // Dinamik Butonlar
+        const social = document.getElementById('social-container');
+        if(s.s_wp) social.innerHTML += `<a href="https://wa.me/${s.s_wp}" class="s-btn bg-wp"><i class="fab fa-whatsapp"></i></a>`;
+        if(s.s_insta) social.innerHTML += `<a href="https://instagram.com/${s.s_insta}" class="s-btn bg-insta"><i class="fab fa-instagram"></i></a>`;
+        if(s.s_konum) social.innerHTML += `<a href="${s.s_konum}" class="s-btn bg-map"><i class="fas fa-map-marker-alt"></i></a>`;
+
         document.getElementById('main-form').style.display = 'block';
     }
 
-    // ADIM 3: ARAÇ VE SERVİS KAYDI
+    // ADIM 3: KAYIT
     document.getElementById('btn-save').onclick = async () => {
-        const plaka = document.getElementById('v-plaka').value.toUpperCase();
-        const model = document.getElementById('v-model').value;
+        const secilenler = [];
+        document.querySelectorAll('.opt-item input:checked').forEach(c => secilenler.push(c.value));
+        
         const km = parseInt(document.getElementById('v-km').value);
-        const nextOffset = parseInt(document.getElementById('v-next-km').value);
-        const note = document.getElementById('v-note').value;
-
-        if(!plaka || !km) { alert("Lütfen plaka ve KM girin!"); return; }
+        const next = parseInt(document.getElementById('v-next-km').value);
 
         await updateDoc(currentQRRef, {
-            plaka: plaka,
-            model: model,
+            plaka: document.getElementById('v-plaka').value.toUpperCase(),
+            model: document.getElementById('v-model').value,
             servisler: arrayUnion({
                 tarih: new Date().toLocaleDateString('tr-TR'),
                 km: km,
-                next_km: km + nextOffset,
-                not: note
+                next_km: km + next,
+                islemler: secilenler,
+                not: document.getElementById('v-note').value
             })
         });
 
@@ -177,7 +185,7 @@
         document.getElementById('success-msg').style.display = 'block';
     };
 
-    init();
+    baslat();
 </script>
 </body>
 </html>
