@@ -1,24 +1,183 @@
-<label>SONRAKİ BAKIM ÖNERİSİ</label>
-<select id="next-km-select" style="width:100%; padding:12px; border-radius:12px; border:1.5px solid #eee; margin-bottom:15px">
-    <option value="5000">5.000 KM Sonra</option>
-    <option value="10000" selected>10.000 KM Sonra</option>
-</select>
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Karekod Oto | Servis Kayıt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --accent: #2563eb; --bg: #f8fafc; --text: #0f172a; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text); }
+        .container { max-width: 500px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
+        
+        /* Kart Yapısı */
+        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .s-logo { width: 80px; height: 80px; border-radius: 20px; object-fit: cover; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        /* Form Elemanları */
+        label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 14px; color: #64748b; }
+        input, select, textarea { width: 100%; padding: 14px; border: 1.5px solid #e2e8f0; border-radius: 14px; margin-bottom: 15px; font-family: inherit; font-size: 15px; box-sizing: border-box; transition: 0.3s; }
+        input:focus { border-color: var(--accent); outline: none; background: #f0f7ff; }
+        
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 16px; font-weight: 800; font-size: 16px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Başarı Ekranı */
+        #success-msg { display: none; text-align: center; padding: 40px 20px; }
+        #main-form { display: none; }
+        #login-form { display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="login-form" class="card">
+        <h2 style="margin-top:0">QR Aktivasyonu</h2>
+        <p style="color:#64748b; font-size:14px">Bu karekod henüz bir servise atanmamış. Devam etmek için servis girişi yapın.</p>
+        <label>Servis Kullanıcı Adı</label>
+        <input type="text" id="u-name" placeholder="Örn: test-servis">
+        <label>Şifre</label>
+        <input type="password" id="u-pass" placeholder="••••••">
+        <button id="btn-assign" class="btn btn-primary">QR'I SERVİSE BAĞLA</button>
+    </div>
+
+    <div id="main-form">
+        <div style="text-align:center; margin-bottom:20px">
+            <img id="display-logo" class="s-logo" src="">
+            <h2 id="display-sname" style="margin:0">Servis Adı</h2>
+            <p id="display-sinfo" style="color:#64748b; font-size:13px; margin-top:5px"></p>
+        </div>
+
+        <div class="card">
+            <label>ARAÇ PLAKASI</label>
+            <input type="text" id="v-plaka" placeholder="Örn: 27 ABC 123" style="text-transform: uppercase;">
+            
+            <label>ARAÇ MODELİ</label>
+            <input type="text" id="v-model" placeholder="Örn: Honda Forza 250">
+            
+            <label>GÜNCEL KM</label>
+            <input type="number" id="v-km" placeholder="0">
+
+            <label>SONRAKİ BAKIM ÖNERİSİ</label>
+            <select id="v-next-km">
+                <option value="5000">5.000 KM Sonra</option>
+                <option value="10000" selected>10.000 KM Sonra</option>
+            </select>
+
+            <label>YAPILAN İŞLEMLER</label>
+            <textarea id="v-note" rows="3" placeholder="Yağ değişimi, filtre kontrolü vb."></textarea>
+            
+            <button id="btn-save" class="btn btn-primary">
+                <i class="fas fa-save"></i> SERVİS KAYDINI TAMAMLA
+            </button>
+        </div>
+    </div>
+
+    <div id="success-msg" class="card">
+        <i class="fas fa-check-circle" style="font-size:60px; color:#22c55e"></i>
+        <h2>Kayıt Başarılı!</h2>
+        <p>Araç bilgileri sisteme işlendi. Müşteri bu QR'ı her okuttuğunda servis geçmişini görebilecek.</p>
+        <button class="btn btn-primary" onclick="location.reload()">YENİ KAYIT EKLE</button>
+    </div>
+</div>
 
 <script type="module">
-    // ... Firebase init (config.js'den) ...
+    import { firebaseConfig } from './config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    // Kayıt butonuna basıldığında:
-    const currentKm = parseInt(document.getElementById('srv-km').value);
-    const offset = parseInt(document.getElementById('next-km-select').value);
-    const nextKm = currentKm + offset;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const params = new URLSearchParams(window.location.search);
+    const qrID = params.get('id');
 
-    await updateDoc(docRef, {
-        servisler: arrayUnion({
-            tarih: new Date().toISOString(),
-            km: currentKm,
-            next_km: nextKm, // Servis panelinde görünecek kritik veri
-            tasks: secilenIslemler,
-            note: document.getElementById('srv-note').value
-        })
-    });
+    let currentQRRef = null;
+    let serviceData = null;
+
+    // SİSTEM BAŞLATICI
+    async function init() {
+        if(!qrID) {
+            alert("QR ID bulunamadı!");
+            return;
+        }
+
+        const q = query(collection(db, "karekodlar"), where("qr_id", "==", qrID));
+        const snap = await getDocs(q);
+
+        if(snap.empty) {
+            alert("Bu QR sistemde tanımlı değil!");
+            return;
+        }
+
+        const qrDoc = snap.docs[0];
+        currentQRRef = qrDoc.ref;
+        const qrData = qrDoc.data();
+
+        if(!qrData.servis_id) {
+            document.getElementById('login-form').style.display = 'block';
+        } else {
+            loadService(qrData.servis_id);
+        }
+    }
+
+    // ADIM 1: QR'I SERVİSE BAĞLAMA
+    document.getElementById('btn-assign').onclick = async () => {
+        const user = document.getElementById('u-name').value;
+        const pass = document.getElementById('u-pass').value;
+
+        const sDoc = await getDoc(doc(db, "servisler", user));
+        if(sDoc.exists() && sDoc.data().s_sifre === pass) {
+            await updateDoc(currentQRRef, {
+                servis_id: user,
+                durum: "aktif"
+            });
+            alert("QR Başarıyla Zimmetlendi!");
+            location.reload();
+        } else {
+            alert("Hatalı kullanıcı adı veya şifre!");
+        }
+    };
+
+    // ADIM 2: SERVİS VE FORM YÜKLEME
+    async function loadService(sID) {
+        const sSnap = await getDoc(doc(db, "servisler", sID));
+        serviceData = sSnap.data();
+
+        document.getElementById('display-logo').src = serviceData.s_logo;
+        document.getElementById('display-sname').innerText = serviceData.s_name;
+        document.getElementById('display-sinfo').innerText = serviceData.s_wp + " | " + serviceData.s_insta;
+        
+        document.getElementById('main-form').style.display = 'block';
+    }
+
+    // ADIM 3: ARAÇ VE SERVİS KAYDI
+    document.getElementById('btn-save').onclick = async () => {
+        const plaka = document.getElementById('v-plaka').value.toUpperCase();
+        const model = document.getElementById('v-model').value;
+        const km = parseInt(document.getElementById('v-km').value);
+        const nextOffset = parseInt(document.getElementById('v-next-km').value);
+        const note = document.getElementById('v-note').value;
+
+        if(!plaka || !km) { alert("Lütfen plaka ve KM girin!"); return; }
+
+        await updateDoc(currentQRRef, {
+            plaka: plaka,
+            model: model,
+            servisler: arrayUnion({
+                tarih: new Date().toLocaleDateString('tr-TR'),
+                km: km,
+                next_km: km + nextOffset,
+                not: note
+            })
+        });
+
+        document.getElementById('main-form').style.display = 'none';
+        document.getElementById('success-msg').style.display = 'block';
+    };
+
+    init();
 </script>
+</body>
+</html>
