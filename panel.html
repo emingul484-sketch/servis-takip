@@ -6,170 +6,134 @@
     <title>Karekod Oto | Admin Panel</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root { --accent: #2563eb; --bg: #f4f7fe; --dark: #0f172a; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; display: flex; }
-        
-        /* Sidebar */
         .sidebar { width: 260px; background: var(--dark); height: 100vh; color: white; padding: 20px; box-sizing: border-box; position: fixed; }
-        .main-content { margin-left: 260px; padding: 40px; width: 100%; }
-        
-        /* Form & Cards */
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 800px; }
-        h2 { margin-top: 0; color: var(--dark); }
-        
+        .main-content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-bottom: 30px; }
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .input-group { margin-bottom: 15px; }
-        label { display: block; font-weight: 700; font-size: 13px; margin-bottom: 8px; color: #64748b; }
-        input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-family: inherit; box-sizing: border-box; }
-        input:focus { border-color: var(--accent); outline: none; }
+        input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; box-sizing: border-box; }
+        .btn-add { background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; width: 100%; }
         
-        .btn-add { background: var(--accent); color: white; border: none; padding: 15px 30px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 10px; }
-        .btn-add:hover { opacity: 0.9; transform: translateY(-2px); }
+        /* QR Üretici Tasarımı */
+        .qr-output-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; margin-top: 20px; }
+        .qr-item { background: white; padding: 15px; border-radius: 15px; text-align: center; border: 1px solid #e2e8f0; }
+        .qr-item canvas { width: 100% !important; height: auto !important; }
+        .qr-label { font-size: 11px; font-weight: 800; margin-top: 10px; color: var(--dark); }
 
-        /* Servis Listesi */
-        .servis-list { margin-top: 40px; width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; }
-        .servis-list th, .servis-list td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; }
-        .servis-list th { background: #f8fafc; color: #64748b; font-size: 12px; text-transform: uppercase; }
-        .logo-preview { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+        @media print {
+            .sidebar, .btn-add, .admin-only, h2, label { display: none !important; }
+            .main-content { margin: 0; padding: 0; }
+            .qr-output-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+        }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <h1 style="font-size: 20px; font-weight: 800;">Karekod Oto<br><span style="color: var(--accent); font-size: 14px;">ADMIN PANEL</span></h1>
-    <hr style="opacity: 0.1; margin: 20px 0;">
-    <p style="font-size: 12px; opacity: 0.6;">BAYİLİK YÖNETİMİ</p>
+    <h1 style="font-size: 20px; font-weight: 800;">Karekod Oto<br><span style="color: var(--accent); font-size: 14px;">YÖNETİM</span></h1>
+    <p style="font-size: 11px; opacity: 0.5; margin-top: 50px;">MENÜ</p>
+    <nav>
+        <div style="cursor:pointer; padding:10px 0;" onclick="showTab('bayi-ekle')"><i class="fas fa-store"></i> Bayi Yönetimi</div>
+        <div style="cursor:pointer; padding:10px 0;" onclick="showTab('qr-uret')"><i class="fas fa-qrcode"></i> QR Kod Üretici</div>
+    </nav>
 </div>
 
 <div class="main-content">
-    <div id="admin-auth" class="card" style="max-width: 400px; margin: 100px auto; text-align: center;">
-        <h2>Yönetici Girişi</h2>
-        <input type="password" id="admin-pass" placeholder="Admin Şifresi">
-        <button onclick="checkAdmin()" class="btn-add">GİRİŞ YAP</button>
+    
+    <div id="bayi-ekle" class="tab-content">
+        <div class="card">
+            <h2>Yeni Bayi Tanımla</h2>
+            <div class="form-grid">
+                <input type="text" id="s_name" placeholder="Dükkan Adı">
+                <input type="text" id="s_user" placeholder="Kullanıcı Adı">
+                <input type="text" id="s_sifre" placeholder="Şifre">
+                <input type="text" id="s_logo" placeholder="Logo URL">
+            </div>
+            <button class="btn-add" style="margin-top:20px" onclick="servisKaydet()">BAYİYİ SİSTEME EKLE</button>
+        </div>
     </div>
 
-    <div id="admin-panel" style="display: none;">
+    <div id="qr-uret" class="tab-content" style="display:none">
         <div class="card">
-            <h2>Yeni Servis (Bayi) Ekle</h2>
+            <h2>Toplu QR Oluşturucu</h2>
+            <p style="font-size: 13px; color: #64748b;">ID Başlangıcı ve Adet belirleyin. Sistem otomatik olarak Firebase'e boş kayıt açacaktır.</p>
             <div class="form-grid">
-                <div class="input-group">
-                    <label>DÜKKAN ADI</label>
-                    <input type="text" id="s_name" placeholder="Örn: Battalbey Cengiz Topel">
+                <div>
+                    <label style="font-size: 12px; font-weight: 800;">ID BAŞLANGIÇ (Örn: 1000)</label>
+                    <input type="number" id="qr_start" value="1000">
                 </div>
-                <div class="input-group">
-                    <label>KULLANICI ADI (Giriş ID)</label>
-                    <input type="text" id="s_user" placeholder="Örn: battalbey01">
-                </div>
-                <div class="input-group">
-                    <label>SERVİS ŞİFRE</label>
-                    <input type="text" id="s_sifre" placeholder="Giriş Şifresi">
-                </div>
-                <div class="input-group">
-                    <label>LOGO URL</label>
-                    <input type="text" id="s_logo" placeholder="https://... /logo.png">
-                </div>
-                <div class="input-group">
-                    <label>WHATSAPP (905...)</label>
-                    <input type="text" id="s_wp" placeholder="905xxxxxxxxx">
-                </div>
-                <div class="input-group">
-                    <label>INSTAGRAM (Kullanıcı Adı)</label>
-                    <input type="text" id="s_insta" placeholder="dükkan_kullaniciadi">
-                </div>
-                <div class="input-group" style="grid-column: span 2;">
-                    <label>GOOGLE HARİTA LİNKİ (KONUM)</label>
-                    <input type="text" id="s_konum" placeholder="https://maps.app.goo.gl/...">
+                <div>
+                    <label style="font-size: 12px; font-weight: 800;">KAÇ ADET ÜRETİLSİN?</label>
+                    <input type="number" id="qr_count" value="10">
                 </div>
             </div>
-            <button class="btn-add" onclick="servisKaydet()">BAYİLİĞİ ONAYLA VE KAYDET</button>
+            <button class="btn-add" style="margin-top:20px; background: #22c55e;" onclick="topluQRUret()">QR KODLARI OLUŞTUR VE YAZDIR</button>
         </div>
 
-        <table class="servis-list">
-            <thead>
-                <tr>
-                    <th>Logo</th>
-                    <th>Servis Adı</th>
-                    <th>Kullanıcı Adı</th>
-                    <th>Şifre</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="servis-table-body">
-                </tbody>
-        </table>
+        <div id="qr-display-area" class="qr-output-grid"></div>
     </div>
+
 </div>
 
 <script type="module">
     import { firebaseConfig } from './config.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Admin Giriş Kontrolü (Basit Güvenlik)
-    window.checkAdmin = () => {
-        const pass = document.getElementById('admin-pass').value;
-        if(pass === "admin123") { // Burayı kendi özel şifren yap
-            document.getElementById('admin-auth').style.display = 'none';
-            document.getElementById('admin-panel').style.display = 'block';
-            servisleriGetir();
-        } else {
-            alert("Hatalı Admin Şifresi!");
-        }
+    window.showTab = (tabId) => {
+        document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+        document.getElementById(tabId).style.display = 'block';
     };
 
-    // YENİ SERVİS KAYDET
     window.servisKaydet = async () => {
-        const userID = document.getElementById('s_user').value.trim();
-        if(!userID) return alert("Kullanıcı adı şart!");
-
-        const yeniServis = {
+        const user = document.getElementById('s_user').value;
+        await setDoc(doc(db, "servisler", user), {
             s_name: document.getElementById('s_name').value,
             s_sifre: document.getElementById('s_sifre').value,
-            s_logo: document.getElementById('s_logo').value,
-            s_wp: document.getElementById('s_wp').value,
-            s_insta: document.getElementById('s_insta').value,
-            s_konum: document.getElementById('s_konum').value,
-            kayit_tarihi: new Date().toLocaleDateString('tr-TR')
-        };
-
-        try {
-            await setDoc(doc(db, "servisler", userID), yeniServis);
-            alert("Bayilik başarıyla tanımlandı!");
-            location.reload();
-        } catch (e) {
-            console.error("Hata: ", e);
-        }
+            s_logo: document.getElementById('s_logo').value
+        });
+        alert("Bayi Eklendi!");
     };
 
-    // KAYITLI SERVİSLERİ LİSTELE
-    async function servisleriGetir() {
-        const querySnapshot = await getDocs(collection(db, "servisler"));
-        const tableBody = document.getElementById('servis-table-body');
-        tableBody.innerHTML = "";
-        
-        querySnapshot.forEach((doc) => {
-            const s = doc.data();
-            tableBody.innerHTML += `
-                <tr>
-                    <td><img src="${s.s_logo}" class="logo-preview"></td>
-                    <td><b>${s.s_name}</b></td>
-                    <td>${doc.id}</td>
-                    <td><code>${s.s_sifre}</code></td>
-                    <td><button onclick="servisSil('${doc.id}')" style="color:red; border:none; background:none; cursor:pointer;"><i class="fas fa-trash"></i></button></td>
-                </tr>
-            `;
-        });
-    }
+    window.topluQRUret = async () => {
+        const start = parseInt(document.getElementById('qr_start').value);
+        const count = parseInt(document.getElementById('qr_count').value);
+        const area = document.getElementById('qr-display-area');
+        area.innerHTML = "Oluşturuluyor, lütfen bekleyin...";
 
-    window.servisSil = async (id) => {
-        if(confirm("Bu bayiliği iptal etmek istediğine emin misin?")) {
-            await deleteDoc(doc(db, "servisler", id));
-            location.reload();
+        const baseUrl = "https://emingul484-sketch.github.io/servis-takip/arac.html?id=";
+
+        for(let i = 0; i < count; i++) {
+            const currentID = (start + i).toString();
+            const fullUrl = baseUrl + currentID;
+
+            // 1. Firebase'e Boş Kayıt At (Sistemin bu ID'yi tanıması için)
+            await setDoc(doc(db, "karekodlar", currentID), {
+                qr_id: currentID,
+                servis_id: "", // Henüz bir dükkana bağlı değil
+                plaka: ""      // Henüz bir araca bağlı değil
+            });
+
+            // 2. Ekranda QR Kod Oluştur
+            const qrDiv = document.createElement('div');
+            qrDiv.className = 'qr-item';
+            qrDiv.innerHTML = `<div id="qr-${currentID}"></div><div class="qr-label">ID: ${currentID}</div>`;
+            area.appendChild(qrDiv);
+
+            new QRCode(document.getElementById(`qr-${currentID}`), {
+                text: fullUrl,
+                width: 128,
+                height: 128
+            });
         }
+        
+        alert("QR Kodlar Firebase'e işlendi ve oluşturuldu. Ctrl+P yaparak yazdırabilirsiniz.");
     };
 </script>
 </body>
