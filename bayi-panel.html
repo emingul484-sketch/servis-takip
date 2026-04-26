@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; --success: #22c55e; }
+        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; --success: #22c55e; --warning: #f59e0b; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; }
         .sidebar { width: 280px; background: var(--dark); height: 100vh; color: white; padding: 30px; position: fixed; box-sizing: border-box; }
         .main { margin-left: 280px; padding: 40px; }
@@ -23,10 +23,11 @@
         
         .btn-wp { background: var(--success); color: white; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; font-size: 13px; }
         .status-pill { padding: 5px 10px; border-radius: 8px; font-size: 11px; font-weight: 800; }
-        .status-soon { background: #fef3c7; color: #d97706; } /* Bakımı Yaklaşan */
+        .status-alert { background: #fee2e2; color: #ef4444; }
+        .status-soon { background: #fff7ed; color: #c2410c; }
         
-        #login-screen { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; color: white; }
-        .login-box { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 350px; text-align: center; }
+        #login-screen { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 350px; text-align: center; color: white; }
         input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.2); color: white; margin-bottom: 15px; box-sizing: border-box; }
         .btn-login { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: 800; cursor: pointer; }
     </style>
@@ -35,52 +36,41 @@
 
 <div id="login-screen">
     <div class="login-box">
-        <h2 style="margin-bottom: 30px;">Bayi Girişi</h2>
-        <input type="text" id="user-id" placeholder="Servis Kullanıcı Adı">
+        <h2 style="margin-bottom:30px">Bayi Girişi</h2>
+        <input type="text" id="user-id" placeholder="Servis ID">
         <input type="password" id="user-pass" placeholder="Şifre">
-        <button class="btn-login" onclick="login()">SİSTEME GİRİŞ YAP</button>
+        <button class="btn-login" onclick="login()">GİRİŞ YAP</button>
     </div>
 </div>
 
-<div id="panel-content" style="display: none;">
+<div id="panel-content" style="display:none">
     <div class="sidebar">
-        <h2 id="servis-label" style="font-size: 20px; font-weight: 800;">Servis Paneli</h2>
-        <p id="servis-name-label" style="opacity: 0.6; font-size: 14px; margin-bottom: 40px;">Yükleniyor...</p>
-        <hr style="opacity: 0.1;">
-        <p style="font-size: 12px; cursor: pointer; margin-top: 20px;" onclick="location.reload()">Çıkış Yap</p>
+        <h2 style="font-size:22px; font-weight:800">Karekod Oto</h2>
+        <p id="servis-name-label" style="opacity:0.6; font-size:14px; margin-bottom:40px">Dükkan Adı</p>
+        <hr style="opacity:0.1">
+        <p style="font-size:12px; cursor:pointer; margin-top:20px" onclick="location.reload()">Güvenli Çıkış</p>
     </div>
 
     <div class="main">
         <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Toplam Müşteri</h3>
-                <p id="stat-total">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Son 30 Gün</h3>
-                <p id="stat-month">0</p>
-            </div>
-            <div class="stat-card" style="border-left: 5px solid var(--success);">
-                <h3>Bakımı Gelenler</h3>
-                <p id="stat-alert">0</p>
-            </div>
+            <div class="stat-card"><h3>Toplam Müşteri</h3><p id="stat-total">0</p></div>
+            <div class="stat-card"><h3>Beklenen Bakımlar</h3><p id="stat-alert">0</p></div>
+            <div class="stat-card"><h3>Servis ID</h3><p id="stat-id" style="font-size:18px; color:var(--accent)">-</p></div>
         </div>
 
-        <div style="background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-            <h2 style="margin-bottom: 20px; font-size: 18px;">Müşteri Listesi & Bakım Takibi</h2>
+        <div style="background:white; border-radius:20px; padding:25px; box-shadow:0 4px 15px rgba(0,0,0,0.05)">
             <table class="client-table">
                 <thead>
                     <tr>
-                        <th>Plaka / Model</th>
+                        <th>Müşteri / Araç</th>
                         <th>Telefon</th>
-                        <th>Son Bakım KM</th>
-                        <th>Gelecek Bakım</th>
-                        <th>Durum</th>
+                        <th>Son Bakım</th>
+                        <th>Gelecek Bakım (KM)</th>
+                        <th>Tahmini Tarih</th>
                         <th>İşlem</th>
                     </tr>
                 </thead>
-                <tbody id="client-list-body">
-                    </tbody>
+                <tbody id="client-list-body"></tbody>
             </table>
         </div>
     </div>
@@ -93,23 +83,41 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
     let loggedInServis = null;
+
+    // WHATSAPP NUMARA DÜZELTİCİ (0 ile başlasa da, boşluk olsa da 90'a tamamlar)
+    function formatWPNumber(phone) {
+        let cleaned = phone.replace(/\D/g, ''); // Sadece rakamları al
+        if (cleaned.startsWith('0')) cleaned = cleaned.substring(1); // Baştaki 0'ı at
+        if (!cleaned.startsWith('90')) cleaned = '90' + cleaned; // Başına 90 ekle
+        return cleaned;
+    }
+
+    // TAHMİNİ TARİH HESAPLAYICI (Son 2 bakım arası süreden veya standart 6 aydan hesaplar)
+    function estimateDate(servisler) {
+        if (!servisler || servisler.length === 0) return "Belirsiz";
+        const sonBakim = servisler[servisler.length - 1];
+        const parcalar = sonBakim.tarih.split('.'); // "20.04.2026"
+        const lastDate = new Date(parcalar[2], parcalar[1] - 1, parcalar[0]);
+        
+        // Varsayılan: 6 ay ekle (Motosiklet/Araç için ideal hatırlatma süresi)
+        lastDate.setMonth(lastDate.getMonth() + 6);
+        return lastDate.toLocaleDateString('tr-TR');
+    }
 
     window.login = async () => {
         const uid = document.getElementById('user-id').value;
         const pass = document.getElementById('user-pass').value;
-
         const sSnap = await getDoc(doc(db, "servisler", uid));
+        
         if (sSnap.exists() && sSnap.data().s_sifre === pass) {
             loggedInServis = { id: uid, ...sSnap.data() };
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('panel-content').style.display = 'block';
             document.getElementById('servis-name-label').innerText = loggedInServis.s_name;
+            document.getElementById('stat-id').innerText = uid;
             verileriYukle();
-        } else {
-            alert("Giriş bilgileri hatalı!");
-        }
+        } else { alert("Hatalı giriş!"); }
     };
 
     async function verileriYukle() {
@@ -118,34 +126,29 @@
         const listBody = document.getElementById('client-list-body');
         listBody.innerHTML = "";
         
-        let total = 0;
-        let alerts = 0;
-
+        let count = 0;
         snap.forEach(doc => {
             const data = doc.data();
-            if (!data.plaka) return; // Henüz araç kaydı yapılmamışsa atla
+            if (!data.plaka) return;
+            count++;
 
-            total++;
-            const sonBakim = data.servisler ? data.servisler[data.servisler.length - 1] : null;
-            const nextKm = sonBakim ? sonBakim.next_km : "---";
-            const currentKm = sonBakim ? sonBakim.km : "---";
+            const servisler = data.servisler || [];
+            const sonBakim = servisler[servisler.length - 1] || { km: 0, next_km: 0, tarih: '-' };
+            const wpNum = formatWPNumber(data.musteri_tel || "");
+            const tahminiTarih = estimateDate(servisler);
 
-            // Basit Bakım Kontrolü (Örn: Bakıma 500km kalmışsa sarı yak)
-            let statusHtml = '<span class="status-pill" style="background:#dcfce7; color:#166534;">Güncel</span>';
-            // Not: Gerçek KM takibi için araçtan veri gelmediğinden "Gelecek Bakım KM"ye göre manuel kontrol yapılabilir.
+            // Mesaj içeriği
+            const mesaj = `Merhaba, ${data.plaka} plakalı aracınızın ${sonBakim.next_km} KM bakımı yaklaşmaktadır. Tahmini bakım zamanı: ${tahminiTarih}. Randevu için bize yazabilirsiniz.`;
 
             listBody.innerHTML += `
                 <tr>
+                    <td><b>${data.plaka}</b><br><small>${data.model || ''}</small></td>
+                    <td>${data.musteri_tel}</td>
+                    <td>${sonBakim.km.toLocaleString()} KM</td>
+                    <td style="color:var(--accent); font-weight:800">${sonBakim.next_km.toLocaleString()} KM</td>
+                    <td style="color:var(--warning); font-weight:700">${tahminiTarih}</td>
                     <td>
-                        <div style="font-weight:800;">${data.plaka}</div>
-                        <div style="font-size:11px; color:#64748b;">${data.model || ''}</div>
-                    </td>
-                    <td>${data.musteri_tel || 'Kayıtsız'}</td>
-                    <td>${currentKm.toLocaleString()} KM</td>
-                    <td style="font-weight:700; color:var(--accent);">${nextKm.toLocaleString()} KM</td>
-                    <td>${statusHtml}</td>
-                    <td>
-                        <a href="https://wa.me/${data.musteri_tel}?text=Merhaba, ${data.plaka} plakalı aracınızın ${nextKm} KM bakımı yaklaşmıştır. Randevu için bize ulaşabilirsiniz." 
+                        <a href="https://wa.me/${wpNum}?text=${encodeURIComponent(mesaj)}" 
                            target="_blank" class="btn-wp">
                            <i class="fab fa-whatsapp"></i> Mesaj At
                         </a>
@@ -153,8 +156,7 @@
                 </tr>
             `;
         });
-
-        document.getElementById('stat-total').innerText = total;
+        document.getElementById('stat-total').innerText = count;
     }
 </script>
 </body>
