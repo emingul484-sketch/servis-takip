@@ -1,4 +1,4 @@
-// firebase-config.js
+// config.js
 export const firebaseConfig = {
     apiKey: "AIzaSyDn179sk4QyEh7TYuoU1KXcaXtigqWus6I",
     authDomain: "servis-56e5d.firebaseapp.com",
