@@ -1,0 +1,22 @@
+<script type="module">
+    import { firebaseConfig } from './config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Giriş yapınca dükkan bilgilerini ve müşterileri otomatik çeker
+    async function girisYap() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        
+        const sRef = doc(db, "servisler", user);
+        const sSnap = await getDoc(sRef);
+
+        if(sSnap.exists() && sSnap.data().sifre === pass) {
+            // Müşterileri listele ve KM hesabı yap (Günde 5 KM)
+            // Bakımı 15 günden az kalanları kırmızı yak!
+        }
+    }
+</script>
