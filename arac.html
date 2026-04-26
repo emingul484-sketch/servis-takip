@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; --success: #22c55e; }
+        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--dark); }
         .container { max-width: 500px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
         .card { background: white; padding: 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #f1f5f9; }
@@ -15,43 +15,31 @@
         .header-area { text-align: center; padding: 10px 0; }
         .s-logo { width: 85px; height: 85px; border-radius: 20px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 3px solid white; margin-bottom: 10px; }
         .social-bar { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
-        .s-btn { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 18px; }
+        .s-btn { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; text-decoration: none; }
         .bg-wp { background: #22c55e; } .bg-insta { background: #e4405f; } .bg-map { background: #4285f4; }
 
         .plaka-header { background: var(--dark); color: white; padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 20px; }
         .plaka-num { font-size: 32px; font-weight: 800; letter-spacing: 2px; display: block; }
-        .model-name { font-size: 14px; opacity: 0.8; font-weight: 600; }
-
+        
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0; }
-        .opt-item { background: #f1f5f9; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 2px solid transparent; transition: 0.2s; }
+        .opt-item { background: #f1f5f9; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 2.5px solid transparent; }
         .opt-item input { display: none; }
         .opt-item.active { background: #eff6ff; border-color: var(--accent); color: var(--accent); }
 
         .history-item { border-left: 4px solid var(--accent); padding: 15px; margin-bottom: 15px; }
-        .h-date { font-weight: 800; font-size: 14px; color: var(--accent); display: flex; justify-content: space-between; }
-        .h-km { font-size: 12px; color: #64748b; font-weight: 700; margin: 4px 0; }
-        .h-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-        .tag { background: #f1f5f9; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; color: #475569; }
+        .tag { background: #f1f5f9; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-right: 4px; }
 
-        input, select, textarea { width: 100%; padding: 14px; border: 2px solid #f1f5f9; border-radius: 14px; margin-bottom: 12px; font-family: inherit; box-sizing: border-box; }
+        input, select, textarea { width: 100%; padding: 14px; border: 2px solid #f1f5f9; border-radius: 14px; margin-bottom: 12px; font-family: inherit; box-sizing: border-box; font-size: 15px; }
         .btn-main { width: 100%; padding: 18px; border: none; border-radius: 18px; font-weight: 800; font-size: 16px; cursor: pointer; }
         .btn-blue { background: var(--accent); color: white; }
         .btn-black { background: var(--dark); color: white; }
 
-        #login-form, #master-form, #customer-view, #custom-km-area { display: none; }
+        #master-form, #customer-view, #custom-km-area, #first-time-fields { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div id="login-form" class="card" style="text-align:center; margin-top:50px;">
-        <i class="fas fa-key" style="font-size:40px; color:var(--accent); margin-bottom:15px"></i>
-        <h2>Sistemi Bağla</h2>
-        <input type="text" id="u-name" placeholder="Servis Kullanıcı Adı">
-        <input type="password" id="u-pass" placeholder="Şifre">
-        <button id="btn-assign" class="btn-main btn-blue">DÜKKANA TANIMLA</button>
-    </div>
-
     <div id="app-content">
         <div class="header-area">
             <img id="d-logo" class="s-logo" src="">
@@ -62,26 +50,25 @@
         <div id="customer-view">
             <div class="plaka-header">
                 <span class="plaka-num" id="v-plaka-display">---</span>
-                <span class="model-name" id="v-model-display">---</span>
+                <span id="v-model-display" style="opacity:0.8; font-size:14px">---</span>
             </div>
-            <h3 style="margin-bottom:15px; padding-left:5px"><i class="fas fa-history"></i> Servis Geçmişi</h3>
+            <h3 style="margin-left:5px"><i class="fas fa-history"></i> Servis Geçmişi</h3>
             <div id="history-list"></div>
-            <button id="btn-open-master" class="btn-main btn-black" style="margin-top:20px">
-                <i class="fas fa-tools"></i> YENİ BAKIM KAYDI (USTA)
-            </button>
+            <button id="btn-open-master" class="btn-main btn-black" style="margin-top:20px"><i class="fas fa-tools"></i> YENİ KAYIT EKLE (USTA)</button>
         </div>
 
         <div id="master-form" class="card">
-            <div style="background:#fee2e2; color:#ef4444; padding:8px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:15px; display:inline-block">YETKİLİ USTA PANELİ</div>
+            <div style="background:#fee2e2; color:#ef4444; padding:8px; border-radius:10px; font-size:12px; font-weight:800; margin-bottom:15px; display:inline-block">USTA PANELİ</div>
 
-            <div id="first-time-fields" style="display:none">
-                <label style="font-weight:800; font-size:11px; color:#94a3b8">İLK KAYIT BİLGİLERİ</label>
+            <div id="first-time-fields">
+                <label style="font-weight:800; font-size:11px; color:#94a3b8">MÜŞTERİ & ARAÇ BİLGİLERİ (İLK KAYIT)</label>
                 <input type="text" id="v-plaka-input" placeholder="PLAKA">
-                <input type="text" id="v-model-input" placeholder="MODEL">
+                <input type="text" id="v-model-input" placeholder="MARKA / MODEL">
+                <input type="tel" id="v-phone-input" placeholder="MÜŞTERİ TEL (Örn: 05xx)">
                 <hr style="border:1px solid #f1f5f9; margin-bottom:15px">
             </div>
 
-            <label style="font-weight:800; font-size:11px; color:#94a3b8">BAKIM DETAYLARI</label>
+            <label style="font-weight:800; font-size:11px; color:#94a3b8">GÜNCEL DURUM</label>
             <input type="number" id="v-km" placeholder="GÜNCEL KM">
 
             <div class="options-grid">
@@ -93,19 +80,15 @@
                 <label class="opt-item"><input type="checkbox" value="Genel Kontrol"> Genel Bakım</label>
             </div>
 
-            <label style="font-weight:800; font-size:11px; color:#94a3b8">SONRAKİ BAKIM ARALIĞI</label>
+            <label style="font-weight:800; font-size:11px; color:#94a3b8">SONRAKİ BAKIM</label>
             <select id="v-next-km-select">
                 <option value="2500">2.500 KM Sonra</option>
                 <option value="5000" selected>5.000 KM Sonra</option>
-                <option value="10000">10.000 KM Sonra</option>
                 <option value="custom">-- ÖZEL KM GİR --</option>
             </select>
+            <input type="number" id="v-next-km-custom" placeholder="Özel KM Hedefi" style="display:none">
 
-            <div id="custom-km-area">
-                <input type="number" id="v-next-km-custom" placeholder="Kaç KM sonra gelsin? (Örn: 100000)">
-            </div>
-
-            <textarea id="v-note" rows="2" placeholder="Notlar..."></textarea>
+            <textarea id="v-note" rows="2" placeholder="Ustanın notu..."></textarea>
             
             <button id="btn-save" class="btn-main btn-blue">KAYDI TAMAMLA</button>
             <button onclick="location.reload()" style="background:none; border:none; color:#94a3b8; width:100%; margin-top:15px; font-weight:700">İptal</button>
@@ -125,33 +108,18 @@
     let currentQRRef = null;
     let masterPass = "";
 
-    // UI Dinamikleri
     document.addEventListener('change', (e) => {
         if(e.target.type === 'checkbox') e.target.parentElement.classList.toggle('active', e.target.checked);
-        
-        // Özel KM Seçimi Kontrolü
-        if(e.target.id === 'v-next-km-select') {
-            document.getElementById('custom-km-area').style.display = (e.target.value === 'custom') ? 'block' : 'none';
-        }
+        if(e.target.id === 'v-next-km-select') document.getElementById('v-next-km-custom').style.display = (e.target.value === 'custom' ? 'block' : 'none');
     });
 
     async function init() {
         const q = query(collection(db, "karekodlar"), where("qr_id", "==", qrID));
         const snap = await getDocs(q);
         if(snap.empty) return;
+        currentQRRef = snap.docs[0].ref;
+        const qrData = snap.docs[0].data();
 
-        const qrDoc = snap.docs[0];
-        currentQRRef = qrDoc.ref;
-        const qrData = qrDoc.data();
-
-        if(!qrData.servis_id) {
-            document.getElementById('login-form').style.display = 'block';
-        } else {
-            servisYukle(qrData);
-        }
-    }
-
-    async function servisYukle(qrData) {
         const sSnap = await getDoc(doc(db, "servisler", qrData.servis_id));
         const s = sSnap.data();
         masterPass = s.s_sifre;
@@ -162,81 +130,61 @@
         const social = document.getElementById('social-container');
         if(s.s_wp) social.innerHTML += `<a href="https://wa.me/${s.s_wp}" class="s-btn bg-wp"><i class="fab fa-whatsapp"></i></a>`;
         if(s.s_insta) social.innerHTML += `<a href="https://instagram.com/${s.s_insta}" class="s-btn bg-insta"><i class="fab fa-instagram"></i></a>`;
-        if(s.s_konum) social.innerHTML += `<a href="${s.s_konum}" class="s-btn bg-map"><i class="fas fa-map-marker-alt"></i></a>`;
 
         if(qrData.plaka) {
             document.getElementById('customer-view').style.display = 'block';
             document.getElementById('v-plaka-display').innerText = qrData.plaka;
             document.getElementById('v-model-display').innerText = qrData.model || "";
+            document.getElementById('first-time-fields').style.display = 'none';
             
             const list = document.getElementById('history-list');
             (qrData.servisler || []).reverse().forEach(ser => {
                 list.innerHTML += `
                     <div class="card history-item">
-                        <div class="h-date"><span>${ser.tarih}</span></div>
-                        <div class="h-km">${ser.km.toLocaleString()} KM</div>
-                        <div class="h-tags">${(ser.islemler || []).map(i => `<span class="tag">${i}</span>`).join('')}</div>
-                        ${ser.not ? `<p style="font-size:13px; margin-top:8px;">${ser.not}</p>` : ''}
+                        <div style="font-weight:800; color:var(--accent);">${ser.tarih}</div>
+                        <div style="font-size:13px; font-weight:700; margin:5px 0">${ser.km.toLocaleString()} KM</div>
+                        <div>${(ser.islemler || []).map(i => `<span class="tag">${i}</span>`).join('')}</div>
+                        ${ser.not ? `<p style="font-size:12px; color:#475569; margin-top:10px">${ser.not}</p>` : ''}
                     </div>`;
             });
         } else {
-            document.getElementById('first-time-fields').style.display = 'block';
             document.getElementById('master-form').style.display = 'block';
+            document.getElementById('first-time-fields').style.display = 'block';
         }
     }
 
     document.getElementById('btn-open-master').onclick = () => {
-        const p = prompt("Usta Şifresi:");
-        if(p === masterPass) {
+        if(prompt("Usta Şifresi:") === masterPass) {
             document.getElementById('customer-view').style.display = 'none';
             document.getElementById('master-form').style.display = 'block';
-        } else if(p !== null) alert("Hatalı!");
+        } else { alert("Hatalı!"); }
     };
 
     document.getElementById('btn-save').onclick = async () => {
         const km = parseInt(document.getElementById('v-km').value);
         if(!km) return alert("KM girin!");
 
-        // KM Hesaplama
-        let nextOffset = 0;
-        const selectVal = document.getElementById('v-next-km-select').value;
-        if(selectVal === 'custom') {
-            nextOffset = parseInt(document.getElementById('v-next-km-custom').value) || 0;
-        } else {
-            nextOffset = parseInt(selectVal);
-        }
-
-        const checks = [];
-        document.querySelectorAll('.opt-item input:checked').forEach(i => checks.push(i.value));
+        const nextVal = document.getElementById('v-next-km-select').value;
+        const nextOffset = nextVal === 'custom' ? parseInt(document.getElementById('v-next-km-custom').value) : parseInt(nextVal);
 
         const updateData = {
             servisler: arrayUnion({
                 tarih: new Date().toLocaleDateString('tr-TR'),
                 km: km,
                 next_km: km + nextOffset,
-                islemler: checks,
+                islemler: Array.from(document.querySelectorAll('.opt-item input:checked')).map(i => i.value),
                 not: document.getElementById('v-note').value
             })
         };
 
-        const plakaIn = document.getElementById('v-plaka-input').value.toUpperCase();
-        if(plakaIn) {
-            updateData.plaka = plakaIn;
+        if(document.getElementById('v-plaka-input').value) {
+            updateData.plaka = document.getElementById('v-plaka-input').value.toUpperCase();
             updateData.model = document.getElementById('v-model-input').value;
+            updateData.musteri_tel = document.getElementById('v-phone-input').value; // TEL KAYDI
         }
 
         await updateDoc(currentQRRef, updateData);
         location.reload();
-    };
-
-    document.getElementById('btn-assign').onclick = async () => {
-        const user = document.getElementById('u-name').value;
-        const pass = document.getElementById('u-pass').value;
-        const sSnap = await getDoc(doc(db, "servisler", user));
-        if(sSnap.exists() && sSnap.data().s_sifre === pass) {
-            await updateDoc(currentQRRef, { servis_id: user });
-            location.reload();
-        } else alert("Yetki Yok!");
     };
 
     init();
