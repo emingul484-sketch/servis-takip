@@ -3,136 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oto Nabız | Sistem Yönetimi</title>
+    <title>Oto Nabız | Admin Kontrol</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --accent: #2563eb; --bg: #f4f7fe; --dark: #0f172a; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; }
-        .header { background: var(--dark); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
-        .main { padding: 40px; max-width: 600px; margin: 0 auto; }
-        .card { background: white; padding: 30px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 800; font-size: 12px; margin-bottom: 8px; color: #64748b; text-transform: uppercase; }
-        input { width: 100%; padding: 14px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-family: inherit; }
-        input:focus { border-color: var(--accent); outline: none; }
-        .upload-area { border: 2px dashed #cbd5e1; padding: 20px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; background: #fcfdfe; }
-        .upload-area:hover { border-color: var(--accent); background: #f8faff; }
-        #logo-preview { max-width: 120px; margin-top: 15px; border-radius: 10px; display: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 16px; margin-top: 10px; }
-        .loading-text { display: none; color: var(--accent); font-weight: 700; font-size: 12px; margin-top: 10px; }
+        
+        #admin-login { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; position: fixed; width: 100%; z-index: 999; }
+        .login-box { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        
+        .header { background: var(--dark); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
+        .main { padding: 30px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 400px 1fr; gap: 25px; }
+        @media (max-width: 900px) { .main { grid-template-columns: 1fr; } }
+
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); height: fit-content; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: 800; font-size: 10px; margin-bottom: 4px; color: #64748b; text-transform: uppercase; }
+        input, textarea { width: 100%; padding: 10px; border: 2px solid #f1f5f9; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
+        
+        .bayi-list { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .bayi-card { background: white; padding: 15px; border-radius: 15px; border: 1px solid #f1f5f9; display: flex; gap: 15px; align-items: start; position: relative;}
+        .bayi-card img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
+        .bayi-card-info h4 { margin: 0; font-size: 15px; color: var(--dark); }
+        .bayi-card-info p { margin: 3px 0; font-size: 12px; color: #64748b; line-height: 1.4; }
+        .bayi-card-social { display: flex; gap: 10px; margin-top: 5px; color: var(--accent); font-size: 14px; }
+
+        .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .upload-area { border: 2px dashed #cbd5e1; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; background: #fcfdfe; }
+        #logo-preview { max-width: 60px; margin-top: 5px; border-radius: 5px; display: none; margin-left: auto; margin-right: auto; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <div style="font-weight: 800; font-size: 20px;">OTO NABIZ <span style="font-weight: 400; opacity: 0.6;">| Admin</span></div>
+<div id="admin-login">
+    <div class="login-box">
+        <h2 style="color:white; margin-bottom:20px;">Admin</h2>
+        <input type="password" id="admin-pass-input" placeholder="Şifre" style="background:rgba(0,0,0,0.2); color:white; border:1px solid #334155; margin-bottom:15px;">
+        <button onclick="checkAdminPass()" class="btn-save">GİRİŞ</button>
+    </div>
 </div>
 
-<div class="main">
-    <div class="card">
-        <h2 style="margin-top:0; margin-bottom:25px; font-size:22px;">Yeni Bayilik Tanımla</h2>
-        
-        <div class="form-group">
-            <label>Bayi / Servis Adı</label>
-            <input type="text" id="s_name" placeholder="Örn: Battalbey Cengiz Topel">
-        </div>
+<div id="panel-content" style="display:none">
+    <div class="header">
+        <div style="font-weight: 800; font-size: 18px;">OTO NABIZ <span style="font-weight: 400; opacity: 0.6;">| Yönetim</span></div>
+        <button onclick="location.reload()" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; padding:5px 12px; border-radius:8px; cursor:pointer; font-size:11px;">ÇIKIŞ</button>
+    </div>
 
-        <div class="form-group">
-            <label>Panel Giriş ID (Kullanıcı Adı)</label>
-            <input type="text" id="s_user" placeholder="Örn: battalbey01">
-        </div>
-
-        <div class="form-group">
-            <label>Giriş Şifresi</label>
-            <input type="password" id="s_sifre" placeholder="****">
-        </div>
-
-        <div class="form-group">
-            <label>Bayi Logosu</label>
-            <div class="upload-area" onclick="document.getElementById('logo-input').click()">
-                <i class="fas fa-image" style="font-size: 24px; color: #94a3b8;"></i>
-                <p style="margin: 8px 0 0 0; font-size: 13px; font-weight: 600; color: #64748b;">Logo Seçmek İçin Tıklayın</p>
-                <input type="file" id="logo-input" hidden accept="image/*" onchange="handleLogoUpload(this)">
-                <div id="loading-info" class="loading-text"><i class="fas fa-spinner fa-spin"></i> Resim Buluta Yükleniyor...</div>
-                <img id="logo-preview">
+    <div class="main">
+        <div class="card">
+            <h3 style="margin:0 0 20px 0;">Bayi Bilgileri</h3>
+            <div class="form-group">
+                <label>Servis İsmi</label>
+                <input type="text" id="s_name" placeholder="Örn: Battalbey Otomotiv">
             </div>
-            <input type="hidden" id="s_logo_url">
+            <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div><label>Giriş ID</label><input type="text" id="s_user"></div>
+                <div><label>Şifre</label><input type="text" id="s_sifre"></div>
+            </div>
+            <div class="form-group">
+                <label>Telefon (WhatsApp İçin)</label>
+                <input type="text" id="s_tel" placeholder="05xx xxx xx xx">
+            </div>
+            <div class="form-group">
+                <label>Instagram Kullanıcı Adı</label>
+                <input type="text" id="s_insta" placeholder="Örn: battalbey_servis">
+            </div>
+            <div class="form-group">
+                <label>Adres</label>
+                <textarea id="s_adres" rows="2" placeholder="Mahalle, Cadde, Sokak..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Bayi Logosu</label>
+                <div class="upload-area" onclick="document.getElementById('logo-input').click()">
+                    <span id="up-text" style="font-size:11px; font-weight:600;">Logo Yükle</span>
+                    <input type="file" id="logo-input" hidden accept="image/*" onchange="handleLogoUpload(this)">
+                    <img id="logo-preview">
+                </div>
+                <input type="hidden" id="s_logo_url">
+            </div>
+            <button class="btn-save" onclick="bayiKaydet()">SİSTEME TANIMLA</button>
         </div>
 
-        <button class="btn-save" onclick="bayiKaydet()">BAYİYİ SİSTEME EKLE</button>
+        <div class="card">
+            <h3 style="margin:0 0 20px 0;">Aktif Bayiler</h3>
+            <div id="bayi-listesi" class="bayi-list">
+                <p style="font-size:12px; color:#94a3b8;">Yükleniyor...</p>
+            </div>
+        </div>
     </div>
 </div>
 
 <script type="module">
     import { firebaseConfig } from './config.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // GÖRSELDEN ALINAN IMGBB API ANAHTARI
     const IMGBB_API_KEY = "0fd006aeed01a4802808abbfc44990ca";
+    const ADMIN_PASSWORD = "123"; 
+
+    window.checkAdminPass = () => {
+        if(document.getElementById('admin-pass-input').value === ADMIN_PASSWORD) {
+            document.getElementById('admin-login').style.display = 'none';
+            document.getElementById('panel-content').style.display = 'block';
+            bayileriGetir();
+        } else { alert("Yetkisiz Giriş!"); }
+    };
 
     window.handleLogoUpload = async (input) => {
         const file = input.files[0];
         if (!file) return;
-
-        const loading = document.getElementById('loading-info');
-        const preview = document.getElementById('logo-preview');
-        loading.style.display = 'block';
-        preview.style.display = 'none';
-
+        document.getElementById('up-text').innerText = "Yükleniyor...";
         const formData = new FormData();
         formData.append("image", file);
-
         try {
-            const response = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
-                method: "POST",
-                body: formData
-            });
-            const result = await response.json();
-            
+            const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+            const result = await res.json();
             if (result.success) {
                 document.getElementById('s_logo_url').value = result.data.url;
-                preview.src = result.data.url;
-                preview.style.display = 'inline-block';
-                loading.style.display = 'none';
-            } else {
-                alert("Yükleme başarısız oldu.");
-                loading.style.display = 'none';
+                const prev = document.getElementById('logo-preview');
+                prev.src = result.data.url; prev.style.display = 'block';
+                document.getElementById('up-text').style.display = 'none';
             }
-        } catch (error) {
-            console.error("Hata:", error);
-            alert("Bağlantı hatası!");
-            loading.style.display = 'none';
-        }
+        } catch (e) { alert("Resim yüklenemedi!"); }
     };
 
     window.bayiKaydet = async () => {
         const user = document.getElementById('s_user').value.trim();
-        const name = document.getElementById('s_name').value.trim();
-        const pass = document.getElementById('s_sifre').value.trim();
-        const logo = document.getElementById('s_logo_url').value;
+        const info = {
+            s_name: document.getElementById('s_name').value.trim(),
+            s_sifre: document.getElementById('s_sifre').value.trim(),
+            s_tel: document.getElementById('s_tel').value.trim(),
+            s_insta: document.getElementById('s_insta').value.trim(),
+            s_adres: document.getElementById('s_adres').value.trim(),
+            s_logo: document.getElementById('s_logo_url').value
+        };
 
-        if (!user || !name || !pass) {
-            alert("Lütfen zorunlu alanları doldurun!");
-            return;
-        }
+        if (!user || !info.s_name || !info.s_sifre) return alert("Eksik alanları doldurun!");
 
         try {
-            await setDoc(doc(db, "servisler", user), {
-                s_name: name,
-                s_sifre: pass,
-                s_logo: logo || ""
-            });
-            alert(name + " bayisi sisteme kaydedildi.");
-            location.reload();
-        } catch (e) {
-            alert("Kaydetme hatası: " + e);
-        }
+            await setDoc(doc(db, "servisler", user), info);
+            alert("Bayi Kaydedildi!");
+            bayileriGetir();
+        } catch (e) { alert("Hata!"); }
     };
+
+    async function bayileriGetir() {
+        const container = document.getElementById('bayi-listesi');
+        container.innerHTML = "";
+        const snap = await getDocs(collection(db, "servisler"));
+        snap.forEach(doc => {
+            const d = doc.data();
+            container.innerHTML += `
+                <div class="bayi-card">
+                    <img src="${d.s_logo || 'https://via.placeholder.com/50'}">
+                    <div class="bayi-card-info">
+                        <h4>${d.s_name}</h4>
+                        <p><b>ID:</b> ${doc.id} | <b>Pass:</b> ${d.s_sifre}</p>
+                        <p><i class="fas fa-map-marker-alt"></i> ${d.s_adres || 'Adres Girilmemiş'}</p>
+                        <div class="bayi-card-social">
+                            ${d.s_tel ? '<i class="fab fa-whatsapp"></i>' : ''}
+                            ${d.s_insta ? '<i class="fab fa-instagram"></i>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
 </script>
 </body>
 </html>
