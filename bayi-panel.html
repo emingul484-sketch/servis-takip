@@ -3,78 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Servis Paneli | Karekod Oto</title>
+    <title>Oto Nabız | Servis Takip Sistemi</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; --success: #22c55e; --warning: #f59e0b; --danger: #ef4444; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; }
-        .sidebar { width: 280px; background: var(--dark); height: 100vh; color: white; padding: 30px; position: fixed; box-sizing: border-box; }
-        .main { margin-left: 280px; padding: 40px; }
         
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-bottom: 4px solid transparent; }
-        .stat-card h3 { margin: 0; font-size: 13px; color: #64748b; text-transform: uppercase; }
-        .stat-card p { margin: 10px 0 0 0; font-size: 28px; font-weight: 800; color: var(--dark); }
+        /* Header Düzenlemesi */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 40px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 100; }
+        .brand-left { font-weight: 800; font-size: 22px; color: var(--dark); letter-spacing: -1px; }
+        .brand-right { font-weight: 800; font-size: 18px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+        .brand-right i { font-size: 20px; animation: pulse 2s infinite; }
 
-        .client-table { width: 100%; border-collapse: collapse; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        .client-table th, .client-table td { padding: 18px; text-align: left; border-bottom: 1px solid #f1f5f9; }
-        .client-table th { background: #f8fafc; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .btn-wp { background: var(--success); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.3s; }
-        .btn-wp:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3); }
-        
-        .status-pill { padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
-        .alert-red { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
-        .alert-orange { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
-        .alert-green { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
 
-        input { width: 100%; padding: 15px; border-radius: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.2); color: white; border: 1px solid #334155; box-sizing: border-box; }
-        #login-screen { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .main { padding: 40px; max-width: 1400px; margin: 0 auto; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; margin-bottom: 40px; }
+        .stat-card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.04); border-top: 4px solid #e2e8f0; }
+        .stat-card h3 { margin: 0; font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-card p { margin: 10px 0 0 0; font-size: 32px; font-weight: 800; color: var(--dark); }
+
+        .client-table { width: 100%; border-collapse: collapse; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.02); }
+        .client-table th { background: #fcfdfe; padding: 20px; text-align: left; font-size: 11px; color: #94a3b8; text-transform: uppercase; border-bottom: 1px solid #f1f5f9; }
+        .client-table td { padding: 20px; border-bottom: 1px solid #f8fafc; font-size: 14px; }
+        
+        .btn-wp { background: #25d366; color: white; border: none; padding: 12px 20px; border-radius: 14px; cursor: pointer; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-wp:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2); }
+        
+        .status-pill { padding: 6px 14px; border-radius: 12px; font-size: 11px; font-weight: 800; }
+        .alert-red { background: #fff1f2; color: #e11d48; }
+        .alert-orange { background: #fff7ed; color: #ea580c; }
+        .alert-green { background: #f0fdf4; color: #16a34a; }
+
+        #login-screen { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; background-image: radial-gradient(circle at top right, #1e293b, #0f172a); }
+        .login-box { background: rgba(255,255,255,0.03); padding: 50px; border-radius: 40px; width: 380px; text-align: center; border: 1px solid rgba(255,255,255,0.08); backdrop-filter: blur(10px); }
+        input { width: 100%; padding: 16px; border-radius: 15px; margin-bottom: 15px; background: rgba(0,0,0,0.2); color: white; border: 1px solid rgba(255,255,255,0.1); font-family: inherit; }
     </style>
 </head>
 <body>
 
 <div id="login-screen">
-    <div style="background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 350px; text-align: center; color: white; border: 1px solid rgba(255,255,255,0.1);">
-        <h2 style="margin-bottom:30px">Bayi Girişi</h2>
+    <div class="login-box">
+        <h1 style="color:white; font-size:28px; margin-bottom:10px;">Karekod Oto</h1>
+        <p style="color:var(--accent); font-weight:700; margin-bottom:30px;">OTO NABIZ SERVİS PANELİ</p>
         <input type="text" id="user-id" placeholder="Servis Kullanıcı Adı">
         <input type="password" id="user-pass" placeholder="Şifre">
-        <button onclick="login()" style="width:100%; padding:15px; border-radius:12px; border:none; background:var(--accent); color:white; font-weight:800; cursor:pointer;">PANELİ AÇ</button>
+        <button onclick="login()" style="width:100%; padding:16px; border-radius:15px; border:none; background:var(--accent); color:white; font-weight:800; cursor:pointer; font-size:16px;">Giriş Yap</button>
     </div>
 </div>
 
 <div id="panel-content" style="display:none">
-    <div class="sidebar">
-        <h2 style="font-size:24px; font-weight:800; letter-spacing:-1px;">Karekod Oto</h2>
-        <p id="servis-name-label" style="opacity:0.6; font-size:14px; margin-bottom:40px">---</p>
-        <hr style="opacity:0.1">
-        <div style="padding:15px 0; font-weight:700; color:var(--accent); cursor:default;"><i class="fas fa-users"></i> Müşteri Takibi</div>
-        <p style="position:absolute; bottom:30px; font-size:12px; cursor:pointer; opacity:0.5;" onclick="location.reload()">Çıkış Yap</p>
+    <div class="top-bar">
+        <div class="brand-left">KAREKOD OTO</div>
+        <div id="servis-title" style="font-weight:600; color:#64748b;">Yükleniyor...</div>
+        <div class="brand-right"><i class="fas fa-heartbeat"></i> OTO NABIZ</div>
     </div>
 
     <div class="main">
         <div class="stats-grid">
-            <div class="stat-card"><h3>Toplam Araç</h3><p id="stat-total">0</p></div>
-            <div class="stat-card" style="border-bottom-color:var(--danger)"><h3>Vakti Geçenler</h3><p id="stat-alert">0</p></div>
-            <div class="stat-card" style="border-bottom-color:var(--warning)"><h3>15 Gün Kalanlar</h3><p id="stat-soon">0</p></div>
+            <div class="stat-card" style="border-top-color: var(--accent)"><h3>Toplam Portföy</h3><p id="stat-total">0</p></div>
+            <div class="stat-card" style="border-top-color: var(--danger)"><h3>Vakti Geçenler</h3><p id="stat-alert">0</p></div>
+            <div class="stat-card" style="border-top-color: var(--warning)"><h3>Yaklaşan Bakımlar</h3><p id="stat-soon">0</p></div>
         </div>
 
-        <div style="background:white; border-radius:24px; padding:30px; box-shadow:0 4px 20px rgba(0,0,0,0.03)">
-            <table class="client-table">
-                <thead>
-                    <tr>
-                        <th>ARAÇ BİLGİSİ</th>
-                        <th>GÜNCEL KM</th>
-                        <th>HEDEF KM</th>
-                        <th>TAHMİNİ TARİH</th>
-                        <th>DURUM</th>
-                        <th>İŞLEM</th>
-                    </tr>
-                </thead>
-                <tbody id="client-list-body"></tbody>
-            </table>
+        <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
+            <h2 style="font-size:20px; font-weight:800; color:var(--dark);">Müşteri Analiz ve Takip Listesi</h2>
+            <button onclick="location.reload()" style="background:none; border:1px solid #e2e8f0; padding:8px 15px; border-radius:10px; cursor:pointer; font-size:12px; font-weight:700;"><i class="fas fa-sync"></i> Listeyi Yenile</button>
         </div>
+
+        <table class="client-table">
+            <thead>
+                <tr>
+                    <th>PLAKA / MODEL</th>
+                    <th>GÜNCEL DURUM</th>
+                    <th>BAKIM HEDEFİ</th>
+                    <th>TAHMİNİ ZAMAN</th>
+                    <th>DURUM ANALİZİ</th>
+                    <th>SERVİS HATIRLATMA</th>
+                </tr>
+            </thead>
+            <tbody id="client-list-body"></tbody>
+        </table>
     </div>
 </div>
 
@@ -94,19 +104,14 @@
         return cleaned;
     }
 
-    // GÜNDE 20 KM HESABIYLA TARİH TAHMİNİ
     function calculateEstimate(servisler) {
-        if (!servisler || servisler.length === 0) return { date: new Date(2100, 0, 1), label: "Kayıt Yok" };
+        if (!servisler || servisler.length === 0) return { date: new Date(2100, 0, 1), label: "---" };
         const sonBakim = servisler[servisler.length - 1];
         const kmFarki = sonBakim.next_km - sonBakim.km;
-        
-        // GÜNDE 20 KM HESABI
         const gunEkle = kmFarki > 0 ? kmFarki / 20 : 0; 
-
         const parcalar = sonBakim.tarih.split('.');
         const baslangic = new Date(parcalar[2], parcalar[1] - 1, parcalar[0]);
         baslangic.setDate(baslangic.getDate() + gunEkle);
-        
         return { date: baslangic, label: baslangic.toLocaleDateString('tr-TR') };
     }
 
@@ -119,9 +124,9 @@
             loggedInServis = { id: uid, ...sSnap.data() };
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('panel-content').style.display = 'block';
-            document.getElementById('servis-name-label').innerText = loggedInServis.s_name;
+            document.getElementById('servis-title').innerText = loggedInServis.s_name.toUpperCase();
             verileriYukle();
-        } else { alert("Hatalı Giriş!"); }
+        } else { alert("Giriş bilgilerini kontrol ediniz."); }
     };
 
     async function verileriYukle() {
@@ -136,51 +141,39 @@
         snap.forEach(doc => {
             const data = doc.data();
             if (!data.plaka) return;
-
             const servisler = data.servisler || [];
             const sonBakim = servisler[servisler.length - 1] || { km: 0, next_km: 0, tarih: '01.01.2024' };
             const tahmin = calculateEstimate(servisler);
-            
             const bugun = new Date();
             const farkGun = Math.ceil((tahmin.date - bugun) / (1000 * 60 * 60 * 24));
 
-            let status = { text: "Güncel", class: "alert-green", priority: 3 };
-            if (farkGun <= 0) { 
-                status = { text: "Vakti Geçti", class: "alert-red", priority: 1 };
-                alertCount++;
-            } else if (farkGun <= 15) { 
-                status = { text: "Az Kaldı", class: "alert-orange", priority: 2 };
-                soonCount++;
-            }
+            let status = { text: "İyi Durumda", class: "alert-green", priority: 3 };
+            if (farkGun <= 0) { status = { text: "Vakti Geçti", class: "alert-red", priority: 1 }; alertCount++; }
+            else if (farkGun <= 15) { status = { text: "Yaklaşıyor", class: "alert-orange", priority: 2 }; soonCount++; }
 
-            musteriler.push({
-                ...data,
-                sonBakim,
-                tahmin,
-                status,
-                farkGun,
-                qrLink: `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${data.qr_id}`
-            });
+            musteriler.push({ ...data, sonBakim, tahmin, status, farkGun });
         });
 
-        // AKILLI SIRALAMA
         musteriler.sort((a, b) => a.status.priority - b.status.priority || a.farkGun - b.farkGun);
-
         listBody.innerHTML = "";
+
         musteriler.forEach(m => {
             const wpNum = formatWPNumber(m.musteri_tel || "");
-            const mesaj = `Merhaba, ${m.plaka} plakalı aracınızın servis zamanı gelmiştir.\n\nGüncel Durum: ${m.sonBakim.km.toLocaleString()} KM\nHedef Bakım: ${m.sonBakim.next_km.toLocaleString()} KM\nTahmini Tarih: ${m.tahmin.label}\n\nAracınızın tüm bakım geçmişini dijital kartınızdan inceleyebilirsiniz:\n${m.qrLink}`;
+            const qrLink = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${m.qr_id}`;
+            
+            // PROFESYONEL WP DİLİ
+            const mesaj = `Sayın Müşterimiz,\n\n${loggedInServis.s_name} olarak aracınızın sağlığını önemsiyoruz. ${m.plaka} plakalı aracınızın periyodik bakım vakti yaklaşmıştır.\n\n🛠 Son Servis KM: ${m.sonBakim.km.toLocaleString()}\n🎯 Hedef Bakım: ${m.sonBakim.next_km.toLocaleString()}\n📅 Tahmini Randevu Zamanı: ${m.tahmin.label}\n\nAracınızın dijital servis geçmişini aşağıdaki linkten inceleyebilir, randevu için bizimle iletişime geçebilirsiniz.\n\n🔗 Dijital Kartınız: ${qrLink}\n\nİyi yolculuklar dileriz.`;
 
             listBody.innerHTML += `
                 <tr>
                     <td><div style="font-weight:800; color:var(--dark)">${m.plaka}</div><small style="color:#94a3b8">${m.model || ''}</small></td>
-                    <td>${m.sonBakim.km.toLocaleString()} KM</td>
+                    <td><i class="fas fa-tachometer-alt" style="color:#94a3b8"></i> ${m.sonBakim.km.toLocaleString()} KM</td>
                     <td style="font-weight:800; color:var(--accent)">${m.sonBakim.next_km.toLocaleString()} KM</td>
-                    <td style="font-weight:700">${m.tahmin.label}</td>
+                    <td style="font-weight:700; color:#475569">${m.tahmin.label}</td>
                     <td><span class="status-pill ${m.status.class}">${m.status.text}</span></td>
                     <td>
                         <a href="https://wa.me/${wpNum}?text=${encodeURIComponent(mesaj)}" target="_blank" class="btn-wp">
-                            <i class="fab fa-whatsapp"></i> Mesaj At
+                            <i class="fab fa-whatsapp"></i> Servis Hatırlat
                         </a>
                     </td>
                 </tr>
