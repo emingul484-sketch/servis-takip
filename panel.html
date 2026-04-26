@@ -3,44 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oto Nabız | Admin Kontrol</title>
+    <title>Oto Nabız | Admin</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root { --accent: #2563eb; --bg: #f4f7fe; --dark: #0f172a; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; }
-        
         #admin-login { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; position: fixed; width: 100%; z-index: 999; }
         .login-box { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
-        
         .header { background: var(--dark); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
         .main { padding: 30px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 400px 1fr; gap: 25px; }
-        @media (max-width: 900px) { .main { grid-template-columns: 1fr; } }
-
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); height: fit-content; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: 800; font-size: 10px; margin-bottom: 4px; color: #64748b; text-transform: uppercase; }
-        input, textarea { width: 100%; padding: 10px; border: 2px solid #f1f5f9; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
-        
-        .bayi-list { display: grid; grid-template-columns: 1fr; gap: 15px; }
-        .bayi-card { background: white; padding: 15px; border-radius: 15px; border: 1px solid #f1f5f9; display: flex; gap: 15px; align-items: start; position: relative;}
+        input, textarea { width: 100%; padding: 10px; border: 2px solid #f1f5f9; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+        .bayi-card { background: white; padding: 15px; border-radius: 15px; border: 1px solid #f1f5f9; display: flex; gap: 15px; margin-bottom: 10px; }
         .bayi-card img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
-        .bayi-card-info h4 { margin: 0; font-size: 15px; color: var(--dark); }
-        .bayi-card-info p { margin: 3px 0; font-size: 12px; color: #64748b; line-height: 1.4; }
-        .bayi-card-social { display: flex; gap: 10px; margin-top: 5px; color: var(--accent); font-size: 14px; }
-
-        .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: 10px; }
-        .upload-area { border: 2px dashed #cbd5e1; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; background: #fcfdfe; }
-        #logo-preview { max-width: 60px; margin-top: 5px; border-radius: 5px; display: none; margin-left: auto; margin-right: auto; }
+        .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; }
+        #logo-preview { max-width: 60px; margin-top: 5px; display: none; margin: 10px auto; border-radius: 5px; }
     </style>
 </head>
 <body>
 
 <div id="admin-login">
     <div class="login-box">
-        <h2 style="color:white; margin-bottom:20px;">Admin</h2>
+        <h2 style="color:white; margin-bottom:20px;">Admin Girişi</h2>
         <input type="password" id="admin-pass-input" placeholder="Şifre" style="background:rgba(0,0,0,0.2); color:white; border:1px solid #334155; margin-bottom:15px;">
-        <button onclick="checkAdminPass()" class="btn-save">GİRİŞ</button>
+        <button onclick="checkAdminPass()" class="btn-save">GİRİŞ YAP</button>
     </div>
 </div>
 
@@ -53,43 +42,28 @@
     <div class="main">
         <div class="card">
             <h3 style="margin:0 0 20px 0;">Bayi Bilgileri</h3>
-            <div class="form-group">
-                <label>Servis İsmi</label>
-                <input type="text" id="s_name" placeholder="Örn: Battalbey Otomotiv">
-            </div>
+            <div class="form-group"><label>Servis İsmi</label><input type="text" id="s_name"></div>
             <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div><label>Giriş ID</label><input type="text" id="s_user"></div>
+                <div><label>ID</label><input type="text" id="s_user"></div>
                 <div><label>Şifre</label><input type="text" id="s_sifre"></div>
             </div>
+            <div class="form-group"><label>Telefon</label><input type="text" id="s_tel" placeholder="05xxxxxxxxx"></div>
+            <div class="form-group"><label>Instagram</label><input type="text" id="s_insta"></div>
+            <div class="form-group"><label>Adres</label><textarea id="s_adres" rows="2"></textarea></div>
             <div class="form-group">
-                <label>Telefon (WhatsApp İçin)</label>
-                <input type="text" id="s_tel" placeholder="05xx xxx xx xx">
-            </div>
-            <div class="form-group">
-                <label>Instagram Kullanıcı Adı</label>
-                <input type="text" id="s_insta" placeholder="Örn: battalbey_servis">
-            </div>
-            <div class="form-group">
-                <label>Adres</label>
-                <textarea id="s_adres" rows="2" placeholder="Mahalle, Cadde, Sokak..."></textarea>
-            </div>
-            <div class="form-group">
-                <label>Bayi Logosu</label>
-                <div class="upload-area" onclick="document.getElementById('logo-input').click()">
+                <div style="border: 2px dashed #cbd5e1; padding: 10px; text-align: center; border-radius: 10px; cursor: pointer;" onclick="document.getElementById('logo-input').click()">
                     <span id="up-text" style="font-size:11px; font-weight:600;">Logo Yükle</span>
                     <input type="file" id="logo-input" hidden accept="image/*" onchange="handleLogoUpload(this)">
                     <img id="logo-preview">
                 </div>
                 <input type="hidden" id="s_logo_url">
             </div>
-            <button class="btn-save" onclick="bayiKaydet()">SİSTEME TANIMLA</button>
+            <button class="btn-save" onclick="bayiKaydet()">BAYİYİ KAYDET</button>
         </div>
 
         <div class="card">
             <h3 style="margin:0 0 20px 0;">Aktif Bayiler</h3>
-            <div id="bayi-listesi" class="bayi-list">
-                <p style="font-size:12px; color:#94a3b8;">Yükleniyor...</p>
-            </div>
+            <div id="bayi-listesi"></div>
         </div>
     </div>
 </div>
@@ -101,76 +75,52 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
     const IMGBB_API_KEY = "0fd006aeed01a4802808abbfc44990ca";
-    const ADMIN_PASSWORD = "123"; 
 
     window.checkAdminPass = () => {
-        if(document.getElementById('admin-pass-input').value === ADMIN_PASSWORD) {
+        if(document.getElementById('admin-pass-input').value === "123") { // Şifreyi buradan değiştir
             document.getElementById('admin-login').style.display = 'none';
             document.getElementById('panel-content').style.display = 'block';
             bayileriGetir();
-        } else { alert("Yetkisiz Giriş!"); }
+        } else { alert("Hatalı Şifre!"); }
     };
 
     window.handleLogoUpload = async (input) => {
-        const file = input.files[0];
-        if (!file) return;
+        const file = input.files[0]; if (!file) return;
         document.getElementById('up-text').innerText = "Yükleniyor...";
-        const formData = new FormData();
-        formData.append("image", file);
+        const formData = new FormData(); formData.append("image", file);
         try {
             const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
-            const result = await res.json();
-            if (result.success) {
-                document.getElementById('s_logo_url').value = result.data.url;
-                const prev = document.getElementById('logo-preview');
-                prev.src = result.data.url; prev.style.display = 'block';
-                document.getElementById('up-text').style.display = 'none';
+            const r = await res.json();
+            if (r.success) {
+                document.getElementById('s_logo_url').value = r.data.url;
+                document.getElementById('logo-preview').src = r.data.url;
+                document.getElementById('logo-preview').style.display = "block";
+                document.getElementById('up-text').style.display = "none";
             }
-        } catch (e) { alert("Resim yüklenemedi!"); }
-    };
-
-    window.bayiKaydet = async () => {
-        const user = document.getElementById('s_user').value.trim();
-        const info = {
-            s_name: document.getElementById('s_name').value.trim(),
-            s_sifre: document.getElementById('s_sifre').value.trim(),
-            s_tel: document.getElementById('s_tel').value.trim(),
-            s_insta: document.getElementById('s_insta').value.trim(),
-            s_adres: document.getElementById('s_adres').value.trim(),
-            s_logo: document.getElementById('s_logo_url').value
-        };
-
-        if (!user || !info.s_name || !info.s_sifre) return alert("Eksik alanları doldurun!");
-
-        try {
-            await setDoc(doc(db, "servisler", user), info);
-            alert("Bayi Kaydedildi!");
-            bayileriGetir();
         } catch (e) { alert("Hata!"); }
     };
 
+    window.bayiKaydet = async () => {
+        const user = document.getElementById('s_user').value;
+        const data = {
+            s_name: document.getElementById('s_name').value,
+            s_sifre: document.getElementById('s_sifre').value,
+            s_tel: document.getElementById('s_tel').value,
+            s_insta: document.getElementById('s_insta').value,
+            s_adres: document.getElementById('s_adres').value,
+            s_logo: document.getElementById('s_logo_url').value
+        };
+        await setDoc(doc(db, "servisler", user), data);
+        alert("Bayi Kaydedildi!"); bayileriGetir();
+    };
+
     async function bayileriGetir() {
-        const container = document.getElementById('bayi-listesi');
-        container.innerHTML = "";
-        const snap = await getDocs(collection(db, "servisler"));
-        snap.forEach(doc => {
-            const d = doc.data();
-            container.innerHTML += `
-                <div class="bayi-card">
-                    <img src="${d.s_logo || 'https://via.placeholder.com/50'}">
-                    <div class="bayi-card-info">
-                        <h4>${d.s_name}</h4>
-                        <p><b>ID:</b> ${doc.id} | <b>Pass:</b> ${d.s_sifre}</p>
-                        <p><i class="fas fa-map-marker-alt"></i> ${d.s_adres || 'Adres Girilmemiş'}</p>
-                        <div class="bayi-card-social">
-                            ${d.s_tel ? '<i class="fab fa-whatsapp"></i>' : ''}
-                            ${d.s_insta ? '<i class="fab fa-instagram"></i>' : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
+        const c = document.getElementById('bayi-listesi'); c.innerHTML = "";
+        const s = await getDocs(collection(db, "servisler"));
+        s.forEach(d => {
+            const b = d.data();
+            c.innerHTML += `<div class="bayi-card"><img src="${b.s_logo}"><div><b>${b.s_name}</b><br><small>ID: ${d.id} | Tel: ${b.s_tel}</small></div></div>`;
         });
     }
 </script>
