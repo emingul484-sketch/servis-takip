@@ -17,49 +17,47 @@
         .stat-card h3 { margin: 0; font-size: 13px; color: #64748b; text-transform: uppercase; }
         .stat-card p { margin: 10px 0 0 0; font-size: 28px; font-weight: 800; color: var(--dark); }
 
-        .client-table { width: 100%; border-collapse: collapse; background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .client-table { width: 100%; border-collapse: collapse; background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .client-table th, .client-table td { padding: 18px; text-align: left; border-bottom: 1px solid #f1f5f9; }
-        .client-table th { background: #f8fafc; font-size: 12px; color: #64748b; }
+        .client-table th { background: #f8fafc; font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
         
         .btn-wp { background: var(--success); color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; transition: 0.3s; }
-        .btn-wp:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3); }
+        .btn-wp:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(34, 197, 94, 0.3); }
         
-        .status-pill { padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; text-transform: uppercase; }
+        .status-pill { padding: 6px 12px; border-radius: 20px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
         .alert-red { background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; }
         .alert-orange { background: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
         .alert-green { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
 
+        input { width: 100%; padding: 15px; border-radius: 12px; margin-bottom: 15px; background: rgba(0,0,0,0.2); color: white; border: 1px solid #334155; box-sizing: border-box; }
         #login-screen { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .login-box { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 350px; text-align: center; color: white; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
 <div id="login-screen">
-    <div class="login-box">
+    <div style="background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 350px; text-align: center; color: white; border: 1px solid rgba(255,255,255,0.1);">
         <h2 style="margin-bottom:30px">Bayi Girişi</h2>
-        <input type="text" id="user-id" placeholder="Servis Kullanıcı Adı" style="width:100%; padding:15px; border-radius:12px; margin-bottom:15px; background:rgba(0,0,0,0.2); color:white; border:1px solid #334155;">
-        <input type="password" id="user-pass" placeholder="Şifre" style="width:100%; padding:15px; border-radius:12px; margin-bottom:20px; background:rgba(0,0,0,0.2); color:white; border:1px solid #334155;">
-        <button class="btn-login" onclick="login()" style="width:100%; padding:15px; border-radius:12px; border:none; background:var(--accent); color:white; font-weight:800; cursor:pointer;">GİRİŞ YAP</button>
+        <input type="text" id="user-id" placeholder="Servis Kullanıcı Adı">
+        <input type="password" id="user-pass" placeholder="Şifre">
+        <button onclick="login()" style="width:100%; padding:15px; border-radius:12px; border:none; background:var(--accent); color:white; font-weight:800; cursor:pointer;">PANELİ AÇ</button>
     </div>
 </div>
 
 <div id="panel-content" style="display:none">
     <div class="sidebar">
         <h2 style="font-size:24px; font-weight:800; letter-spacing:-1px;">Karekod Oto</h2>
-        <p id="servis-name-label" style="opacity:0.6; font-size:14px; margin-bottom:40px">Dükkan İsmi</p>
+        <p id="servis-name-label" style="opacity:0.6; font-size:14px; margin-bottom:40px">---</p>
         <hr style="opacity:0.1">
-        <nav style="margin-top:20px">
-            <div style="padding:15px 0; font-weight:700; color:var(--accent);"><i class="fas fa-users"></i> Müşteri Takibi</div>
-        </nav>
+        <div style="padding:15px 0; font-weight:700; color:var(--accent); cursor:default;"><i class="fas fa-users"></i> Müşteri Takibi</div>
         <p style="position:absolute; bottom:30px; font-size:12px; cursor:pointer; opacity:0.5;" onclick="location.reload()">Çıkış Yap</p>
     </div>
 
     <div class="main">
         <div class="stats-grid">
-            <div class="stat-card"><h3>Kayıtlı Araç</h3><p id="stat-total">0</p></div>
+            <div class="stat-card"><h3>Toplam Araç</h3><p id="stat-total">0</p></div>
             <div class="stat-card" style="border-bottom-color:var(--danger)"><h3>Vakti Geçenler</h3><p id="stat-alert">0</p></div>
-            <div class="stat-card" style="border-bottom-color:var(--warning)"><h3>Yaklaşanlar</h3><p id="stat-soon">0</p></div>
+            <div class="stat-card" style="border-bottom-color:var(--warning)"><h3>15 Gün Kalanlar</h3><p id="stat-soon">0</p></div>
         </div>
 
         <div style="background:white; border-radius:24px; padding:30px; box-shadow:0 4px 20px rgba(0,0,0,0.03)">
@@ -67,11 +65,11 @@
                 <thead>
                     <tr>
                         <th>ARAÇ BİLGİSİ</th>
-                        <th>SON BAKIM</th>
+                        <th>GÜNCEL KM</th>
                         <th>HEDEF KM</th>
                         <th>TAHMİNİ TARİH</th>
                         <th>DURUM</th>
-                        <th>EYLEM</th>
+                        <th>İŞLEM</th>
                     </tr>
                 </thead>
                 <tbody id="client-list-body"></tbody>
@@ -96,21 +94,20 @@
         return cleaned;
     }
 
-    // GÜNDE 5 KM HESABIYLA TARİH TAHMİNİ
+    // GÜNDE 20 KM HESABIYLA TARİH TAHMİNİ
     function calculateEstimate(servisler) {
-        if (!servisler || servisler.length === 0) return { date: new Date(2099, 1, 1), label: "---" };
+        if (!servisler || servisler.length === 0) return { date: new Date(2100, 0, 1), label: "Kayıt Yok" };
         const sonBakim = servisler[servisler.length - 1];
         const kmFarki = sonBakim.next_km - sonBakim.km;
-        const gunEkle = kmFarki / 5; // Günde 5 km
+        
+        // GÜNDE 20 KM HESABI
+        const gunEkle = kmFarki > 0 ? kmFarki / 20 : 0; 
 
         const parcalar = sonBakim.tarih.split('.');
         const baslangic = new Date(parcalar[2], parcalar[1] - 1, parcalar[0]);
         baslangic.setDate(baslangic.getDate() + gunEkle);
         
-        return { 
-            date: baslangic, 
-            label: baslangic.toLocaleDateString('tr-TR') 
-        };
+        return { date: baslangic, label: baslangic.toLocaleDateString('tr-TR') };
     }
 
     window.login = async () => {
@@ -124,7 +121,7 @@
             document.getElementById('panel-content').style.display = 'block';
             document.getElementById('servis-name-label').innerText = loggedInServis.s_name;
             verileriYukle();
-        } else { alert("Hatalı!"); }
+        } else { alert("Hatalı Giriş!"); }
     };
 
     async function verileriYukle() {
@@ -141,20 +138,18 @@
             if (!data.plaka) return;
 
             const servisler = data.servisler || [];
-            const sonBakim = servisler[servisler.length - 1] || { km: 0, next_km: 0, tarih: '01.01.2000' };
+            const sonBakim = servisler[servisler.length - 1] || { km: 0, next_km: 0, tarih: '01.01.2024' };
             const tahmin = calculateEstimate(servisler);
             
-            // Durum Belirleme
             const bugun = new Date();
-            const farkZaman = tahmin.date - bugun;
-            const farkGun = Math.ceil(farkZaman / (1000 * 60 * 60 * 24));
+            const farkGun = Math.ceil((tahmin.date - bugun) / (1000 * 60 * 60 * 24));
 
             let status = { text: "Güncel", class: "alert-green", priority: 3 };
             if (farkGun <= 0) { 
-                status = { text: "VAKTİ GEÇTİ", class: "alert-red", priority: 1 };
+                status = { text: "Vakti Geçti", class: "alert-red", priority: 1 };
                 alertCount++;
             } else if (farkGun <= 15) { 
-                status = { text: "YAKLAŞTI", class: "alert-orange", priority: 2 };
+                status = { text: "Az Kaldı", class: "alert-orange", priority: 2 };
                 soonCount++;
             }
 
@@ -168,13 +163,13 @@
             });
         });
 
-        // AKILLI SIRALAMA: Önce vakti geçenler, sonra yaklaşanlar
+        // AKILLI SIRALAMA
         musteriler.sort((a, b) => a.status.priority - b.status.priority || a.farkGun - b.farkGun);
 
         listBody.innerHTML = "";
         musteriler.forEach(m => {
             const wpNum = formatWPNumber(m.musteri_tel || "");
-            const mesaj = `Merhaba, ${m.plaka} plakalı aracınızın servis zamanı gelmiştir.\n\nGüncel Durum: ${m.sonBakim.km.toLocaleString()} KM\nBakım Hedefi: ${m.sonBakim.next_km.toLocaleString()} KM\nTahmini Tarih: ${m.tahmin.label}\n\nAracınızın tüm bakım geçmişini buradan inceleyebilirsiniz:\n${m.qrLink}`;
+            const mesaj = `Merhaba, ${m.plaka} plakalı aracınızın servis zamanı gelmiştir.\n\nGüncel Durum: ${m.sonBakim.km.toLocaleString()} KM\nHedef Bakım: ${m.sonBakim.next_km.toLocaleString()} KM\nTahmini Tarih: ${m.tahmin.label}\n\nAracınızın tüm bakım geçmişini dijital kartınızdan inceleyebilirsiniz:\n${m.qrLink}`;
 
             listBody.innerHTML += `
                 <tr>
@@ -185,7 +180,7 @@
                     <td><span class="status-pill ${m.status.class}">${m.status.text}</span></td>
                     <td>
                         <a href="https://wa.me/${wpNum}?text=${encodeURIComponent(mesaj)}" target="_blank" class="btn-wp">
-                            <i class="fab fa-whatsapp"></i> Hatırlat
+                            <i class="fab fa-whatsapp"></i> Mesaj At
                         </a>
                     </td>
                 </tr>
