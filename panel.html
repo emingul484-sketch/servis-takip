@@ -26,7 +26,6 @@
         .bayi-info { flex-grow: 1; }
         .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; }
         .btn-save:hover { opacity: 0.9; }
-        .btn-delete { background: none; border: none; color: var(--danger); cursor: pointer; padding: 10px; font-size: 18px; }
         
         #logo-preview { max-width: 60px; height: 60px; object-fit: cover; margin-top: 5px; display: none; margin: 10px auto; border-radius: 10px; border: 2px solid #f1f5f9; }
     </style>
@@ -75,8 +74,7 @@
 
         <div class="card">
             <h3 style="margin:0 0 20px 0;"><i class="fas fa-list"></i> Aktif Bayiler</h3>
-            <div id="bayi-listesi">
-                </div>
+            <div id="bayi-listesi"></div>
         </div>
     </div>
 </div>
@@ -84,14 +82,15 @@
 <script type="module">
     import { firebaseConfig } from './config.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const IMGBB_API_KEY = "0fd006aeed01a4802808abbfc44990ca";
 
     window.checkAdminPass = () => {
-        if(document.getElementById('admin-pass-input').value === "123") {
+        // ŞİFRE GÜNCELLENDİ
+        if(document.getElementById('admin-pass-input').value === "eminkaan201151") {
             document.getElementById('admin-login').style.display = 'none';
             document.getElementById('panel-content').style.display = 'block';
             bayileriGetir();
@@ -133,19 +132,11 @@
         try {
             await setDoc(doc(db, "servisler", user), data);
             alert("Bayi başarıyla kaydedildi!");
-            // Formu Temizle
             document.querySelectorAll('input').forEach(i => i.value = "");
             document.getElementById('logo-preview').style.display = "none";
             document.getElementById('up-text').style.display = "block";
             bayileriGetir();
         } catch (e) { alert("Hata oluştu!"); }
-    };
-
-    window.bayiSil = async (id) => {
-        if(confirm(id + " ID'li bayiyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) {
-            await deleteDoc(doc(db, "servisler", id));
-            bayileriGetir();
-        }
     };
 
     async function bayileriGetir() {
@@ -159,6 +150,7 @@
 
         snap.forEach(d => {
             const b = d.data();
+            // SİLME BUTONU KALDIRILDI
             container.innerHTML += `
                 <div class="bayi-card">
                     <img src="${b.s_logo || 'https://via.placeholder.com/50'}">
@@ -167,9 +159,6 @@
                         <div style="font-size:11px; color:#64748b">ID: <b>${d.id}</b> | Şifre: ${b.s_sifre}</div>
                         <div style="font-size:11px; color:#64748b">Tel: ${b.s_tel}</div>
                     </div>
-                    <button class="btn-delete" onclick="bayiSil('${d.id}')">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
                 </div>`;
         });
     }
