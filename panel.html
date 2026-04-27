@@ -7,63 +7,76 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --accent: #2563eb; --bg: #f4f7fe; --dark: #0f172a; }
+        :root { --accent: #2563eb; --bg: #f4f7fe; --dark: #0f172a; --danger: #ef4444; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; }
         #admin-login { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; position: fixed; width: 100%; z-index: 999; }
         .login-box { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
         .header { background: var(--dark); color: white; padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; }
         .main { padding: 30px; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 400px 1fr; gap: 25px; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        @media (max-width: 850px) { .main { grid-template-columns: 1fr; } }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); height: fit-content; }
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: 800; font-size: 10px; margin-bottom: 4px; color: #64748b; text-transform: uppercase; }
-        input, textarea { width: 100%; padding: 10px; border: 2px solid #f1f5f9; border-radius: 8px; box-sizing: border-box; font-family: inherit; }
-        .bayi-card { background: white; padding: 15px; border-radius: 15px; border: 1px solid #f1f5f9; display: flex; gap: 15px; margin-bottom: 10px; }
-        .bayi-card img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; }
-        .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; }
-        #logo-preview { max-width: 60px; margin-top: 5px; display: none; margin: 10px auto; border-radius: 5px; }
+        input, textarea { width: 100%; padding: 10px; border: 2px solid #f1f5f9; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
+        input:focus { border-color: var(--accent); outline: none; }
+        
+        .bayi-card { background: white; padding: 15px; border-radius: 15px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; transition: 0.3s; }
+        .bayi-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .bayi-card img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; background: #f1f5f9; }
+        .bayi-info { flex-grow: 1; }
+        .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .btn-save:hover { opacity: 0.9; }
+        .btn-delete { background: none; border: none; color: var(--danger); cursor: pointer; padding: 10px; font-size: 18px; }
+        
+        #logo-preview { max-width: 60px; height: 60px; object-fit: cover; margin-top: 5px; display: none; margin: 10px auto; border-radius: 10px; border: 2px solid #f1f5f9; }
     </style>
 </head>
 <body>
 
 <div id="admin-login">
     <div class="login-box">
-        <h2 style="color:white; margin-bottom:20px;">Admin Girişi</h2>
-        <input type="password" id="admin-pass-input" placeholder="Şifre" style="background:rgba(0,0,0,0.2); color:white; border:1px solid #334155; margin-bottom:15px;">
-        <button onclick="checkAdminPass()" class="btn-save">GİRİŞ YAP</button>
+        <i class="fas fa-user-shield" style="font-size: 40px; color: var(--accent); margin-bottom: 15px;"></i>
+        <h2 style="color:white; margin: 0 0 20px 0;">Admin Girişi</h2>
+        <input type="password" id="admin-pass-input" placeholder="Şifre" style="background:rgba(255,255,255,0.1); color:white; border:1px solid #334155; margin-bottom:15px; text-align: center;">
+        <button onclick="checkAdminPass()" class="btn-save">PANELİ AÇ</button>
     </div>
 </div>
 
 <div id="panel-content" style="display:none">
     <div class="header">
-        <div style="font-weight: 800; font-size: 18px;">OTO NABIZ <span style="font-weight: 400; opacity: 0.6;">| Yönetim</span></div>
-        <button onclick="location.reload()" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; padding:5px 12px; border-radius:8px; cursor:pointer; font-size:11px;">ÇIKIŞ</button>
+        <div style="font-weight: 800; font-size: 18px;"><i class="fas fa-bolt" style="color:var(--accent)"></i> OTO NABIZ <span style="font-weight: 400; opacity: 0.6;">| Yönetim</span></div>
+        <button onclick="location.reload()" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; padding:5px 12px; border-radius:8px; cursor:pointer; font-size:11px;">GÜVENLİ ÇIKIŞ</button>
     </div>
 
     <div class="main">
         <div class="card">
-            <h3 style="margin:0 0 20px 0;">Bayi Bilgileri</h3>
-            <div class="form-group"><label>Servis İsmi</label><input type="text" id="s_name"></div>
+            <h3 style="margin:0 0 20px 0;"><i class="fas fa-plus-circle"></i> Bayi Tanımla</h3>
+            <div class="form-group"><label>Servis İsmi (Müşteri Görecek)</label><input type="text" id="s_name" placeholder="Örn: Battalbey Çiğköfte"></div>
             <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div><label>ID</label><input type="text" id="s_user"></div>
-                <div><label>Şifre</label><input type="text" id="s_sifre"></div>
+                <div><label>Kullanıcı ID</label><input type="text" id="s_user" placeholder="kullaniciadi"></div>
+                <div><label>Giriş Şifresi</label><input type="text" id="s_sifre" placeholder="****"></div>
             </div>
-            <div class="form-group"><label>Telefon</label><input type="text" id="s_tel" placeholder="05xxxxxxxxx"></div>
-            <div class="form-group"><label>Instagram</label><input type="text" id="s_insta"></div>
-            <div class="form-group"><label>Adres</label><textarea id="s_adres" rows="2"></textarea></div>
+            <div class="form-group"><label>Telefon (WhatsApp ve Arama)</label><input type="text" id="s_tel" placeholder="05xxxxxxxxx"></div>
+            <div class="form-group"><label>Instagram (Sadece Kullanıcı Adı)</label><input type="text" id="s_insta" placeholder="hesapadi"></div>
+            <div class="form-group"><label>Açık Adres (Konum İçin)</label><textarea id="s_adres" rows="2" placeholder="Mahalle, Sokak, No..."></textarea></div>
+            
             <div class="form-group">
-                <div style="border: 2px dashed #cbd5e1; padding: 10px; text-align: center; border-radius: 10px; cursor: pointer;" onclick="document.getElementById('logo-input').click()">
-                    <span id="up-text" style="font-size:11px; font-weight:600;">Logo Yükle</span>
+                <label>Servis Logosu</label>
+                <div style="border: 2px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 12px; cursor: pointer; background: #f8fafc;" onclick="document.getElementById('logo-input').click()">
+                    <span id="up-text" style="font-size:12px; font-weight:700; color: #64748b;"><i class="fas fa-cloud-upload-alt"></i> Logo Seç</span>
                     <input type="file" id="logo-input" hidden accept="image/*" onchange="handleLogoUpload(this)">
                     <img id="logo-preview">
                 </div>
                 <input type="hidden" id="s_logo_url">
             </div>
-            <button class="btn-save" onclick="bayiKaydet()">BAYİYİ KAYDET</button>
+            
+            <button class="btn-save" id="save-btn" onclick="bayiKaydet()">BAYİYİ SİSTEME EKLE</button>
         </div>
 
         <div class="card">
-            <h3 style="margin:0 0 20px 0;">Aktif Bayiler</h3>
-            <div id="bayi-listesi"></div>
+            <h3 style="margin:0 0 20px 0;"><i class="fas fa-list"></i> Aktif Bayiler</h3>
+            <div id="bayi-listesi">
+                </div>
         </div>
     </div>
 </div>
@@ -71,14 +84,14 @@
 <script type="module">
     import { firebaseConfig } from './config.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const IMGBB_API_KEY = "0fd006aeed01a4802808abbfc44990ca";
 
     window.checkAdminPass = () => {
-        if(document.getElementById('admin-pass-input').value === "123") { // Şifreyi buradan değiştir
+        if(document.getElementById('admin-pass-input').value === "123") {
             document.getElementById('admin-login').style.display = 'none';
             document.getElementById('panel-content').style.display = 'block';
             bayileriGetir();
@@ -98,11 +111,16 @@
                 document.getElementById('logo-preview').style.display = "block";
                 document.getElementById('up-text').style.display = "none";
             }
-        } catch (e) { alert("Hata!"); }
+        } catch (e) { 
+            alert("Logo yüklenemedi!"); 
+            document.getElementById('up-text').innerText = "Tekrar Dene";
+        }
     };
 
     window.bayiKaydet = async () => {
-        const user = document.getElementById('s_user').value;
+        const user = document.getElementById('s_user').value.trim().toLowerCase();
+        if(!user) return alert("Lütfen bir ID girin!");
+
         const data = {
             s_name: document.getElementById('s_name').value,
             s_sifre: document.getElementById('s_sifre').value,
@@ -111,16 +129,48 @@
             s_adres: document.getElementById('s_adres').value,
             s_logo: document.getElementById('s_logo_url').value
         };
-        await setDoc(doc(db, "servisler", user), data);
-        alert("Bayi Kaydedildi!"); bayileriGetir();
+
+        try {
+            await setDoc(doc(db, "servisler", user), data);
+            alert("Bayi başarıyla kaydedildi!");
+            // Formu Temizle
+            document.querySelectorAll('input').forEach(i => i.value = "");
+            document.getElementById('logo-preview').style.display = "none";
+            document.getElementById('up-text').style.display = "block";
+            bayileriGetir();
+        } catch (e) { alert("Hata oluştu!"); }
+    };
+
+    window.bayiSil = async (id) => {
+        if(confirm(id + " ID'li bayiyi silmek istediğinize emin misiniz? Bu işlem geri alınamaz!")) {
+            await deleteDoc(doc(db, "servisler", id));
+            bayileriGetir();
+        }
     };
 
     async function bayileriGetir() {
-        const c = document.getElementById('bayi-listesi'); c.innerHTML = "";
-        const s = await getDocs(collection(db, "servisler"));
-        s.forEach(d => {
+        const container = document.getElementById('bayi-listesi'); 
+        container.innerHTML = "<p style='font-size:13px; color:#64748b;'>Yükleniyor...</p>";
+        
+        const snap = await getDocs(collection(db, "servisler"));
+        container.innerHTML = "";
+        
+        if(snap.empty) container.innerHTML = "Henüz bayi eklenmemiş.";
+
+        snap.forEach(d => {
             const b = d.data();
-            c.innerHTML += `<div class="bayi-card"><img src="${b.s_logo}"><div><b>${b.s_name}</b><br><small>ID: ${d.id} | Tel: ${b.s_tel}</small></div></div>`;
+            container.innerHTML += `
+                <div class="bayi-card">
+                    <img src="${b.s_logo || 'https://via.placeholder.com/50'}">
+                    <div class="bayi-info">
+                        <div style="font-weight:800; font-size:14px; color:var(--dark)">${b.s_name}</div>
+                        <div style="font-size:11px; color:#64748b">ID: <b>${d.id}</b> | Şifre: ${b.s_sifre}</div>
+                        <div style="font-size:11px; color:#64748b">Tel: ${b.s_tel}</div>
+                    </div>
+                    <button class="btn-delete" onclick="bayiSil('${d.id}')">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>`;
         });
     }
 </script>
