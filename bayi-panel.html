@@ -46,33 +46,33 @@
 
 <div id="login-screen">
     <div class="login-box">
-        <i class="fas fa-user-tie" style="font-size: 40px; color: var(--accent); margin-bottom: 20px;"></i>
-        <h2 style="margin-bottom:20px;">Bayi Girişi</h2>
+        <i class="fas fa-user-shield" style="font-size: 40px; color: var(--accent); margin-bottom: 20px;"></i>
+        <h2 style="margin-bottom:20px;">Bayi Yönetim Paneli</h2>
         <input type="text" id="user-id" placeholder="Bayi Kullanıcı Adı">
         <input type="password" id="user-pass" placeholder="Şifre">
-        <button onclick="login()" style="width:100%; padding:14px; border-radius:12px; border:none; background:var(--accent); color:white; font-weight:800; cursor:pointer;">GİRİŞ YAP</button>
+        <button onclick="login()" style="width:100%; padding:14px; border-radius:12px; border:none; background:var(--accent); color:white; font-weight:800; cursor:pointer;">PANELİ AÇ</button>
     </div>
 </div>
 
 <div id="panel-content" style="display:none">
     <div class="top-bar">
         <div id="servis-title" style="font-weight:800; color:var(--dark); font-size:18px;">YÜKLENİYOR...</div>
-        <button onclick="location.reload()" style="background:#f1f5f9; border:none; color:var(--dark); padding:8px 15px; border-radius:10px; cursor:pointer; font-weight:700; font-size:12px;">ÇIKIŞ YAP</button>
+        <button onclick="location.reload()" style="background:#f1f5f9; border:none; color:var(--dark); padding:8px 15px; border-radius:10px; cursor:pointer; font-weight:700; font-size:12px;">GÜVENLİ ÇIKIŞ</button>
     </div>
 
     <div class="main">
         <div class="stats-grid">
-            <div class="stat-card"><h3>Toplam Müşteri</h3><p id="stat-total">0</p></div>
+            <div class="stat-card"><h3>Toplam Araç</h3><p id="stat-total">0</p></div>
             <div class="stat-card"><h3>Bakımı Geçenler</h3><p id="stat-alert" style="color:var(--danger)">0</p></div>
             <div class="stat-card"><h3>15 Gün Kalanlar</h3><p id="stat-soon" style="color:var(--warning)">0</p></div>
         </div>
 
         <div style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:flex-end; flex-wrap: wrap; gap: 15px;">
             <div>
-                <h2 style="font-size:20px; font-weight:800; margin:0 0 10px 0;">Müşteri Takibi</h2>
-                <input type="text" id="search-input" placeholder="Plaka ara..." onkeyup="tabloFiltrele()">
+                <h2 style="font-size:20px; font-weight:800; margin:0 0 10px 0;">Müşteri Takip Listesi</h2>
+                <input type="text" id="search-input" placeholder="Plaka ile hızlı ara..." onkeyup="tabloFiltrele()">
             </div>
-            <button onclick="verileriYukle()" style="background:var(--accent); color:white; border:none; padding:12px 20px; border-radius:12px; cursor:pointer; font-size:13px; font-weight:700;"><i class="fas fa-sync-alt"></i> VERİLERİ YENİLE</button>
+            <button onclick="verileriYukle()" style="background:var(--accent); color:white; border:none; padding:12px 20px; border-radius:12px; cursor:pointer; font-size:13px; font-weight:700;"><i class="fas fa-sync-alt"></i> VERİLERİ TAZELE</button>
         </div>
 
         <div class="table-container">
@@ -80,9 +80,9 @@
                 <thead>
                     <tr>
                         <th>PLAKA</th>
-                        <th>MODEL</th>
-                        <th>SON KM</th>
-                        <th>HEDEF KM</th>
+                        <th>ARAÇ MODELİ</th>
+                        <th>SON SERVİS KM</th>
+                        <th>HEDEF BAKIM KM</th>
                         <th>TAHMİNİ TARİH</th>
                         <th>DURUM</th>
                         <th>İŞLEM</th>
@@ -115,7 +115,7 @@
             document.getElementById('panel-content').style.display = 'block';
             document.getElementById('servis-title').innerText = loggedInServis.s_name.toUpperCase();
             verileriYukle();
-        } else { alert("Hatalı giriş!"); }
+        } else { alert("Giriş bilgileri hatalı!"); }
     };
 
     window.verileriYukle = async () => {
@@ -140,15 +140,17 @@
             const tDate = new Date(parcalar[2], parcalar[1]-1, parcalar[0]);
             tDate.setDate(tDate.getDate() + gunEkle);
 
-            const farkGun = Math.ceil((tDate - new Date()) / (1000 * 60 * 60 * 24));
-            let status = { text: "Zamanı Var", class: "alert-green", prio: 3 };
-            if (farkGun <= 0) { status = { text: "Vakti Geçti", class: "alert-red", prio: 1 }; alertCount++; }
-            else if (farkGun <= 15) { status = { text: "Az Kaldı", class: "alert-orange", prio: 2 }; soonCount++; }
+            const bugun = new Date();
+            const farkGun = Math.ceil((tDate - bugun) / (1000 * 60 * 60 * 24));
+
+            let status = { text: "Zamanı Var", class: "alert-green", priority: 3 };
+            if (farkGun <= 0) { status = { text: "Vakti Geçti", class: "alert-red", priority: 1 }; alertCount++; }
+            else if (farkGun <= 15) { status = { text: "Az Kaldı", class: "alert-orange", priority: 2 }; soonCount++; }
 
             musteriler.push({ ...data, sonBakim, tDate: tDate.toLocaleDateString('tr-TR'), status });
         });
 
-        musteriler.sort((a, b) => a.status.prio - b.status.prio);
+        musteriler.sort((a, b) => a.status.priority - b.status.priority);
         listBody.innerHTML = "";
 
         musteriler.forEach(m => {
@@ -158,8 +160,8 @@
 
             const link = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${m.qr_id}`;
             
-            // EMOJİ KORUMALI MESAJ FORMATI (TÜMÜ URL ENCODE EDİLMİŞ)
-            const msgBody = `Sayın Müşterimiz,%0A%0A*${loggedInServis.s_name.toUpperCase()}* olarak aracınızın sağlığını önemsiyoruz. 🛠️%0A*${m.plaka}* plakalı aracınızın periyodik bakım vakti yaklaşmıştır.%0A%0A📍 Son Servis KM: ${Number(m.sonBakim.km).toLocaleString()}%0A🎯 Hedef Bakım: ${Number(m.sonBakim.next_km).toLocaleString()}%0A📅 Tahmini Randevu: ${m.tDate}%0A%0AAracınızın dijital servis geçmişini aşağıdaki linkten inceleyebilir, randevu için bizimle iletişime geçebilirsiniz. 📱%0A%0A💳 *Dijital Kartınız:* ${link}%0A%0Aİyi yolculuklar dileriz. ✨`;
+            // PROFESYONEL VE EMOJİSİZ MESAJ DİLİ
+            const mesajMetni = `Sayın Müşterimiz,%0A%0A${loggedInServis.s_name.toUpperCase()} olarak aracınızın sağlığını ve güvenliğini önemsiyoruz. ${m.plaka} plakalı aracınızın periyodik bakım vakti yaklaşmıştır.%0A%0ASon Servis KM: ${Number(m.sonBakim.km).toLocaleString()}%0AHedef Bakım KM: ${Number(m.sonBakim.next_km).toLocaleString()}%0ATahmini Randevu Zamanı: ${m.tDate}%0A%0AAracınızın dijital servis geçmişini incelemek ve randevu oluşturmak için aşağıdaki bağlantıyı kullanabilirsiniz.%0A%0ADijital Servis Kartınız: ${link}%0A%0Aİyi yolculuklar dileriz.`;
 
             listBody.innerHTML += `
                 <tr>
@@ -170,7 +172,7 @@
                     <td>${m.tDate}</td>
                     <td><span class="status-pill ${m.status.class}">${m.status.text}</span></td>
                     <td>
-                        ${wpNum ? `<a href="https://wa.me/${wpNum}?text=${msgBody}" target="_blank" class="btn-wp"><i class="fab fa-whatsapp"></i> Hatırlat</a>` : '<small>No Yok</small>'}
+                        ${wpNum ? `<a href="https://wa.me/${wpNum}?text=${mesajMetni}" target="_blank" class="btn-wp"><i class="fab fa-whatsapp"></i> Mesaj At</a>` : '<small>No Kayıtsız</small>'}
                     </td>
                 </tr>
             `;
@@ -182,10 +184,10 @@
     };
 
     window.tabloFiltrele = () => {
-        const f = document.getElementById("search-input").value.toUpperCase();
+        const input = document.getElementById("search-input").value.toUpperCase();
         const tr = document.getElementById("client-table").getElementsByTagName("tr");
         for (let i = 1; i < tr.length; i++) {
-            tr[i].style.display = tr[i].innerText.toUpperCase().includes(f) ? "" : "none";
+            tr[i].style.display = tr[i].textContent.toUpperCase().includes(input) ? "" : "none";
         }
     };
 </script>
