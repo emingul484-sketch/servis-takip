@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni Servis Kaydı | Oto Nabız</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 15px; }
+        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 500px; margin: 0 auto; }
+        
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { margin: 0; font-size: 20px; font-weight: 800; color: var(--dark); }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: 800; font-size: 11px; margin-bottom: 5px; color: #64748b; text-transform: uppercase; }
+        input, textarea { width: 100%; padding: 14px; border: 2px solid #f1f5f9; border-radius: 12px; box-sizing: border-box; font-family: inherit; font-size: 14px; transition: 0.3s; }
+        input:focus, textarea:focus { border-color: var(--accent); outline: none; background: #fff; }
+        
+        .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 16px; border-radius: 15px; font-weight: 800; cursor: pointer; font-size: 16px; margin-top: 10px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+        
+        /* Geçmiş Kayıtlar Alanı */
+        .history-box { margin-top: 30px; border-top: 2px solid #f1f5f9; padding-top: 20px; }
+        .history-item { background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 10px; border-left: 4px solid var(--accent); }
+        .history-date { font-size: 11px; font-weight: 800; color: var(--accent); }
+        .history-km { font-size: 14px; font-weight: 700; color: var(--dark); margin: 3px 0; }
+        .history-notes { font-size: 12px; color: #64748b; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="header">
+        <i class="fas fa-tools" style="font-size: 30px; color: var(--accent); margin-bottom: 10px;"></i>
+        <h2>Yeni Servis Kaydı</h2>
+    </div>
+
+    <div class="form-group">
+        <label>Araç Plakası</label>
+        <input type="text" id="plaka" placeholder="Örn: 34ABC123" oninput="gecmisGetir(this.value.toUpperCase())">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="form-group">
+            <label>Mevcut KM</label>
+            <input type="number" id="km" placeholder="0">
+        </div>
+        <div class="form-group">
+            <label>Gelecek Bakım KM</label>
+            <input type="number" id="next_km" placeholder="0">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>Yapılan Diğer İşlemler (Notlar)</label>
+        <textarea id="notlar" rows="4" placeholder="Yağ değişimi, filtreler, fren kontrolü vb..."></textarea>
+    </div>
+
+    <button class="btn-save" onclick="servisKaydet()">KAYDI TAMAMLA VE KAYDET</button>
+
+    <div class="history-box" id="history-container" style="display: none;">
+        <h3 style="font-size: 14px; margin-bottom: 15px;">Aracın Servis Geçmişi</h3>
+        <div id="history-list"></div>
+    </div>
+</div>
+
+<script type="module">
+    import { firebaseConfig } from './config.js';
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // PLAKA YAZILDIĞINDA GEÇMİŞİ ÇEKER
+    window.gecmisGetir = async (plaka) => {
+        if(plaka.length < 5) {
+            document.getElementById('history-container').style.display = "none";
+            return;
+        }
+
+        const docRef = doc(db, "karekodlar", plaka);
+        const docSnap = await getDoc(docRef);
+
+        const list = document.getElementById('history-list');
+        const container = document.getElementById('history-container');
+        list.innerHTML = "";
+
+        if (docSnap.exists()) {
+            container.display = "block";
+            const data = docSnap.data();
+            const servisler = data.servisler || [];
+            
+            if(servisler.length > 0) {
+                container.style.display = "block";
+                servisler.reverse().forEach(s => {
+                    list.innerHTML += `
+                        <div class="history-item">
+                            <div class="history-date">${s.tarih}</div>
+                            <div class="history-km">${Number(s.km).toLocaleString()} KM Bakımı</div>
+                            <div class="history-notes">${s.notlar || 'Not girilmemiş.'}</div>
+                        </div>
+                    `;
+                });
+            }
+        }
+    };
+
+    window.servisKaydet = async () => {
+        const plaka = document.getElementById('plaka').value.toUpperCase().trim();
+        const km = document.getElementById('km').value;
+        const next_km = document.getElementById('next_km').value;
+        const notlar = document.getElementById('notlar').value;
+
+        if(!plaka || !km || !next_km) return alert("Lütfen plaka ve KM bilgilerini girin!");
+
+        const yeniVeri = {
+            tarih: new Date().toLocaleDateString('tr-TR'),
+            km: km,
+            next_km: next_km,
+            notlar: notlar
+        };
+
+        try {
+            const docRef = doc(db, "karekodlar", plaka);
+            await updateDoc(docRef, {
+                servisler: arrayUnion(yeniVeri)
+            });
+            alert("Kayıt başarıyla eklendi!");
+            location.reload();
+        } catch (error) {
+            console.error("Hata:", error);
+            alert("Hata: Bu plaka sisteme tanımlı olmayabilir!");
+        }
+    };
+</script>
+</body>
+</html>
