@@ -17,7 +17,7 @@
         .s-logo { width: 85px; height: 85px; border-radius: 20px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 3px solid white; margin-bottom: 10px; }
         .social-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; }
         .s-btn { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 20px; transition: 0.3s; }
-        .bg-wp { background: #22c55e; } .bg-insta { background: #e4405f; } .bg-map { background: #4285f4; }
+        .bg-wp { background: #22c55e; } .bg-insta { background: #e4405f; } .bg-map { background: #ef4444; } .bg-call { background: #2563eb; }
         .s-btn:active { transform: scale(0.9); }
 
         /* Plaka Alanı */
@@ -40,7 +40,7 @@
         .btn-blue { background: var(--accent); color: white; }
         .btn-black { background: var(--dark); color: white; }
 
-        #master-form, #customer-view, #custom-km-area, #first-time-fields, #login-form { display: none; }
+        #master-form, #customer-view, #login-form { display: none; }
     </style>
 </head>
 <body>
@@ -57,7 +57,7 @@
     <div id="app-content">
         <div class="header-area">
             <img id="d-logo" class="s-logo" src="">
-            <h2 id="d-name" style="margin:0; font-size:20px">---</h2>
+            <h2 id="d-name" style="margin:0; font-size:20px">Yükleniyor...</h2>
             <div class="social-bar" id="social-container">
                 </div>
         </div>
@@ -82,8 +82,8 @@
             <div id="first-time-fields">
                 <label style="font-weight:800; font-size:11px; color:#94a3b8">İLK SEFERE ÖZEL: MÜŞTERİ & ARAÇ</label>
                 <input type="text" id="v-plaka-input" placeholder="PLAKA (Örn: 34 ABC 123)">
-                <input type="text" id="v-model-input" placeholder="MARKA / MODEL (Örn: Honda Forza 250)">
-                <input type="tel" id="v-phone-input" placeholder="MÜŞTERİ TELEFON (Örn: 0532...)">
+                <input type="text" id="v-model-input" placeholder="MARKA / MODEL">
+                <input type="tel" id="v-phone-input" placeholder="MÜŞTERİ TELEFON">
                 <hr style="border:1px solid #f1f5f9; margin-bottom:15px">
             </div>
 
@@ -128,7 +128,6 @@
     let currentQRRef = null;
     let masterPass = "";
 
-    // Dinamik Arayüz Kontrolleri
     document.addEventListener('change', (e) => {
         if(e.target.type === 'checkbox') e.target.parentElement.classList.toggle('active', e.target.checked);
         if(e.target.id === 'v-next-km-select') {
@@ -155,18 +154,29 @@
 
     async function arayuzYukle(qrData) {
         const sSnap = await getDoc(doc(db, "servisler", qrData.servis_id));
+        if(!sSnap.exists()) return;
+        
         const s = sSnap.data();
         masterPass = s.s_sifre;
 
-        // Dükkan Bilgileri & Konum Butonları
-        document.getElementById('d-logo').src = s.s_logo;
-        document.getElementById('d-name').innerText = s.s_name;
+        document.getElementById('d-logo').src = s.s_logo || "";
+        document.getElementById('d-name').innerText = s.s_name || "Servis İsmi";
         
         const social = document.getElementById('social-container');
         social.innerHTML = "";
-        if(s.s_wp) social.innerHTML += `<a href="https://wa.me/${s.s_wp}" class="s-btn bg-wp"><i class="fab fa-whatsapp"></i></a>`;
-        if(s.s_insta) social.innerHTML += `<a href="https://instagram.com/${s.s_insta}" class="s-btn bg-insta"><i class="fab fa-instagram"></i></a>`;
-        if(s.s_konum) social.innerHTML += `<a href="${s.s_konum}" target="_blank" class="s-btn bg-map"><i class="fas fa-map-marker-alt"></i></a>`;
+        
+        // SOSYAL BUTONLAR - PANELDEKİ İSİMLERLE EŞLEŞTİRİLDİ
+        if(s.s_tel) {
+            social.innerHTML += `<a href="tel:${s.s_tel}" class="s-btn bg-call"><i class="fas fa-phone"></i></a>`;
+            social.innerHTML += `<a href="https://wa.me/90${s.s_tel.replace(/\D/g,'')}" class="s-btn bg-wp"><i class="fab fa-whatsapp"></i></a>`;
+        }
+        if(s.s_insta) {
+            social.innerHTML += `<a href="https://instagram.com/${s.s_insta}" class="s-btn bg-insta"><i class="fab fa-instagram"></i></a>`;
+        }
+        if(s.s_adres) {
+            const mapQuery = encodeURIComponent(s.s_name + " " + s.s_adres);
+            social.innerHTML += `<a href="https://www.google.com/maps/search/?api=1&query=${mapQuery}" target="_blank" class="s-btn bg-map"><i class="fas fa-map-marker-alt"></i></a>`;
+        }
 
         if(qrData.plaka) {
             document.getElementById('customer-view').style.display = 'block';
@@ -175,23 +185,22 @@
             document.getElementById('first-time-fields').style.display = 'none';
             
             const list = document.getElementById('history-list');
+            list.innerHTML = "";
             (qrData.servisler || []).reverse().forEach(ser => {
                 list.innerHTML += `
                     <div class="card history-item">
                         <div class="h-date">${ser.tarih}</div>
-                        <div style="font-weight:800; font-size:15px; margin:5px 0;">${ser.km.toLocaleString()} KM</div>
+                        <div style="font-weight:800; font-size:15px; margin:5px 0;">${Number(ser.km).toLocaleString()} KM</div>
                         <div>${(ser.islemler || []).map(i => `<span class="tag">${i}</span>`).join('')}</div>
                         ${ser.not ? `<p style="font-size:13px; color:#475569; margin-top:10px">${ser.not}</p>` : ''}
                     </div>`;
             });
         } else {
-            // Hiç plaka yoksa direkt usta girişi gibi formu aç
             document.getElementById('master-form').style.display = 'block';
             document.getElementById('first-time-fields').style.display = 'block';
         }
     }
 
-    // Usta Giriş Butonu
     document.getElementById('btn-open-master').onclick = () => {
         const p = prompt("Servis Şifresini Girin:");
         if(p === masterPass) {
@@ -201,7 +210,6 @@
         } else if(p !== null) { alert("Şifre Yanlış!"); }
     };
 
-    // Kayıt Tamamlama
     document.getElementById('btn-save').onclick = async () => {
         const km = parseInt(document.getElementById('v-km').value);
         if(!km) return alert("Lütfen mevcut KM giriniz!");
@@ -222,7 +230,6 @@
             })
         };
 
-        // İlk Kayıt Verileri
         const plakaVal = document.getElementById('v-plaka-input').value.toUpperCase();
         if(plakaVal) {
             updateData.plaka = plakaVal;
@@ -234,7 +241,6 @@
         location.reload();
     };
 
-    // QR'ı Servise Tanımlama (Aktivasyon)
     document.getElementById('btn-assign').onclick = async () => {
         const user = document.getElementById('u-name').value;
         const pass = document.getElementById('u-pass').value;
