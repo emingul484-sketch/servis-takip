@@ -11,13 +11,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
     <style>
-        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; --danger: #ef4444; --success: #10b981; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--dark); }
         
         .controls { 
             background: white; padding: 25px; border-radius: 20px; 
             max-width: 900px; margin: 0 auto 30px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border: 1px solid #f1f5f9;
         }
         
         .grid-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
@@ -25,17 +26,22 @@
         select, input { width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 10px; font-family: inherit; box-sizing: border-box; }
 
         .btn-group { display: flex; gap: 10px; }
-        .btn-generate { flex: 2; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; }
-        .btn-zip { flex: 1; background: #10b981; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; display: none; }
+        .btn-generate { flex: 2; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .btn-generate:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-zip { flex: 1; background: var(--success); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; display: none; transition: 0.3s; }
+        .btn-zip:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-zip:disabled { background: #6b7280; cursor: not-allowed; }
 
         #print-area { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 25px; justify-items: center;
+            gap: 25px; justify-items: center; min-height: 200px;
         }
 
+        /* Sticker Tasarımları */
         .sticker {
             width: 180px; padding: 20px; border-radius: 20px; text-align: center;
             position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px;
+            box-sizing: border-box;
         }
         
         .theme-white { background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; }
@@ -43,16 +49,16 @@
         .theme-blue { background: #2563eb; color: #ffffff; }
         .theme-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #000; }
 
-        .sticker-logo { width: 45px; height: 45px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; background: white; }
+        .sticker-logo { width: 45px; height: 45px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; background: white; padding: 2px; }
         .sticker-header { font-size: 11px; font-weight: 800; margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .qr-wrapper { background: white; padding: 10px; display: inline-block; border-radius: 12px; }
-        /* QR kodun boş çıkmaması için canvas'ı görünür tutuyoruz */
+        .qr-wrapper { background: white; padding: 10px; display: inline-block; border-radius: 12px; min-width: 130px; min-height: 130px; }
         .qr-wrapper canvas { display: block !important; } 
         
         .sticker-footer { margin-top: 10px; font-size: 10px; font-weight: 700; }
         .sticker-id { font-size: 8px; opacity: 0.5; margin-top: 5px; }
         
-        .download-btn { margin-top: 15px; font-size: 10px; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; background: rgba(0,0,0,0.1); color: inherit; }
+        .download-btn { margin-top: 15px; font-size: 10px; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; background: rgba(0,0,0,0.15); color: inherit; transition: 0.2s; }
+        .download-btn:hover { background: rgba(0,0,0,0.25); }
 
         @media print { .controls, .download-btn { display: none; } }
     </style>
@@ -60,11 +66,11 @@
 <body>
 
 <div class="controls">
-    <h2 style="margin:0 0 20px 0;">🚀 Jet Hızında QR Üretici</h2>
+    <h2 style="margin:0 0 20px 0; font-weight: 800;">🚀 Jet Hızında QR Üretici</h2>
     <div class="grid-inputs">
         <div>
             <label>Bayi Seçin</label>
-            <select id="bayi-select"><option value="">Yükleniyor...</option></select>
+            <select id="bayi-select"><option value="">Veriler Yükleniyor...</option></select>
         </div>
         <div>
             <label>Üretilecek Adet</label>
@@ -86,7 +92,11 @@
     </div>
 </div>
 
-<div id="print-area"></div>
+<div id="print-area">
+    <div style="text-align: center; color: #94a3b8; font-size: 14px; margin-top: 50px;">
+        Bayi seçip "Üret" butonuna basın.<br>QR'lar burada belirecektir.
+    </div>
+</div>
 
 <script type="module">
     import { firebaseConfig } from './config.js';
@@ -98,25 +108,36 @@
     let bayiler = {};
 
     async function bayileriYukle() {
-        const snap = await getDocs(collection(db, "servisler"));
         const select = document.getElementById('bayi-select');
-        select.innerHTML = '<option value="">Seçiniz...</option>';
-        snap.forEach(doc => {
-            bayiler[doc.id] = doc.data();
-            select.innerHTML += `<option value="${doc.id}">${doc.data().s_name}</option>`;
-        });
+        try {
+            const snap = await getDocs(collection(db, "servisler"));
+            select.innerHTML = '<option value="">Seçiniz...</option>';
+            snap.forEach(doc => {
+                bayiler[doc.id] = doc.data();
+                select.innerHTML += `<option value="${doc.id}">${doc.data().s_name}</option>`;
+            });
+        } catch (e) {
+            console.error(e);
+            select.innerHTML = '<option value="">Hata Oluştu!</option>';
+        }
     }
 
     window.generateQRs = async () => {
         const bayiId = document.getElementById('bayi-select').value;
-        if(!bayiId) return alert("Bayi seçin!");
+        if(!bayiId) return alert("Lütfen önce bir bayi seçin!");
 
         const count = parseInt(document.getElementById('qr-count').value);
+        if(isNaN(count) || count < 1) return alert("Geçerli bir adet girin!");
+        
         const theme = document.getElementById('theme-select').value;
         const area = document.getElementById('print-area');
-        area.innerHTML = "Üretiliyor, lütfen bekleyin...";
+        
+        // 1. DÜZELTME: Ekranı temizliyoruz (Üst üste binmeyi önler)
+        area.innerHTML = "<p style='grid-column: 1/-1; text-align: center; color: var(--accent); font-weight:800;'>QR'lar üretiliyor ve Firebase'e kaydediliyor, lütfen bekleyin...</p>";
 
         const generatedIds = [];
+        const bayiName = bayiler[bayiId].s_name.toUpperCase();
+        const bayiLogo = bayiler[bayiId].s_logo || "";
 
         for(let i = 0; i < count; i++) {
             const timestamp = Date.now().toString().slice(-6);
@@ -124,23 +145,23 @@
             const uniqueID = `${bayiId}-${timestamp}${i}${random}`;
             generatedIds.push(uniqueID);
             
-            const targetURL = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${uniqueID}`;
-            
+            // Firebase'e kaydet (Sorgusuz direkt yaz)
             await setDoc(doc(db, "uretilmis_qrlar", uniqueID), { 
                 bayi: bayiId, 
-                servis_id: bayiId, // Bayi paneline düşmesi için gerekli
+                servis_id: bayiId,
                 tarih: new Date().toISOString() 
             });
         }
 
-        area.innerHTML = "";
+        // 2. DÜZELTME: Firebase kayıtları bitince ekrana basıyoruz
+        area.innerHTML = ""; 
         for(let id of generatedIds) {
             const sticker = document.createElement('div');
             sticker.className = `sticker ${theme}`;
             sticker.id = `stk-${id}`;
             sticker.innerHTML = `
-                ${bayiler[bayiId].s_logo ? `<img src="${bayiler[bayiId].s_logo}" class="sticker-logo">` : ''}
-                <div class="sticker-header">${bayiler[bayiId].s_name.toUpperCase()}</div>
+                ${bayiLogo ? `<img src="${bayiLogo}" class="sticker-logo">` : ''}
+                <div class="sticker-header">${bayiName}</div>
                 <div class="qr-wrapper" id="qr-${id}"></div>
                 <div class="sticker-footer">DİJİTAL SERVİS KARTI</div>
                 <div class="sticker-id">ID: ${id}</div>
@@ -148,11 +169,13 @@
             `;
             area.appendChild(sticker);
 
-            // QR KOD OLUŞTURMA
+            // Gelişmiş QR Oluşturma (H seviyesi hata telafisi)
             new QRCode(document.getElementById(`qr-${id}`), {
                 text: `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${id}`,
                 width: 130,
                 height: 130,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
                 correctLevel: QRCode.CorrectLevel.H
             });
         }
@@ -163,10 +186,10 @@
     window.downloadSticker = async (divId, name) => {
         const element = document.getElementById(divId);
         const btn = element.querySelector('.download-btn');
-        btn.style.visibility = "hidden"; // Display none yerine visibility kullanmak kaymayı önler
+        btn.style.visibility = "hidden";
 
-        // Kısa bir bekleme ekleyerek QR'ın render olduğundan emin oluyoruz
-        await new Promise(r => setTimeout(r, 300));
+        // 3. DÜZELTME: Render süresini garantiye alıyoruz
+        await new Promise(r => setTimeout(r, 400));
 
         const canvas = await html2canvas(element, { 
             useCORS: true, 
@@ -175,10 +198,12 @@
             backgroundColor: null
         });
 
-        const link = document.createElement('a');
-        link.download = `QR-${name}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
+        if (confirm("Görsel indiriliyor, onaylıyor musunuz?")) {
+            const link = document.createElement('a');
+            link.download = `QR-${name}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        }
         btn.style.visibility = "visible";
     };
 
@@ -187,7 +212,10 @@
         const zip = new JSZip();
         const stickers = document.querySelectorAll('.sticker');
         const zipBtn = document.getElementById('zip-btn');
+        const originalText = zipBtn.innerText;
         
+        if (stickers.length === 0) return alert("Önce QR üretmelisiniz.");
+
         zipBtn.innerText = "HAZIRLANIYOR...";
         zipBtn.disabled = true;
 
@@ -198,8 +226,8 @@
             
             btn.style.visibility = "hidden";
             
-            // Render için bekleme
-            await new Promise(r => setTimeout(r, 200));
+            // Her birinin render olması için bekleme
+            await new Promise(r => setTimeout(r, 250));
 
             const canvas = await html2canvas(element, { useCORS: true, scale: 2 });
             const imgData = canvas.toDataURL("image/png").split(',')[1];
@@ -212,7 +240,7 @@
         const content = await zip.generateAsync({type:"blob"});
         saveAs(content, `OtoNabiz-QR-Paketi.zip`);
         
-        zipBtn.innerText = "TOPLU İNDİR (ZIP)";
+        zipBtn.innerText = originalText;
         zipBtn.disabled = false;
     };
 
