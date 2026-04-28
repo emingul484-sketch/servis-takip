@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oto Nabız | Profesyonel QR Üretim</title>
+    <title>Oto Nabız | Tam Otomatik QR Üretim</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; --danger: #ef4444; }
+        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
         
         .controls { 
@@ -17,15 +17,14 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.05);
         }
         
-        .grid-inputs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         label { display: block; font-weight: 800; font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
         select, input { width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 10px; font-family: inherit; box-sizing: border-box; }
 
         .btn-generate { 
             width: 100%; background: var(--accent); color: white; border: none; 
-            padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s;
+            padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; 
         }
-        .btn-generate:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
         #print-area { 
             display: grid; 
@@ -34,11 +33,9 @@
             justify-items: center;
         }
 
-        /* Renkli Sticker Temaları */
         .sticker {
             width: 180px; padding: 20px; border-radius: 20px; text-align: center;
-            position: relative; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
+            position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 10px;
         }
         
         .theme-white { background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; }
@@ -47,15 +44,12 @@
         .theme-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #000; }
 
         .sticker-logo { width: 45px; height: 45px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; background: white; padding: 2px; }
-        .sticker-header { font-size: 11px; font-weight: 800; margin-bottom: 10px; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .sticker-header { font-size: 11px; font-weight: 800; margin-bottom: 10px; }
         .qr-wrapper { background: white; padding: 10px; display: inline-block; border-radius: 12px; }
-        .sticker-footer { margin-top: 10px; font-size: 10px; font-weight: 700; opacity: 0.9; }
+        .sticker-footer { margin-top: 10px; font-size: 10px; font-weight: 700; }
         .sticker-id { font-size: 8px; opacity: 0.5; margin-top: 5px; }
         
-        .download-btn {
-            margin-top: 15px; font-size: 10px; background: rgba(0,0,0,0.15); color: inherit;
-            border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 700;
-        }
+        .download-btn { margin-top: 15px; font-size: 10px; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 700; background: rgba(0,0,0,0.1); color: inherit; }
 
         @media print { .controls, .download-btn { display: none; } }
     </style>
@@ -63,19 +57,15 @@
 <body>
 
 <div class="controls">
-    <h2 style="margin-top:0; font-weight: 800; color: var(--dark);">🚀 Profesyonel Sticker Üretici</h2>
+    <h2 style="margin:0 0 20px 0;">🚀 Akıllı QR Üretici</h2>
     <div class="grid-inputs">
         <div>
             <label>Bayi Seçin</label>
-            <select id="bayi-select"><option value="">Veriler Yükleniyor...</option></select>
+            <select id="bayi-select"><option value="">Yükleniyor...</option></select>
         </div>
         <div>
-            <label>Adet</label>
+            <label>Üretilecek Adet</label>
             <input type="number" id="qr-count" value="10" min="1">
-        </div>
-        <div>
-            <label>Başlangıç Sayısı (ID)</label>
-            <input type="number" id="start-no" value="100" min="1">
         </div>
         <div>
             <label>Renk Teması</label>
@@ -87,7 +77,7 @@
             </select>
         </div>
     </div>
-    <button class="btn-generate" onclick="generateQRs()">KONTROL ET VE SİSTEME İŞLE</button>
+    <button class="btn-generate" onclick="generateQRs()">SON KALINAN YERDEN ÜRETMEYE BAŞLA</button>
 </div>
 
 <div id="print-area"></div>
@@ -95,7 +85,7 @@
 <script type="module">
     import { firebaseConfig } from './config.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, setDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -113,80 +103,66 @@
 
     window.generateQRs = async () => {
         const bayiId = document.getElementById('bayi-select').value;
-        if(!bayiId) return alert("Lütfen bir bayi seçin!");
+        if(!bayiId) return alert("Önce bayi seçin!");
 
         const count = parseInt(document.getElementById('qr-count').value);
-        const startNo = parseInt(document.getElementById('start-no').value);
         const theme = document.getElementById('theme-select').value;
         const area = document.getElementById('print-area');
+        area.innerHTML = "<p>Sıradaki ID'ler hesaplanıyor...</p>";
 
-        if(isNaN(startNo) || startNo < 1) return alert("Lütfen geçerli bir başlangıç sayısı girin!");
-
-        area.innerHTML = "<p style='font-weight:800; color:var(--accent)'>Veritabanı kontrol ediliyor, lütfen bekleyin...</p>";
-
-        // 1. ÖNCE TÜM ARALIĞI KONTROL ET (ÇAKIŞMAYI ÖNLEMEK İÇİN)
-        for(let i = 0; i < count; i++) {
-            const currentNo = startNo + i;
-            const uniqueID = `${bayiId}-${currentNo}`;
-            const docRef = doc(db, "uretilmis_qrlar", uniqueID);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists()) {
-                alert(`HATA: "${uniqueID}" ID'si daha önce bu bayi için üretilmiş!\nLütfen "Başlangıç Sayısı" değerini büyütün.`);
-                area.innerHTML = "<p style='color:var(--danger); font-weight:800;'>Hata: Çakışan ID bulundu.</p>";
-                return;
-            }
-        }
-
-        // 2. ÇAKIŞMA YOKSA OLUŞTURMAYA BAŞLA
-        area.innerHTML = "";
-        for(let i = 0; i < count; i++) {
-            const currentNo = startNo + i;
-            const uniqueID = `${bayiId}-${currentNo}`;
-            const targetURL = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${uniqueID}`;
+        try {
+            // 1. SON KALINAN NUMARAYI BUL
+            const qrRef = collection(db, "uretilmis_qrlar");
+            const q = query(qrRef, where("bayi", "==", bayiId), orderBy("sayi_id", "desc"), limit(1));
+            const querySnap = await getDocs(q);
             
-            // Firebase'e kaydet (Bi daha üretilmesin diye)
-            await setDoc(doc(db, "uretilmis_qrlar", uniqueID), { 
-                bayi: bayiId, 
-                tarih: new Date().toISOString(),
-                sayi_id: currentNo 
-            });
+            let startNo = 100; // Eğer bayi yeniyse 100'den başla
+            if (!querySnap.empty) {
+                startNo = querySnap.docs[0].data().sayi_id + 1;
+            }
 
-            const sticker = document.createElement('div');
-            sticker.className = `sticker ${theme}`;
-            sticker.id = `stk-${uniqueID}`;
-            sticker.innerHTML = `
-                ${bayiler[bayiId].s_logo ? `<img src="${bayiler[bayiId].s_logo}" class="sticker-logo">` : ''}
-                <div class="sticker-header">${bayiler[bayiId].s_name.toUpperCase()}</div>
-                <div class="qr-wrapper" id="qr-${uniqueID}"></div>
-                <div class="sticker-footer">DİJİTAL SERVİS KARTI</div>
-                <div class="sticker-id">ID: ${uniqueID}</div>
-                <button class="download-btn" onclick="downloadSticker('stk-${uniqueID}', '${uniqueID}')"><i class="fas fa-download"></i> PNG İNDİR</button>
-            `;
-            area.appendChild(sticker);
+            // 2. ÜRETMEYE BAŞLA
+            area.innerHTML = "";
+            for(let i = 0; i < count; i++) {
+                const currentNo = startNo + i;
+                const uniqueID = `${bayiId}-${currentNo}`;
+                const targetURL = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${uniqueID}`;
+                
+                await setDoc(doc(db, "uretilmis_qrlar", uniqueID), { 
+                    bayi: bayiId, 
+                    sayi_id: currentNo,
+                    tarih: new Date().toISOString() 
+                });
 
-            // Gelişmiş QR Oluşturma (Hata Payı Yüksek - H Seviyesi)
-            new QRCode(document.getElementById(`qr-${uniqueID}`), {
-                text: targetURL,
-                width: 130,
-                height: 130,
-                colorDark : "#000000",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
+                const sticker = document.createElement('div');
+                sticker.className = `sticker ${theme}`;
+                sticker.id = `stk-${uniqueID}`;
+                sticker.innerHTML = `
+                    ${bayiler[bayiId].s_logo ? `<img src="${bayiler[bayiId].s_logo}" class="sticker-logo">` : ''}
+                    <div class="sticker-header">${bayiler[bayiId].s_name.toUpperCase()}</div>
+                    <div class="qr-wrapper" id="qr-${uniqueID}"></div>
+                    <div class="sticker-footer">DİJİTAL SERVİS KARTI</div>
+                    <div class="sticker-id">ID: ${uniqueID}</div>
+                    <button class="download-btn" onclick="downloadSticker('stk-${uniqueID}', '${uniqueID}')">PNG İNDİR</button>
+                `;
+                area.appendChild(sticker);
+
+                new QRCode(document.getElementById(`qr-${uniqueID}`), {
+                    text: targetURL, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.H
+                });
+            }
+        } catch (e) {
+            console.error(e);
+            alert("ID hesaplanırken bir hata oluştu. Lütfen koleksiyonun indexlendiğinden emin olun.");
         }
     }
 
     window.downloadSticker = (divId, name) => {
         const btn = document.querySelector(`#${divId} .download-btn`);
-        btn.style.display = "none"; 
-        html2canvas(document.getElementById(divId), { 
-            useCORS: true, 
-            scale: 3,
-            backgroundColor: null 
-        }).then(canvas => {
+        btn.style.display = "none";
+        html2canvas(document.getElementById(divId), { useCORS: true, scale: 3 }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `OtoNabiz-QR-${name}.png`;
+            link.download = `QR-${name}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
             btn.style.display = "block";
@@ -195,8 +171,5 @@
 
     bayileriYukle();
 </script>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 </body>
 </html>
