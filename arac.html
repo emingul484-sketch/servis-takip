@@ -14,7 +14,7 @@
         
         .header-area { text-align: center; padding: 10px 0; }
         .s-logo { width: 85px; height: 85px; border-radius: 20px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 3px solid white; margin-bottom: 10px; }
-        .social-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; }
+        .social-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; flex-wrap: wrap; }
         .s-btn { width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; font-size: 20px; transition: 0.3s; }
         .bg-wp { background: #22c55e; } .bg-insta { background: #e4405f; } .bg-map { background: #ef4444; } .bg-call { background: #2563eb; }
         .s-btn:active { transform: scale(0.9); }
@@ -140,7 +140,6 @@
             return;
         }
 
-        // DÜZELTME: Koleksiyon ismini üretici paneli ile eşitledik
         currentQRRef = doc(db, "uretilmis_qrlar", qrID);
         const qrSnap = await getDoc(currentQRRef);
         
@@ -174,16 +173,20 @@
         const social = document.getElementById('social-container');
         social.innerHTML = "";
         
+        // Arama ve WhatsApp Butonları
         if(s.s_tel) {
             social.innerHTML += `<a href="tel:${s.s_tel}" class="s-btn bg-call"><i class="fas fa-phone"></i></a>`;
             social.innerHTML += `<a href="https://wa.me/90${s.s_tel.replace(/\D/g,'')}" target="_blank" class="s-btn bg-wp"><i class="fab fa-whatsapp"></i></a>`;
         }
+        
+        // Instagram Butonu
         if(s.s_insta) {
             social.innerHTML += `<a href="https://instagram.com/${s.s_insta}" target="_blank" class="s-btn bg-insta"><i class="fab fa-instagram"></i></a>`;
         }
-        if(s.s_adres) {
-            const mapQuery = encodeURIComponent(s.s_name + " " + s.s_adres);
-            social.innerHTML += `<a href="https://www.google.com/maps/search/?api=1&query=${mapQuery}" target="_blank" class="s-btn bg-map"><i class="fas fa-map-marker-alt"></i></a>`;
+        
+        // KONUM BUTONU (GÜNCELLEDİĞİMİZ KISIM)
+        if(s.s_konum) {
+            social.innerHTML += `<a href="${s.s_konum}" target="_blank" class="s-btn bg-map"><i class="fas fa-map-marker-alt"></i></a>`;
         }
 
         if(qrData.plaka) {
@@ -209,6 +212,7 @@
         }
     }
 
+    // ... Geri kalan buton dinleyicileri (btn-save, btn-assign vb.) senin kodundaki ile aynı
     document.getElementById('btn-open-master').onclick = () => {
         const p = prompt("Servis Şifresini Girin:");
         if(p === masterPass) {
@@ -238,7 +242,6 @@
             })
         };
 
-        // Eğer ilk kez kayıt yapılıyorsa plaka vb. bilgilerini de ekle
         const plakaInput = document.getElementById('v-plaka-input');
         if(plakaInput && plakaInput.value) {
             updateData.plaka = plakaInput.value.toUpperCase();
