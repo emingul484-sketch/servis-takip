@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --accent: #2563eb; --bg: #f4f7fe; --dark: #0f172a; --danger: #ef4444; }
+        :root { --accent: #2563eb; --bg: #f4f7fe; --dark: #0f172a; --danger: #ef4444; --edit: #f59e0b; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 0; }
         #admin-login { background: var(--dark); height: 100vh; display: flex; align-items: center; justify-content: center; position: fixed; width: 100%; z-index: 999; }
         .login-box { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 320px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
@@ -20,14 +20,14 @@
         input, textarea { width: 100%; padding: 10px; border: 2px solid #f1f5f9; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; }
         input:focus { border-color: var(--accent); outline: none; }
         
-        .bayi-card { background: white; padding: 15px; border-radius: 15px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; transition: 0.3s; }
-        .bayi-card:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .bayi-card img { width: 50px; height: 50px; border-radius: 10px; object-fit: cover; background: #f1f5f9; }
+        .bayi-card { background: white; padding: 15px; border-radius: 15px; border: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; transition: 0.3s; }
+        .bayi-card img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; background: #f1f5f9; }
         .bayi-info { flex-grow: 1; }
         .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; }
-        .btn-save:hover { opacity: 0.9; }
+        .btn-edit { background: var(--edit); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; }
         
-        #logo-preview { max-width: 60px; height: 60px; object-fit: cover; margin-top: 5px; display: none; margin: 10px auto; border-radius: 10px; border: 2px solid #f1f5f9; }
+        #logo-preview { max-width: 60px; height: 60px; object-fit: cover; margin: 10px auto; border-radius: 10px; border: 2px solid #f1f5f9; display: none; }
+        .edit-mode { border: 2px solid var(--edit) !important; background: #fffcf0 !important; }
     </style>
 </head>
 <body>
@@ -43,26 +43,26 @@
 
 <div id="panel-content" style="display:none">
     <div class="header">
-        <div style="font-weight: 800; font-size: 18px;"><i class="fas fa-bolt" style="color:var(--accent)"></i> OTO NABIZ <span style="font-weight: 400; opacity: 0.6;">| Yönetim</span></div>
+        <div style="font-weight: 800; font-size: 18px;"><i class="fas fa-bolt" style="color:var(--accent)"></i> OTO NABIZ <span style="font-weight: 400; opacity: 0.6;">| Admin</span></div>
         <button onclick="location.reload()" style="background:none; border:1px solid rgba(255,255,255,0.2); color:white; padding:5px 12px; border-radius:8px; cursor:pointer; font-size:11px;">GÜVENLİ ÇIKIŞ</button>
     </div>
 
     <div class="main">
-        <div class="card">
-            <h3 style="margin:0 0 20px 0;"><i class="fas fa-plus-circle"></i> Bayi Tanımla</h3>
-            <div class="form-group"><label>Servis İsmi (Müşteri Görecek)</label><input type="text" id="s_name" placeholder="Örn: Battalbey Çiğköfte"></div>
+        <div class="card" id="form-card">
+            <h3 id="form-title" style="margin:0 0 20px 0;"><i class="fas fa-plus-circle"></i> Bayi Tanımla</h3>
+            <div class="form-group"><label>Servis İsmi</label><input type="text" id="s_name"></div>
             <div class="form-group" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                <div><label>Kullanıcı ID</label><input type="text" id="s_user" placeholder="kullaniciadi"></div>
-                <div><label>Giriş Şifresi</label><input type="text" id="s_sifre" placeholder="****"></div>
+                <div><label>Kullanıcı ID (Düzenlenemez)</label><input type="text" id="s_user" placeholder="kullaniciadi"></div>
+                <div><label>Giriş Şifresi</label><input type="text" id="s_sifre"></div>
             </div>
-            <div class="form-group"><label>Telefon (WhatsApp ve Arama)</label><input type="text" id="s_tel" placeholder="05xxxxxxxxx"></div>
-            <div class="form-group"><label>Instagram (Sadece Kullanıcı Adı)</label><input type="text" id="s_insta" placeholder="hesapadi"></div>
-            <div class="form-group"><label>Açık Adres (Konum İçin)</label><textarea id="s_adres" rows="2" placeholder="Mahalle, Sokak, No..."></textarea></div>
+            <div class="form-group"><label>Telefon</label><input type="text" id="s_tel"></div>
+            <div class="form-group"><label>Instagram</label><input type="text" id="s_insta"></div>
+            <div class="form-group"><label>Google Harita Konum Linki</label><input type="url" id="s_konum"></div>
             
             <div class="form-group">
                 <label>Servis Logosu</label>
-                <div style="border: 2px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 12px; cursor: pointer; background: #f8fafc;" onclick="document.getElementById('logo-input').click()">
-                    <span id="up-text" style="font-size:12px; font-weight:700; color: #64748b;"><i class="fas fa-cloud-upload-alt"></i> Logo Seç</span>
+                <div style="border: 2px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 12px; cursor: pointer;" onclick="document.getElementById('logo-input').click()">
+                    <span id="up-text" style="font-size:12px; font-weight:700;"><i class="fas fa-cloud-upload-alt"></i> Logo Değiştir</span>
                     <input type="file" id="logo-input" hidden accept="image/*" onchange="handleLogoUpload(this)">
                     <img id="logo-preview">
                 </div>
@@ -70,6 +70,7 @@
             </div>
             
             <button class="btn-save" id="save-btn" onclick="bayiKaydet()">BAYİYİ SİSTEME EKLE</button>
+            <button id="cancel-edit" style="display:none; width:100%; background:none; border:none; color:var(--danger); margin-top:10px; font-weight:800; cursor:pointer;" onclick="resetForm()">İptal Et</button>
         </div>
 
         <div class="card">
@@ -87,14 +88,14 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const IMGBB_API_KEY = "0fd006aeed01a4802808abbfc44990ca";
+    let editMode = false;
 
     window.checkAdminPass = () => {
-        // ŞİFRE GÜNCELLENDİ
         if(document.getElementById('admin-pass-input').value === "eminkaan201151") {
             document.getElementById('admin-login').style.display = 'none';
             document.getElementById('panel-content').style.display = 'block';
             bayileriGetir();
-        } else { alert("Hatalı Şifre!"); }
+        } else { alert("Hatalı!"); }
     };
 
     window.handleLogoUpload = async (input) => {
@@ -110,55 +111,90 @@
                 document.getElementById('logo-preview').style.display = "block";
                 document.getElementById('up-text').style.display = "none";
             }
-        } catch (e) { 
-            alert("Logo yüklenemedi!"); 
-            document.getElementById('up-text').innerText = "Tekrar Dene";
-        }
+        } catch (e) { alert("Yüklenemedi!"); }
     };
 
     window.bayiKaydet = async () => {
         const user = document.getElementById('s_user').value.trim().toLowerCase();
-        if(!user) return alert("Lütfen bir ID girin!");
+        if(!user) return alert("ID gerekli!");
 
         const data = {
             s_name: document.getElementById('s_name').value,
             s_sifre: document.getElementById('s_sifre').value,
             s_tel: document.getElementById('s_tel').value,
             s_insta: document.getElementById('s_insta').value,
-            s_adres: document.getElementById('s_adres').value,
+            s_konum: document.getElementById('s_konum').value,
             s_logo: document.getElementById('s_logo_url').value
         };
 
         try {
             await setDoc(doc(db, "servisler", user), data);
-            alert("Bayi başarıyla kaydedildi!");
-            document.querySelectorAll('input').forEach(i => i.value = "");
-            document.getElementById('logo-preview').style.display = "none";
-            document.getElementById('up-text').style.display = "block";
+            alert(editMode ? "Bilgiler güncellendi!" : "Yeni bayi eklendi!");
+            resetForm();
             bayileriGetir();
-        } catch (e) { alert("Hata oluştu!"); }
+        } catch (e) { alert("Hata!"); }
+    };
+
+    window.duzenleHazirlik = (id, dataJson) => {
+        const data = JSON.parse(decodeURIComponent(dataJson));
+        editMode = true;
+        
+        // Formu doldur
+        document.getElementById('s_user').value = id;
+        document.getElementById('s_user').disabled = true; // ID değişemez
+        document.getElementById('s_name').value = data.s_name;
+        document.getElementById('s_sifre').value = data.s_sifre;
+        document.getElementById('s_tel').value = data.s_tel;
+        document.getElementById('s_insta').value = data.s_insta;
+        document.getElementById('s_konum').value = data.s_konum || "";
+        document.getElementById('s_logo_url').value = data.s_logo;
+        
+        if(data.s_logo) {
+            document.getElementById('logo-preview').src = data.s_logo;
+            document.getElementById('logo-preview').style.display = "block";
+            document.getElementById('up-text').style.display = "none";
+        }
+
+        // Görsel efektler
+        document.getElementById('form-card').classList.add('edit-mode');
+        document.getElementById('form-title').innerHTML = `<i class="fas fa-edit"></i> Profili Düzenle`;
+        document.getElementById('save-btn').innerText = "BİLGİLERİ GÜNCELLE";
+        document.getElementById('save-btn').style.background = "var(--edit)";
+        document.getElementById('cancel-edit').style.display = "block";
+        window.scrollTo(0,0);
+    };
+
+    window.resetForm = () => {
+        editMode = false;
+        document.getElementById('s_user').disabled = false;
+        document.querySelectorAll('.card input').forEach(i => i.value = "");
+        document.getElementById('logo-preview').style.display = "none";
+        document.getElementById('up-text').style.display = "block";
+        document.getElementById('form-card').classList.remove('edit-mode');
+        document.getElementById('form-title').innerHTML = `<i class="fas fa-plus-circle"></i> Bayi Tanımla`;
+        document.getElementById('save-btn').innerText = "BAYİYİ SİSTEME EKLE";
+        document.getElementById('save-btn').style.background = "var(--accent)";
+        document.getElementById('cancel-edit').style.display = "none";
     };
 
     async function bayileriGetir() {
         const container = document.getElementById('bayi-listesi'); 
-        container.innerHTML = "<p style='font-size:13px; color:#64748b;'>Yükleniyor...</p>";
-        
         const snap = await getDocs(collection(db, "servisler"));
         container.innerHTML = "";
         
-        if(snap.empty) container.innerHTML = "Henüz bayi eklenmemiş.";
-
         snap.forEach(d => {
             const b = d.data();
-            // SİLME BUTONU KALDIRILDI
+            const bJson = encodeURIComponent(JSON.stringify(b));
             container.innerHTML += `
                 <div class="bayi-card">
                     <img src="${b.s_logo || 'https://via.placeholder.com/50'}">
                     <div class="bayi-info">
-                        <div style="font-weight:800; font-size:14px; color:var(--dark)">${b.s_name}</div>
-                        <div style="font-size:11px; color:#64748b">ID: <b>${d.id}</b> | Şifre: ${b.s_sifre}</div>
-                        <div style="font-size:11px; color:#64748b">Tel: ${b.s_tel}</div>
+                        <div style="font-weight:800; font-size:13px;">${b.s_name}</div>
+                        <div style="font-size:10px; color:#64748b">ID: ${d.id}</div>
                     </div>
+                    <button class="btn-edit" onclick="duzenleHazirlik('${d.id}', '${bJson}')">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </button>
                 </div>`;
         });
     }
