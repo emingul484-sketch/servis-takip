@@ -7,6 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
     <style>
         :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
@@ -21,10 +24,9 @@
         label { display: block; font-weight: 800; font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
         select, input { width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 10px; font-family: inherit; box-sizing: border-box; }
 
-        .btn-generate { 
-            width: 100%; background: var(--accent); color: white; border: none; 
-            padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; 
-        }
+        .btn-group { display: flex; gap: 10px; }
+        .btn-generate { flex: 2; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .btn-zip { flex: 1; background: #10b981; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; display: none; }
 
         #print-area { 
             display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
@@ -42,8 +44,11 @@
         .theme-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #000; }
 
         .sticker-logo { width: 45px; height: 45px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; background: white; }
-        .sticker-header { font-size: 11px; font-weight: 800; margin-bottom: 10px; }
+        .sticker-header { font-size: 11px; font-weight: 800; margin-bottom: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .qr-wrapper { background: white; padding: 10px; display: inline-block; border-radius: 12px; }
+        /* QR kodun boş çıkmaması için canvas'ı görünür tutuyoruz */
+        .qr-wrapper canvas { display: block !important; } 
+        
         .sticker-footer { margin-top: 10px; font-size: 10px; font-weight: 700; }
         .sticker-id { font-size: 8px; opacity: 0.5; margin-top: 5px; }
         
@@ -75,7 +80,10 @@
             </select>
         </div>
     </div>
-    <button class="btn-generate" onclick="generateQRs()">ANINDA QR ÜRET</button>
+    <div class="btn-group">
+        <button class="btn-generate" onclick="generateQRs()">ANINDA QR ÜRET</button>
+        <button id="zip-btn" class="btn-zip" onclick="downloadAllAsZip()">TOPLU İNDİR (ZIP)</button>
+    </div>
 </div>
 
 <div id="print-area"></div>
@@ -106,52 +114,107 @@
         const count = parseInt(document.getElementById('qr-count').value);
         const theme = document.getElementById('theme-select').value;
         const area = document.getElementById('print-area');
-        area.innerHTML = "";
+        area.innerHTML = "Üretiliyor, lütfen bekleyin...";
+
+        const generatedIds = [];
 
         for(let i = 0; i < count; i++) {
-            // BENZERSİZ ID OLUŞTURMA: BayiID + ZamanDamgası + Random
-            const timestamp = Date.now().toString().slice(-6); // Son 6 hanesi yeterli
-            const random = Math.floor(Math.random() * 900) + 100; // 100-999 arası random
+            const timestamp = Date.now().toString().slice(-6);
+            const random = Math.floor(Math.random() * 900) + 100;
             const uniqueID = `${bayiId}-${timestamp}${i}${random}`;
+            generatedIds.push(uniqueID);
             
             const targetURL = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${uniqueID}`;
             
-            // Firebase'e kaydet (Sorgusuz sualsiz direkt yazar)
             await setDoc(doc(db, "uretilmis_qrlar", uniqueID), { 
                 bayi: bayiId, 
+                servis_id: bayiId, // Bayi paneline düşmesi için gerekli
                 tarih: new Date().toISOString() 
             });
+        }
 
+        area.innerHTML = "";
+        for(let id of generatedIds) {
             const sticker = document.createElement('div');
             sticker.className = `sticker ${theme}`;
-            sticker.id = `stk-${uniqueID}`;
+            sticker.id = `stk-${id}`;
             sticker.innerHTML = `
                 ${bayiler[bayiId].s_logo ? `<img src="${bayiler[bayiId].s_logo}" class="sticker-logo">` : ''}
                 <div class="sticker-header">${bayiler[bayiId].s_name.toUpperCase()}</div>
-                <div class="qr-wrapper" id="qr-${uniqueID}"></div>
+                <div class="qr-wrapper" id="qr-${id}"></div>
                 <div class="sticker-footer">DİJİTAL SERVİS KARTI</div>
-                <div class="sticker-id">ID: ${uniqueID}</div>
-                <button class="download-btn" onclick="downloadSticker('stk-${uniqueID}', '${uniqueID}')">PNG İNDİR</button>
+                <div class="sticker-id">ID: ${id}</div>
+                <button class="download-btn" onclick="downloadSticker('stk-${id}', '${id}')">PNG İNDİR</button>
             `;
             area.appendChild(sticker);
 
-            new QRCode(document.getElementById(`qr-${uniqueID}`), {
-                text: targetURL, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.H
+            // QR KOD OLUŞTURMA
+            new QRCode(document.getElementById(`qr-${id}`), {
+                text: `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${id}`,
+                width: 130,
+                height: 130,
+                correctLevel: QRCode.CorrectLevel.H
             });
         }
-    }
+        document.getElementById('zip-btn').style.display = "block";
+    };
 
-    window.downloadSticker = (divId, name) => {
-        const btn = document.querySelector(`#${divId} .download-btn`);
-        btn.style.display = "none";
-        html2canvas(document.getElementById(divId), { useCORS: true, scale: 3 }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `QR-${name}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-            btn.style.display = "block";
+    // TEKİL İNDİRME (BOŞ ÇIKMA SORUNU GİDERİLDİ)
+    window.downloadSticker = async (divId, name) => {
+        const element = document.getElementById(divId);
+        const btn = element.querySelector('.download-btn');
+        btn.style.visibility = "hidden"; // Display none yerine visibility kullanmak kaymayı önler
+
+        // Kısa bir bekleme ekleyerek QR'ın render olduğundan emin oluyoruz
+        await new Promise(r => setTimeout(r, 300));
+
+        const canvas = await html2canvas(element, { 
+            useCORS: true, 
+            scale: 3,
+            logging: false,
+            backgroundColor: null
         });
-    }
+
+        const link = document.createElement('a');
+        link.download = `QR-${name}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+        btn.style.visibility = "visible";
+    };
+
+    // TOPLU İNDİRME (ZIP)
+    window.downloadAllAsZip = async () => {
+        const zip = new JSZip();
+        const stickers = document.querySelectorAll('.sticker');
+        const zipBtn = document.getElementById('zip-btn');
+        
+        zipBtn.innerText = "HAZIRLANIYOR...";
+        zipBtn.disabled = true;
+
+        for (let i = 0; i < stickers.length; i++) {
+            const element = stickers[i];
+            const id = element.id.replace('stk-', '');
+            const btn = element.querySelector('.download-btn');
+            
+            btn.style.visibility = "hidden";
+            
+            // Render için bekleme
+            await new Promise(r => setTimeout(r, 200));
+
+            const canvas = await html2canvas(element, { useCORS: true, scale: 2 });
+            const imgData = canvas.toDataURL("image/png").split(',')[1];
+            
+            zip.file(`QR-${id}.png`, imgData, {base64: true});
+            btn.style.visibility = "visible";
+            zipBtn.innerText = `%${Math.round(((i+1)/stickers.length)*100)}`;
+        }
+
+        const content = await zip.generateAsync({type:"blob"});
+        saveAs(content, `OtoNabiz-QR-Paketi.zip`);
+        
+        zipBtn.innerText = "TOPLU İNDİR (ZIP)";
+        zipBtn.disabled = false;
+    };
 
     bayileriYukle();
 </script>
