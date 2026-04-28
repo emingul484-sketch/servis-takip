@@ -12,7 +12,6 @@
         .container { max-width: 500px; margin: 0 auto; padding: 15px; box-sizing: border-box; }
         .card { background: white; padding: 20px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); margin-bottom: 15px; border: 1px solid #f1f5f9; }
         
-        /* Dükkan Header */
         .header-area { text-align: center; padding: 10px 0; }
         .s-logo { width: 85px; height: 85px; border-radius: 20px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border: 3px solid white; margin-bottom: 10px; }
         .social-bar { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; }
@@ -20,17 +19,14 @@
         .bg-wp { background: #22c55e; } .bg-insta { background: #e4405f; } .bg-map { background: #ef4444; } .bg-call { background: #2563eb; }
         .s-btn:active { transform: scale(0.9); }
 
-        /* Plaka Alanı */
         .plaka-header { background: var(--dark); color: white; padding: 20px; border-radius: 20px; text-align: center; margin-bottom: 20px; }
         .plaka-num { font-size: 32px; font-weight: 800; letter-spacing: 2px; display: block; }
         
-        /* Hızlı Seçim Butonları */
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0; }
         .opt-item { background: #f1f5f9; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: 2.5px solid transparent; }
         .opt-item input { display: none; }
         .opt-item.active { background: #eff6ff; border-color: var(--accent); color: var(--accent); }
 
-        /* Servis Listesi */
         .history-item { border-left: 4px solid var(--accent); padding: 15px; margin-bottom: 15px; position: relative; }
         .h-date { font-weight: 800; color: var(--accent); font-size: 14px; }
         .tag { background: #f1f5f9; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 800; margin-right: 4px; display: inline-block; margin-top: 5px; }
@@ -40,15 +36,19 @@
         .btn-blue { background: var(--accent); color: white; }
         .btn-black { background: var(--dark); color: white; }
 
-        #master-form, #customer-view, #login-form { display: none; }
+        #master-form, #customer-view, #login-form, #app-content { display: none; }
+        .loading-screen { text-align: center; padding-top: 50px; font-weight: 800; color: var(--accent); }
     </style>
 </head>
 <body>
+
+<div id="loader" class="loading-screen">Sistem Kontrol Ediliyor...</div>
 
 <div class="container">
     <div id="login-form" class="card" style="text-align:center; margin-top:50px;">
         <i class="fas fa-qrcode" style="font-size:40px; color:var(--accent); margin-bottom:15px"></i>
         <h2>QR Aktif Et</h2>
+        <p style="font-size:13px; color:#64748b; margin-bottom:20px;">Bu QR henüz bir servise atanmamış.</p>
         <input type="text" id="u-name" placeholder="Servis Kullanıcı Adı">
         <input type="password" id="u-pass" placeholder="Şifre">
         <button id="btn-assign" class="btn-main btn-blue">SERVİSE BAĞLA</button>
@@ -58,8 +58,7 @@
         <div class="header-area">
             <img id="d-logo" class="s-logo" src="">
             <h2 id="d-name" style="margin:0; font-size:20px">Yükleniyor...</h2>
-            <div class="social-bar" id="social-container">
-                </div>
+            <div class="social-bar" id="social-container"></div>
         </div>
 
         <div id="customer-view">
@@ -119,7 +118,7 @@
 <script type="module">
     import { firebaseConfig } from './config.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -136,18 +135,28 @@
     });
 
     async function baslat() {
-        if(!qrID) return;
-        const q = query(collection(db, "karekodlar"), where("qr_id", "==", qrID));
-        const snap = await getDocs(q);
+        if(!qrID) {
+            document.getElementById('loader').innerText = "Hata: QR ID bulunamadı.";
+            return;
+        }
+
+        // DÜZELTME: Koleksiyon ismini üretici paneli ile eşitledik
+        currentQRRef = doc(db, "uretilmis_qrlar", qrID);
+        const qrSnap = await getDoc(currentQRRef);
         
-        if(snap.empty) { alert("QR Tanımsız!"); return; }
+        document.getElementById('loader').style.display = 'none';
+
+        if(!qrSnap.exists()) { 
+            alert("QR Kod sistemde kayıtlı değil!"); 
+            return; 
+        }
         
-        currentQRRef = snap.docs[0].ref;
-        const qrData = snap.docs[0].data();
+        const qrData = qrSnap.data();
 
         if(!qrData.servis_id) {
             document.getElementById('login-form').style.display = 'block';
         } else {
+            document.getElementById('app-content').style.display = 'block';
             arayuzYukle(qrData);
         }
     }
@@ -165,13 +174,12 @@
         const social = document.getElementById('social-container');
         social.innerHTML = "";
         
-        // SOSYAL BUTONLAR - PANELDEKİ İSİMLERLE EŞLEŞTİRİLDİ
         if(s.s_tel) {
             social.innerHTML += `<a href="tel:${s.s_tel}" class="s-btn bg-call"><i class="fas fa-phone"></i></a>`;
-            social.innerHTML += `<a href="https://wa.me/90${s.s_tel.replace(/\D/g,'')}" class="s-btn bg-wp"><i class="fab fa-whatsapp"></i></a>`;
+            social.innerHTML += `<a href="https://wa.me/90${s.s_tel.replace(/\D/g,'')}" target="_blank" class="s-btn bg-wp"><i class="fab fa-whatsapp"></i></a>`;
         }
         if(s.s_insta) {
-            social.innerHTML += `<a href="https://instagram.com/${s.s_insta}" class="s-btn bg-insta"><i class="fab fa-instagram"></i></a>`;
+            social.innerHTML += `<a href="https://instagram.com/${s.s_insta}" target="_blank" class="s-btn bg-insta"><i class="fab fa-instagram"></i></a>`;
         }
         if(s.s_adres) {
             const mapQuery = encodeURIComponent(s.s_name + " " + s.s_adres);
@@ -186,7 +194,7 @@
             
             const list = document.getElementById('history-list');
             list.innerHTML = "";
-            (qrData.servisler || []).reverse().forEach(ser => {
+            (qrData.servisler || []).slice().reverse().forEach(ser => {
                 list.innerHTML += `
                     <div class="card history-item">
                         <div class="h-date">${ser.tarih}</div>
@@ -230,9 +238,10 @@
             })
         };
 
-        const plakaVal = document.getElementById('v-plaka-input').value.toUpperCase();
-        if(plakaVal) {
-            updateData.plaka = plakaVal;
+        // Eğer ilk kez kayıt yapılıyorsa plaka vb. bilgilerini de ekle
+        const plakaInput = document.getElementById('v-plaka-input');
+        if(plakaInput && plakaInput.value) {
+            updateData.plaka = plakaInput.value.toUpperCase();
             updateData.model = document.getElementById('v-model-input').value;
             updateData.musteri_tel = document.getElementById('v-phone-input').value;
         }
@@ -245,10 +254,13 @@
         const user = document.getElementById('u-name').value;
         const pass = document.getElementById('u-pass').value;
         const sSnap = await getDoc(doc(db, "servisler", user));
+        
         if(sSnap.exists() && sSnap.data().s_sifre === pass) {
             await updateDoc(currentQRRef, { servis_id: user });
             location.reload();
-        } else { alert("Hatalı Kullanıcı veya Şifre!"); }
+        } else { 
+            alert("Hatalı Kullanıcı veya Şifre!"); 
+        }
     };
 
     baslat();
