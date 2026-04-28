@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oto Nabız | Tam Otomatik QR Üretim</title>
+    <title>Oto Nabız | Kesintisiz QR Üretim</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -27,10 +27,8 @@
         }
 
         #print-area { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 25px; 
-            justify-items: center;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+            gap: 25px; justify-items: center;
         }
 
         .sticker {
@@ -43,7 +41,7 @@
         .theme-blue { background: #2563eb; color: #ffffff; }
         .theme-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #000; }
 
-        .sticker-logo { width: 45px; height: 45px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; background: white; padding: 2px; }
+        .sticker-logo { width: 45px; height: 45px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; background: white; }
         .sticker-header { font-size: 11px; font-weight: 800; margin-bottom: 10px; }
         .qr-wrapper { background: white; padding: 10px; display: inline-block; border-radius: 12px; }
         .sticker-footer { margin-top: 10px; font-size: 10px; font-weight: 700; }
@@ -57,7 +55,7 @@
 <body>
 
 <div class="controls">
-    <h2 style="margin:0 0 20px 0;">🚀 Akıllı QR Üretici</h2>
+    <h2 style="margin:0 0 20px 0;">🚀 Jet Hızında QR Üretici</h2>
     <div class="grid-inputs">
         <div>
             <label>Bayi Seçin</label>
@@ -77,7 +75,7 @@
             </select>
         </div>
     </div>
-    <button class="btn-generate" onclick="generateQRs()">SON KALINAN YERDEN ÜRETMEYE BAŞLA</button>
+    <button class="btn-generate" onclick="generateQRs()">ANINDA QR ÜRET</button>
 </div>
 
 <div id="print-area"></div>
@@ -85,7 +83,7 @@
 <script type="module">
     import { firebaseConfig } from './config.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, doc, setDoc, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -103,57 +101,43 @@
 
     window.generateQRs = async () => {
         const bayiId = document.getElementById('bayi-select').value;
-        if(!bayiId) return alert("Önce bayi seçin!");
+        if(!bayiId) return alert("Bayi seçin!");
 
         const count = parseInt(document.getElementById('qr-count').value);
         const theme = document.getElementById('theme-select').value;
         const area = document.getElementById('print-area');
-        area.innerHTML = "<p>Sıradaki ID'ler hesaplanıyor...</p>";
+        area.innerHTML = "";
 
-        try {
-            // 1. SON KALINAN NUMARAYI BUL
-            const qrRef = collection(db, "uretilmis_qrlar");
-            const q = query(qrRef, where("bayi", "==", bayiId), orderBy("sayi_id", "desc"), limit(1));
-            const querySnap = await getDocs(q);
+        for(let i = 0; i < count; i++) {
+            // BENZERSİZ ID OLUŞTURMA: BayiID + ZamanDamgası + Random
+            const timestamp = Date.now().toString().slice(-6); // Son 6 hanesi yeterli
+            const random = Math.floor(Math.random() * 900) + 100; // 100-999 arası random
+            const uniqueID = `${bayiId}-${timestamp}${i}${random}`;
             
-            let startNo = 100; // Eğer bayi yeniyse 100'den başla
-            if (!querySnap.empty) {
-                startNo = querySnap.docs[0].data().sayi_id + 1;
-            }
+            const targetURL = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${uniqueID}`;
+            
+            // Firebase'e kaydet (Sorgusuz sualsiz direkt yazar)
+            await setDoc(doc(db, "uretilmis_qrlar", uniqueID), { 
+                bayi: bayiId, 
+                tarih: new Date().toISOString() 
+            });
 
-            // 2. ÜRETMEYE BAŞLA
-            area.innerHTML = "";
-            for(let i = 0; i < count; i++) {
-                const currentNo = startNo + i;
-                const uniqueID = `${bayiId}-${currentNo}`;
-                const targetURL = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${uniqueID}`;
-                
-                await setDoc(doc(db, "uretilmis_qrlar", uniqueID), { 
-                    bayi: bayiId, 
-                    sayi_id: currentNo,
-                    tarih: new Date().toISOString() 
-                });
+            const sticker = document.createElement('div');
+            sticker.className = `sticker ${theme}`;
+            sticker.id = `stk-${uniqueID}`;
+            sticker.innerHTML = `
+                ${bayiler[bayiId].s_logo ? `<img src="${bayiler[bayiId].s_logo}" class="sticker-logo">` : ''}
+                <div class="sticker-header">${bayiler[bayiId].s_name.toUpperCase()}</div>
+                <div class="qr-wrapper" id="qr-${uniqueID}"></div>
+                <div class="sticker-footer">DİJİTAL SERVİS KARTI</div>
+                <div class="sticker-id">ID: ${uniqueID}</div>
+                <button class="download-btn" onclick="downloadSticker('stk-${uniqueID}', '${uniqueID}')">PNG İNDİR</button>
+            `;
+            area.appendChild(sticker);
 
-                const sticker = document.createElement('div');
-                sticker.className = `sticker ${theme}`;
-                sticker.id = `stk-${uniqueID}`;
-                sticker.innerHTML = `
-                    ${bayiler[bayiId].s_logo ? `<img src="${bayiler[bayiId].s_logo}" class="sticker-logo">` : ''}
-                    <div class="sticker-header">${bayiler[bayiId].s_name.toUpperCase()}</div>
-                    <div class="qr-wrapper" id="qr-${uniqueID}"></div>
-                    <div class="sticker-footer">DİJİTAL SERVİS KARTI</div>
-                    <div class="sticker-id">ID: ${uniqueID}</div>
-                    <button class="download-btn" onclick="downloadSticker('stk-${uniqueID}', '${uniqueID}')">PNG İNDİR</button>
-                `;
-                area.appendChild(sticker);
-
-                new QRCode(document.getElementById(`qr-${uniqueID}`), {
-                    text: targetURL, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.H
-                });
-            }
-        } catch (e) {
-            console.error(e);
-            alert("ID hesaplanırken bir hata oluştu. Lütfen koleksiyonun indexlendiğinden emin olun.");
+            new QRCode(document.getElementById(`qr-${uniqueID}`), {
+                text: targetURL, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.H
+            });
         }
     }
 
