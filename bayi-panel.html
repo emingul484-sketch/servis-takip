@@ -119,15 +119,17 @@
     };
 
     window.verileriYukle = async () => {
-        const q = query(collection(db, "karekodlar"), where("servis_id", "==", loggedInServis.id));
+        // DÜZELTME: "karekodlar" yerine "uretilmis_qrlar" koleksiyonu sorgulanıyor
+        const q = query(collection(db, "uretilmis_qrlar"), where("servis_id", "==", loggedInServis.id));
         const snap = await getDocs(q);
         const listBody = document.getElementById('client-list-body');
         
         let musteriler = [];
         let alertCount = 0, soonCount = 0;
 
-        snap.forEach(doc => {
-            const data = doc.data();
+        snap.forEach(documentSnapshot => {
+            const data = documentSnapshot.data();
+            // Sadece plaka bilgisi girilmiş olanları listeye dahil et
             if (!data.plaka) return;
             
             const servisler = data.servisler || [];
@@ -147,7 +149,8 @@
             if (farkGun <= 0) { status = { text: "Vakti Geçti", class: "alert-red", priority: 1 }; alertCount++; }
             else if (farkGun <= 15) { status = { text: "Az Kaldı", class: "alert-orange", priority: 2 }; soonCount++; }
 
-            musteriler.push({ ...data, sonBakim, tDate: tDate.toLocaleDateString('tr-TR'), status });
+            // GÜNCELLEME: documentSnapshot.id kullanılarak doğru URL oluşturulması sağlandı
+            musteriler.push({ ...data, qr_id: documentSnapshot.id, sonBakim, tDate: tDate.toLocaleDateString('tr-TR'), status });
         });
 
         musteriler.sort((a, b) => a.status.priority - b.status.priority);
@@ -158,9 +161,9 @@
             if (wpNum.startsWith('0')) wpNum = wpNum.substring(1);
             if (wpNum.length === 10) wpNum = '90' + wpNum;
 
+            // QR ID artık belgenin ismi olduğu için link otomatik düzelecek
             const link = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${m.qr_id}`;
             
-            // PROFESYONEL VE EMOJİSİZ MESAJ DİLİ
             const mesajMetni = `Sayın Müşterimiz,%0A%0A${loggedInServis.s_name.toUpperCase()} olarak aracınızın sağlığını ve güvenliğini önemsiyoruz. ${m.plaka} plakalı aracınızın periyodik bakım vakti yaklaşmıştır.%0A%0ASon Servis KM: ${Number(m.sonBakim.km).toLocaleString()}%0AHedef Bakım KM: ${Number(m.sonBakim.next_km).toLocaleString()}%0ATahmini Randevu Zamanı: ${m.tDate}%0A%0AAracınızın dijital servis geçmişini incelemek ve randevu oluşturmak için aşağıdaki bağlantıyı kullanabilirsiniz.%0A%0ADijital Servis Kartınız: ${link}%0A%0Aİyi yolculuklar dileriz.`;
 
             listBody.innerHTML += `
