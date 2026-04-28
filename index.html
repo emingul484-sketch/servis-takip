@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; }
+        :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; --danger: #ef4444; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
         
         .controls { 
@@ -23,8 +23,9 @@
 
         .btn-generate { 
             width: 100%; background: var(--accent); color: white; border: none; 
-            padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; 
+            padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s;
         }
+        .btn-generate:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
         #print-area { 
             display: grid; 
@@ -37,6 +38,7 @@
         .sticker {
             width: 180px; padding: 20px; border-radius: 20px; text-align: center;
             position: relative; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
         
         .theme-white { background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; }
@@ -44,14 +46,15 @@
         .theme-blue { background: #2563eb; color: #ffffff; }
         .theme-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #000; }
 
-        .sticker-logo { width: 40px; height: 40px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; }
-        .sticker-header { font-size: 11px; font-weight: 800; margin-bottom: 10px; letter-spacing: 0.5px; }
+        .sticker-logo { width: 45px; height: 45px; object-fit: contain; margin-bottom: 10px; border-radius: 8px; background: white; padding: 2px; }
+        .sticker-header { font-size: 11px; font-weight: 800; margin-bottom: 10px; letter-spacing: 0.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .qr-wrapper { background: white; padding: 10px; display: inline-block; border-radius: 12px; }
-        .sticker-footer { margin-top: 10px; font-size: 10px; font-weight: 700; opacity: 0.8; }
+        .sticker-footer { margin-top: 10px; font-size: 10px; font-weight: 700; opacity: 0.9; }
+        .sticker-id { font-size: 8px; opacity: 0.5; margin-top: 5px; }
         
         .download-btn {
-            margin-top: 10px; font-size: 10px; background: rgba(0,0,0,0.1); 
-            border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;
+            margin-top: 15px; font-size: 10px; background: rgba(0,0,0,0.15); color: inherit;
+            border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-weight: 700;
         }
 
         @media print { .controls, .download-btn { display: none; } }
@@ -60,19 +63,19 @@
 <body>
 
 <div class="controls">
-    <h2 style="margin-top:0;">🚀 Profesyonel Sticker Üretici</h2>
+    <h2 style="margin-top:0; font-weight: 800; color: var(--dark);">🚀 Profesyonel Sticker Üretici</h2>
     <div class="grid-inputs">
         <div>
             <label>Bayi Seçin</label>
-            <select id="bayi-select"><option value="">Yükleniyor...</option></select>
+            <select id="bayi-select"><option value="">Veriler Yükleniyor...</option></select>
         </div>
         <div>
             <label>Adet</label>
-            <input type="number" id="qr-count" value="5">
+            <input type="number" id="qr-count" value="10" min="1">
         </div>
         <div>
-            <label>Başlangıç ID (Sayı)</label>
-            <input type="number" id="start-no" value="100">
+            <label>Başlangıç Sayısı (ID)</label>
+            <input type="number" id="start-no" value="100" min="1">
         </div>
         <div>
             <label>Renk Teması</label>
@@ -84,7 +87,7 @@
             </select>
         </div>
     </div>
-    <button class="btn-generate" onclick="generateQRs()">KONTROL ET VE OLUŞTUR</button>
+    <button class="btn-generate" onclick="generateQRs()">KONTROL ET VE SİSTEME İŞLE</button>
 </div>
 
 <div id="print-area"></div>
@@ -101,7 +104,7 @@
     async function bayileriYukle() {
         const snap = await getDocs(collection(db, "servisler"));
         const select = document.getElementById('bayi-select');
-        select.innerHTML = '<option value="">Seçiniz</option>';
+        select.innerHTML = '<option value="">Seçiniz...</option>';
         snap.forEach(doc => {
             bayiler[doc.id] = doc.data();
             select.innerHTML += `<option value="${doc.id}">${doc.data().s_name}</option>`;
@@ -110,30 +113,32 @@
 
     window.generateQRs = async () => {
         const bayiId = document.getElementById('bayi-select').value;
-        if(!bayiId) return alert("Bayi seçin!");
+        if(!bayiId) return alert("Lütfen bir bayi seçin!");
 
         const count = parseInt(document.getElementById('qr-count').value);
         const startNo = parseInt(document.getElementById('start-no').value);
         const theme = document.getElementById('theme-select').value;
         const area = document.getElementById('print-area');
-        area.innerHTML = "Kontrol ediliyor...";
 
+        if(isNaN(startNo) || startNo < 1) return alert("Lütfen geçerli bir başlangıç sayısı girin!");
+
+        area.innerHTML = "<p style='font-weight:800; color:var(--accent)'>Veritabanı kontrol ediliyor, lütfen bekleyin...</p>";
+
+        // 1. ÖNCE TÜM ARALIĞI KONTROL ET (ÇAKIŞMAYI ÖNLEMEK İÇİN)
         for(let i = 0; i < count; i++) {
             const currentNo = startNo + i;
             const uniqueID = `${bayiId}-${currentNo}`;
-            
-            // ÇAKIŞMA KONTROLÜ
             const docRef = doc(db, "uretilmis_qrlar", uniqueID);
             const docSnap = await getDoc(docRef);
 
             if (docSnap.exists()) {
-                alert(`HATA: ${uniqueID} daha önce üretilmiş! Lütfen başlangıç numarasını değiştirin.`);
-                area.innerHTML = "";
+                alert(`HATA: "${uniqueID}" ID'si daha önce bu bayi için üretilmiş!\nLütfen "Başlangıç Sayısı" değerini büyütün.`);
+                area.innerHTML = "<p style='color:var(--danger); font-weight:800;'>Hata: Çakışan ID bulundu.</p>";
                 return;
             }
         }
 
-        // Eğer hepsi temizse oluşturmaya başla
+        // 2. ÇAKIŞMA YOKSA OLUŞTURMAYA BAŞLA
         area.innerHTML = "";
         for(let i = 0; i < count; i++) {
             const currentNo = startNo + i;
@@ -141,7 +146,11 @@
             const targetURL = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${uniqueID}`;
             
             // Firebase'e kaydet (Bi daha üretilmesin diye)
-            await setDoc(doc(db, "uretilmis_qrlar", uniqueID), { bayi: bayiId, tarih: new Date() });
+            await setDoc(doc(db, "uretilmis_qrlar", uniqueID), { 
+                bayi: bayiId, 
+                tarih: new Date().toISOString(),
+                sayi_id: currentNo 
+            });
 
             const sticker = document.createElement('div');
             sticker.className = `sticker ${theme}`;
@@ -151,29 +160,43 @@
                 <div class="sticker-header">${bayiler[bayiId].s_name.toUpperCase()}</div>
                 <div class="qr-wrapper" id="qr-${uniqueID}"></div>
                 <div class="sticker-footer">DİJİTAL SERVİS KARTI</div>
-                <button class="download-btn" onclick="downloadSticker('stk-${uniqueID}', '${uniqueID}')">PNG İNDİR</button>
+                <div class="sticker-id">ID: ${uniqueID}</div>
+                <button class="download-btn" onclick="downloadSticker('stk-${uniqueID}', '${uniqueID}')"><i class="fas fa-download"></i> PNG İNDİR</button>
             `;
             area.appendChild(sticker);
 
+            // Gelişmiş QR Oluşturma (Hata Payı Yüksek - H Seviyesi)
             new QRCode(document.getElementById(`qr-${uniqueID}`), {
-                text: targetURL, width: 130, height: 130, correctLevel: QRCode.CorrectLevel.H
+                text: targetURL,
+                width: 130,
+                height: 130,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
             });
         }
     }
 
     window.downloadSticker = (divId, name) => {
         const btn = document.querySelector(`#${divId} .download-btn`);
-        btn.style.display = "none"; // İndirirken butonu gizle
-        html2canvas(document.getElementById(divId), { useCORS: true, scale: 3 }).then(canvas => {
+        btn.style.display = "none"; 
+        html2canvas(document.getElementById(divId), { 
+            useCORS: true, 
+            scale: 3,
+            backgroundColor: null 
+        }).then(canvas => {
             const link = document.createElement('a');
-            link.download = `QR-${name}.png`;
+            link.download = `OtoNabiz-QR-${name}.png`;
             link.href = canvas.toDataURL("image/png");
             link.click();
-            btn.style.display = "block"; // Butonu geri getir
+            btn.style.display = "block";
         });
     }
 
     bayileriYukle();
 </script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 </body>
 </html>
