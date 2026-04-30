@@ -13,65 +13,26 @@
     <style>
         :root { --accent: #2563eb; --bg: #f8fafc; --dark: #0f172a; }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); padding: 20px; }
-        
-        .controls { 
-            background: white; padding: 25px; border-radius: 20px; 
-            max-width: 900px; margin: 0 auto 30px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        }
-        
+        .controls { background: white; padding: 25px; border-radius: 20px; max-width: 900px; margin: 0 auto 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .grid-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         label { display: block; font-weight: 800; font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
         select, input { width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 10px; font-family: inherit; }
-
         .btn-group { display: flex; gap: 10px; }
         .btn-generate { flex: 2; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: opacity 0.2s; }
-        .btn-generate:hover { opacity: 0.9; }
         .btn-zip { flex: 1; background: #10b981; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; display: none; }
-
-        #print-area { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
-            gap: 20px; justify-items: center;
-        }
-
-        /* STICKER TASARIMI */
-        .sticker {
-            width: 240px; 
-            padding: 15px; 
-            border-radius: 15px; 
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-sizing: border-box;
-            position: relative;
-        }
-        
+        #print-area { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; justify-items: center; }
+        .sticker { width: 240px; padding: 15px; border-radius: 15px; text-align: center; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; position: relative; }
         .theme-white { background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; }
         .theme-dark { background: #0f172a; color: #ffffff; }
         .theme-blue { background: #2563eb; color: #ffffff; }
         .theme-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #000; }
-
         .sticker-logo { width: 50px; height: 50px; object-fit: contain; margin-bottom: 8px; border-radius: 6px; background: white; padding: 2px; }
         .sticker-header { font-size: 12px; font-weight: 800; margin-bottom: 10px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .qr-wrapper { 
-            background: white; 
-            padding: 10px; 
-            border-radius: 10px; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 160px; 
-            height: 160px;
-        }
+        .qr-wrapper { background: white; padding: 10px; border-radius: 10px; display: flex; justify-content: center; align-items: center; width: 160px; height: 160px; }
         .qr-wrapper img, .qr-wrapper canvas { width: 160px !important; height: 160px !important; }
-        
         .sticker-footer { margin-top: 10px; font-size: 10px; font-weight: 700; }
         .sticker-id { font-size: 8px; opacity: 0.6; margin-top: 3px; }
-        
         .download-btn { margin-top: 12px; font-size: 10px; border: none; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 700; background: rgba(0,0,0,0.1); color: inherit; }
-
         @media print { .controls, .download-btn { display: none; } }
     </style>
 </head>
@@ -115,7 +76,6 @@
     const db = getFirestore(app);
     let bayiler = {};
 
-    // Sayfa yüklendiğinde bayileri çek
     async function bayileriYukle() {
         try {
             const snap = await getDocs(collection(db, "servisler"));
@@ -127,7 +87,6 @@
             });
         } catch (error) {
             console.error("Bayi yükleme hatası:", error);
-            alert("Veriler yüklenemedi, bağlantınızı kontrol edin.");
         }
     }
 
@@ -142,12 +101,10 @@
         area.innerHTML = ""; 
 
         for(let i = 0; i < count; i++) {
-            // Benzersiz ID üretimi
             const id = `${bayiId}-${Date.now().toString().slice(-6)}${i}`;
-            const targetURL = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${id}`;
+            const targetURL = encodeURI(`https://emingul484-sketch.github.io/servis-takip/arac.html?id=${id}`);
             
             try {
-                // Firebase Kayıt - "servis_id" alanı arac.html ile uyumlu hale getirildi
                 await setDoc(doc(db, "uretilmis_qrlar", id), { 
                     servis_id: bayiId, 
                     tarih: new Date().toISOString(),
@@ -168,13 +125,15 @@
                 `;
                 area.appendChild(sticker);
 
-                // QR Kod Oluşturma
-                new QRCode(document.getElementById(`qr-${id}`), {
-                    text: targetURL,
-                    width: 160,
-                    height: 160,
-                    correctLevel: QRCode.CorrectLevel.H
-                });
+                // ÇÖZÜM: HTML'in ekrana yerleşmesi için milisaniyelik bir ara veriyoruz
+                setTimeout(() => {
+                    new QRCode(document.getElementById(`qr-${id}`), {
+                        text: targetURL,
+                        width: 160,
+                        height: 160,
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                }, 50);
 
             } catch (err) {
                 console.error("Kayıt hatası:", err);
@@ -187,47 +146,31 @@
         const element = document.getElementById(divId);
         const btn = element.querySelector('.download-btn');
         btn.style.display = "none";
-
-        await new Promise(r => setTimeout(r, 600)); // QR'ın render edilmesi için bekleme
-
-        const canvas = await html2canvas(element, { 
-            useCORS: true, 
-            scale: 3, // Daha yüksek kalite için ölçek artırıldı
-            backgroundColor: null 
-        });
-
+        await new Promise(r => setTimeout(r, 400));
+        const canvas = await html2canvas(element, { useCORS: true, scale: 3 });
         const link = document.createElement('a');
         link.download = `QR-${name}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
-        
         btn.style.display = "block";
     };
 
     window.downloadAllAsZip = async () => {
         const zip = new JSZip();
         const stickers = document.querySelectorAll('.sticker');
-        const total = stickers.length;
-        
-        if(total === 0) return;
-
-        for (let [index, sticker] of stickers.entries()) {
+        for (let sticker of stickers) {
             const id = sticker.id.replace('stk-', '');
             const btn = sticker.querySelector('.download-btn');
             btn.style.display = "none";
-            
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 400));
             const canvas = await html2canvas(sticker, { useCORS: true, scale: 2 });
-            const imgData = canvas.toDataURL("image/png").split(',')[1];
-            zip.file(`QR-${id}.png`, imgData, {base64: true});
+            zip.file(`QR-${id}.png`, canvas.toDataURL("image/png").split(',')[1], {base64: true});
             btn.style.display = "block";
         }
-
         const content = await zip.generateAsync({type:"blob"});
         saveAs(content, `Oto-Nabiz-QR-Paketi.zip`);
     };
 
-    // Başlangıçta bayileri yükle
     bayileriYukle();
 </script>
 </body>
