@@ -24,7 +24,8 @@
         .bayi-card img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; background: #f1f5f9; }
         .bayi-info { flex-grow: 1; }
         .btn-save { width: 100%; background: var(--accent); color: white; border: none; padding: 14px; border-radius: 10px; font-weight: 800; cursor: pointer; transition: 0.3s; }
-        .btn-edit { background: var(--edit); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; }
+        .btn-edit { background: var(--edit); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; margin-right: 5px; }
+        .btn-delete { background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; }
         
         #logo-preview { max-width: 60px; height: 60px; object-fit: cover; margin: 10px auto; border-radius: 10px; border: 2px solid #f1f5f9; display: none; }
         .edit-mode { border: 2px solid var(--edit) !important; background: #fffcf0 !important; }
@@ -83,7 +84,7 @@
 <script type="module">
     import { firebaseConfig } from './config.js';
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, doc, setDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
@@ -135,13 +136,26 @@
         } catch (e) { alert("Hata!"); }
     };
 
+    // BAYİ SİLME FONKSİYONU
+    window.bayiSil = async (id) => {
+        if(confirm(`${id} kullanıcısına ait bayi kaydı tamamen silinecek. Onaylıyor musunuz?`)) {
+            try {
+                await deleteDoc(doc(db, "servisler", id));
+                alert("Bayi başarıyla silindi.");
+                bayileriGetir();
+            } catch (e) {
+                console.error(e);
+                alert("Silme işlemi sırasında bir hata oluştu!");
+            }
+        }
+    };
+
     window.duzenleHazirlik = (id, dataJson) => {
         const data = JSON.parse(decodeURIComponent(dataJson));
         editMode = true;
         
-        // Formu doldur
         document.getElementById('s_user').value = id;
-        document.getElementById('s_user').disabled = true; // ID değişemez
+        document.getElementById('s_user').disabled = true; 
         document.getElementById('s_name').value = data.s_name;
         document.getElementById('s_sifre').value = data.s_sifre;
         document.getElementById('s_tel').value = data.s_tel;
@@ -155,7 +169,6 @@
             document.getElementById('up-text').style.display = "none";
         }
 
-        // Görsel efektler
         document.getElementById('form-card').classList.add('edit-mode');
         document.getElementById('form-title').innerHTML = `<i class="fas fa-edit"></i> Profili Düzenle`;
         document.getElementById('save-btn').innerText = "BİLGİLERİ GÜNCELLE";
@@ -193,7 +206,10 @@
                         <div style="font-size:10px; color:#64748b">ID: ${d.id}</div>
                     </div>
                     <button class="btn-edit" onclick="duzenleHazirlik('${d.id}', '${bJson}')">
-                        <i class="fas fa-edit"></i> Düzenle
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-delete" onclick="bayiSil('${d.id}')">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>`;
         });
