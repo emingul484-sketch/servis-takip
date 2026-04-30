@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Karekod Oto | Servis Takip</title>
+    <title>Oto Nabız | Servis Takip</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -79,7 +79,7 @@
             </div>
 
             <div id="first-time-fields">
-                <label style="font-weight:800; font-size:11px; color:#94a3b8">İLK SEFERE ÖZEL: MÜŞTERİ & ARAÇ</label>
+                <label style="font-weight:800; font-size:11px; color:#94a3b8">İLK SEFERE ÖZEL: ARAÇ BİLGİLERİ</label>
                 <input type="text" id="v-plaka-input" placeholder="PLAKA (Örn: 34 ABC 123)">
                 <input type="text" id="v-model-input" placeholder="MARKA / MODEL">
                 <input type="tel" id="v-phone-input" placeholder="MÜŞTERİ TELEFON">
@@ -141,22 +141,26 @@
         }
 
         currentQRRef = doc(db, "uretilmis_qrlar", qrID);
-        const qrSnap = await getDoc(currentQRRef);
-        
-        document.getElementById('loader').style.display = 'none';
+        try {
+            const qrSnap = await getDoc(currentQRRef);
+            document.getElementById('loader').style.display = 'none';
 
-        if(!qrSnap.exists()) { 
-            alert("QR Kod sistemde kayıtlı değil!"); 
-            return; 
-        }
-        
-        const qrData = qrSnap.data();
+            if(!qrSnap.exists()) { 
+                alert("Bu QR Kod sisteme kayıtlı değil!"); 
+                return; 
+            }
+            
+            const qrData = qrSnap.data();
 
-        if(!qrData.servis_id) {
-            document.getElementById('login-form').style.display = 'block';
-        } else {
-            document.getElementById('app-content').style.display = 'block';
-            arayuzYukle(qrData);
+            if(!qrData.servis_id) {
+                document.getElementById('login-form').style.display = 'block';
+            } else {
+                document.getElementById('app-content').style.display = 'block';
+                arayuzYukle(qrData);
+            }
+        } catch (err) {
+            console.error("Hata:", err);
+            document.getElementById('loader').innerText = "Veri çekme hatası!";
         }
     }
 
@@ -173,18 +177,13 @@
         const social = document.getElementById('social-container');
         social.innerHTML = "";
         
-        // Arama ve WhatsApp Butonları
         if(s.s_tel) {
             social.innerHTML += `<a href="tel:${s.s_tel}" class="s-btn bg-call"><i class="fas fa-phone"></i></a>`;
             social.innerHTML += `<a href="https://wa.me/90${s.s_tel.replace(/\D/g,'')}" target="_blank" class="s-btn bg-wp"><i class="fab fa-whatsapp"></i></a>`;
         }
-        
-        // Instagram Butonu
         if(s.s_insta) {
             social.innerHTML += `<a href="https://instagram.com/${s.s_insta}" target="_blank" class="s-btn bg-insta"><i class="fab fa-instagram"></i></a>`;
         }
-        
-        // KONUM BUTONU (GÜNCELLEDİĞİMİZ KISIM)
         if(s.s_konum) {
             social.innerHTML += `<a href="${s.s_konum}" target="_blank" class="s-btn bg-map"><i class="fas fa-map-marker-alt"></i></a>`;
         }
@@ -197,7 +196,11 @@
             
             const list = document.getElementById('history-list');
             list.innerHTML = "";
-            (qrData.servisler || []).slice().reverse().forEach(ser => {
+            
+            // KRİTİK DÜZELTME: Array kontrolü eklendi
+            const servisKayitlari = Array.isArray(qrData.servisler) ? qrData.servisler : [];
+            
+            servisKayitlari.slice().reverse().forEach(ser => {
                 list.innerHTML += `
                     <div class="card history-item">
                         <div class="h-date">${ser.tarih}</div>
@@ -212,7 +215,6 @@
         }
     }
 
-    // ... Geri kalan buton dinleyicileri (btn-save, btn-assign vb.) senin kodundaki ile aynı
     document.getElementById('btn-open-master').onclick = () => {
         const p = prompt("Servis Şifresini Girin:");
         if(p === masterPass) {
@@ -249,8 +251,14 @@
             updateData.musteri_tel = document.getElementById('v-phone-input').value;
         }
 
-        await updateDoc(currentQRRef, updateData);
-        location.reload();
+        try {
+            await updateDoc(currentQRRef, updateData);
+            alert("Kayıt başarıyla işlendi!");
+            location.reload();
+        } catch (err) {
+            console.error("Güncelleme hatası:", err);
+            alert("Kayıt sırasında bir hata oluştu!");
+        }
     };
 
     document.getElementById('btn-assign').onclick = async () => {
@@ -259,7 +267,10 @@
         const sSnap = await getDoc(doc(db, "servisler", user));
         
         if(sSnap.exists() && sSnap.data().s_sifre === pass) {
-            await updateDoc(currentQRRef, { servis_id: user });
+            await updateDoc(currentQRRef, { 
+                servis_id: user,
+                servisler: [] // İlk atamada diziyi garanti et
+            });
             location.reload();
         } else { 
             alert("Hatalı Kullanıcı veya Şifre!"); 
