@@ -22,10 +22,11 @@
         
         .grid-inputs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         label { display: block; font-weight: 800; font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 5px; }
-        select, input { width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 10px; }
+        select, input { width: 100%; padding: 12px; border: 2px solid #f1f5f9; border-radius: 10px; font-family: inherit; }
 
         .btn-group { display: flex; gap: 10px; }
-        .btn-generate { flex: 2; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .btn-generate { flex: 2; background: var(--accent); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: opacity 0.2s; }
+        .btn-generate:hover { opacity: 0.9; }
         .btn-zip { flex: 1; background: #10b981; color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; display: none; }
 
         #print-area { 
@@ -33,9 +34,9 @@
             gap: 20px; justify-items: center;
         }
 
-        /* STICKER TASARIMI - KARE FORMUNA YAKINLAŞTIRILDI */
+        /* STICKER TASARIMI */
         .sticker {
-            width: 240px; /* Genişlik artırıldı */
+            width: 240px; 
             padding: 15px; 
             border-radius: 15px; 
             text-align: center;
@@ -43,6 +44,7 @@
             flex-direction: column;
             align-items: center;
             box-sizing: border-box;
+            position: relative;
         }
         
         .theme-white { background: #ffffff; color: #0f172a; border: 1px solid #e2e8f0; }
@@ -51,18 +53,19 @@
         .theme-gold { background: linear-gradient(135deg, #d4af37, #f1c40f); color: #000; }
 
         .sticker-logo { width: 50px; height: 50px; object-fit: contain; margin-bottom: 8px; border-radius: 6px; background: white; padding: 2px; }
-        .sticker-header { font-size: 12px; font-weight: 800; margin-bottom: 10px; width: 100%; }
+        .sticker-header { font-size: 12px; font-weight: 800; margin-bottom: 10px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        /* QR KUTUSU - KESİN KARE */
         .qr-wrapper { 
             background: white; 
             padding: 10px; 
             border-radius: 10px; 
-            display: block;
-            width: 160px; /* Kare olması için sabitlendi */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 160px; 
             height: 160px;
         }
-        .qr-wrapper img, .qr-wrapper canvas { margin: 0 auto; width: 160px !important; height: 160px !important; }
+        .qr-wrapper img, .qr-wrapper canvas { width: 160px !important; height: 160px !important; }
         
         .sticker-footer { margin-top: 10px; font-size: 10px; font-weight: 700; }
         .sticker-id { font-size: 8px; opacity: 0.6; margin-top: 3px; }
@@ -83,7 +86,7 @@
         </div>
         <div>
             <label>Üretilecek Adet</label>
-            <input type="number" id="qr-count" value="1" min="1">
+            <input type="number" id="qr-count" value="1" min="1" max="50">
         </div>
         <div>
             <label>Renk Teması</label>
@@ -112,70 +115,85 @@
     const db = getFirestore(app);
     let bayiler = {};
 
+    // Sayfa yüklendiğinde bayileri çek
     async function bayileriYukle() {
-        const snap = await getDocs(collection(db, "servisler"));
-        const select = document.getElementById('bayi-select');
-        select.innerHTML = '<option value="">Seçiniz...</option>';
-        snap.forEach(doc => {
-            bayiler[doc.id] = doc.data();
-            select.innerHTML += `<option value="${doc.id}">${doc.data().s_name}</option>`;
-        });
+        try {
+            const snap = await getDocs(collection(db, "servisler"));
+            const select = document.getElementById('bayi-select');
+            select.innerHTML = '<option value="">Seçiniz...</option>';
+            snap.forEach(doc => {
+                bayiler[doc.id] = doc.data();
+                select.innerHTML += `<option value="${doc.id}">${doc.data().s_name}</option>`;
+            });
+        } catch (error) {
+            console.error("Bayi yükleme hatası:", error);
+            alert("Veriler yüklenemedi, bağlantınızı kontrol edin.");
+        }
     }
 
     window.generateQRs = async () => {
         const bayiId = document.getElementById('bayi-select').value;
-        if(!bayiId) return alert("Bayi seçin!");
+        if(!bayiId) return alert("Lütfen bir bayi seçin!");
 
         const count = parseInt(document.getElementById('qr-count').value);
         const theme = document.getElementById('theme-select').value;
         const area = document.getElementById('print-area');
         
-        area.innerHTML = ""; // Eski üretilenleri temizle
+        area.innerHTML = ""; 
 
         for(let i = 0; i < count; i++) {
-            const id = `${bayiId}-${Date.now().toString().slice(-5)}${i}`;
+            // Benzersiz ID üretimi
+            const id = `${bayiId}-${Date.now().toString().slice(-6)}${i}`;
             const targetURL = `https://emingul484-sketch.github.io/servis-takip/arac.html?id=${id}`;
             
-            // Firebase Kayıt
-            await setDoc(doc(db, "uretilmis_qrlar", id), { bayi_id: bayiId, tarih: new Date().toISOString() });
+            try {
+                // Firebase Kayıt - "servis_id" alanı arac.html ile uyumlu hale getirildi
+                await setDoc(doc(db, "uretilmis_qrlar", id), { 
+                    servis_id: bayiId, 
+                    tarih: new Date().toISOString(),
+                    plaka: "",
+                    servisler: [] 
+                });
 
-            const sticker = document.createElement('div');
-            sticker.className = `sticker ${theme}`;
-            sticker.id = `stk-${id}`;
-            sticker.innerHTML = `
-                ${bayiler[bayiId].s_logo ? `<img src="${bayiler[bayiId].s_logo}" class="sticker-logo">` : ''}
-                <div class="sticker-header">${bayiler[bayiId].s_name.toUpperCase()}</div>
-                <div class="qr-wrapper" id="qr-${id}"></div>
-                <div class="sticker-footer">DİJİTAL SERVİS KARTI</div>
-                <div class="sticker-id">ID: ${id}</div>
-                <button class="download-btn" onclick="downloadSticker('stk-${id}', '${id}')">PNG İNDİR</button>
-            `;
-            area.appendChild(sticker);
+                const sticker = document.createElement('div');
+                sticker.className = `sticker ${theme}`;
+                sticker.id = `stk-${id}`;
+                sticker.innerHTML = `
+                    ${bayiler[bayiId].s_logo ? `<img src="${bayiler[bayiId].s_logo}" class="sticker-logo">` : ''}
+                    <div class="sticker-header">${bayiler[bayiId].s_name.toUpperCase()}</div>
+                    <div class="qr-wrapper" id="qr-${id}"></div>
+                    <div class="sticker-footer">DİJİTAL SERVİS KARTI</div>
+                    <div class="sticker-id">ID: ${id}</div>
+                    <button class="download-btn" onclick="downloadSticker('stk-${id}', '${id}')">PNG İNDİR</button>
+                `;
+                area.appendChild(sticker);
 
-            // QR Çizimi
-            new QRCode(document.getElementById(`qr-${id}`), {
-                text: targetURL,
-                width: 160,
-                height: 160,
-                correctLevel: QRCode.CorrectLevel.H
-            });
+                // QR Kod Oluşturma
+                new QRCode(document.getElementById(`qr-${id}`), {
+                    text: targetURL,
+                    width: 160,
+                    height: 160,
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+
+            } catch (err) {
+                console.error("Kayıt hatası:", err);
+            }
         }
         document.getElementById('zip-btn').style.display = "block";
     };
 
-    // İNDİRME FONKSİYONU - %100 DOLU ÇIKMASI İÇİN GÜNCELLENDİ
     window.downloadSticker = async (divId, name) => {
         const element = document.getElementById(divId);
         const btn = element.querySelector('.download-btn');
-        btn.style.display = "none"; // İndirirken butonu gizle
+        btn.style.display = "none";
 
-        // ÖNEMLİ: QRCode.js'in çizimi bitirmesi için 500ms bekliyoruz
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 600)); // QR'ın render edilmesi için bekleme
 
         const canvas = await html2canvas(element, { 
             useCORS: true, 
-            scale: 2,
-            backgroundColor: null // Şeffaf arka plan desteği
+            scale: 3, // Daha yüksek kalite için ölçek artırıldı
+            backgroundColor: null 
         });
 
         const link = document.createElement('a');
@@ -183,19 +201,22 @@
         link.href = canvas.toDataURL("image/png");
         link.click();
         
-        btn.style.display = "block"; // Butonu geri getir
+        btn.style.display = "block";
     };
 
     window.downloadAllAsZip = async () => {
         const zip = new JSZip();
         const stickers = document.querySelectorAll('.sticker');
+        const total = stickers.length;
         
-        for (let sticker of stickers) {
+        if(total === 0) return;
+
+        for (let [index, sticker] of stickers.entries()) {
             const id = sticker.id.replace('stk-', '');
             const btn = sticker.querySelector('.download-btn');
             btn.style.display = "none";
             
-            await new Promise(r => setTimeout(r, 400));
+            await new Promise(r => setTimeout(r, 500));
             const canvas = await html2canvas(sticker, { useCORS: true, scale: 2 });
             const imgData = canvas.toDataURL("image/png").split(',')[1];
             zip.file(`QR-${id}.png`, imgData, {base64: true});
@@ -203,9 +224,10 @@
         }
 
         const content = await zip.generateAsync({type:"blob"});
-        saveAs(content, `Toplu-QR-Paketi.zip`);
+        saveAs(content, `Oto-Nabiz-QR-Paketi.zip`);
     };
 
+    // Başlangıçta bayileri yükle
     bayileriYukle();
 </script>
 </body>
